@@ -72,3 +72,18 @@ export function useNow(intervalMs = 60_000) {
   }, [intervalMs]);
   return now;
 }
+
+const TOUCH_ONLY = '(hover: none) and (pointer: coarse)';
+
+/** True on phones and tablets without a mouse, where the onscreen keyboard replaces the system one. */
+export function useTouchOnly(): boolean {
+  const [touch, setTouch] = useState(() => typeof matchMedia === 'function' && matchMedia(TOUCH_ONLY).matches);
+  useEffect(() => {
+    if (typeof matchMedia !== 'function') return;
+    const mq = matchMedia(TOUCH_ONLY);
+    const on = () => setTouch(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return touch;
+}

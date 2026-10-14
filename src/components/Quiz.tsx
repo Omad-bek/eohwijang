@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Check, CornerDownLeft, Keyboard, RotateCcw, Sparkles, SkipForward } from 'lucide-react';
+import { ArrowLeft, Check, CircleHelp, CornerDownLeft, Keyboard, RotateCcw, Sparkles, SkipForward, X } from 'lucide-react';
 import type { PromptLang, Settings, Stage, VocabEntry } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { Outcome } from '../lib/srs';
 import { checkAnswer, isCorrect, type DiffResult } from '../utils/hangulDiff';
 import { backspaceJamo, DUBEOLSIK, typeJamo } from '../utils/hangulInput';
+import { useTouchOnly } from '../lib/hooks';
 import { DiffView } from './DiffView';
 import { KoreanKeyboard } from './KoreanKeyboard';
 import { Seal } from './Seal';
@@ -78,6 +79,14 @@ function readKeyboardOpen(): boolean {
   }
 }
 
+type EdgeKind = 'right' | 'wrong' | 'skip';
+
+const EDGE_TONE: Record<EdgeKind, { glow: string; bar: string }> = {
+  right: { glow: 'from-accent/45 via-accent/12', bar: 'bg-accent shadow-[0_-20px_50px_rgba(16,185,129,0.55)]' },
+  wrong: { glow: 'from-danger/40 via-danger/10', bar: 'bg-danger shadow-[0_-20px_50px_rgba(239,68,68,0.5)]' },
+  skip: { glow: 'from-amber/35 via-amber/10', bar: 'bg-amber shadow-[0_-20px_50px_rgba(251,191,36,0.45)]' },
+};
+
 function Prompt({ word, lang }: { word: VocabEntry; lang: PromptLang }) {
   const langs = (['uz', 'ru', 'en'] as const).filter((l) => word[l]);
   if (lang === 'all' || !word[lang as 'uz' | 'ru' | 'en']) {
@@ -115,7 +124,12 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   const [lastRight, setLastRight] = useState<{ prompt: string; ko: string } | null>(null);
   const [imeHint, setImeHint] = useState(false);
   /** Onscreen 두벌식 keyboard; remembered per device. */
-  const [kbOpen, setKbOpen] = useState(readKeyboardOpen);
+  const [kbPref, setKbPref] = useState(readKeyboardOpen);
+  /** Phones and tablets always use the onscreen keyboard; the field is read-only so the system keyboard never opens. */
+  const touch = useTouchOnly();
+  const kbOpen = touch || kbPref;
+  /** Full-width glow rising from the bottom edge of the screen; `id` restarts it. */
+  const [edge, setEdge] = useState<{ id: number; kind: EdgeKind } | null>(null);
   const [keyFlash, setKeyFlash] = useState<{ code: string; n: number } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const answerRow = useRef<HTMLDivElement>(null);
@@ -134,8 +148,11 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
     if (phase.kind !== 'done') inputRef.current?.focus({ preventScroll: true });
   }, [phase.kind, current]);
 
+  const flashEdge = (kind: EdgeKind) => setEdge((e) => ({ id: (e?.id ?? 0) + 1, kind }));
+
   const cheer = () => {
     glow(inputRef.current);
+    flashEdge('right');
     setPraise((prev) => {
       const pool = t.praise.filter((p) => p !== prev?.text);
       return { id: (prev?.id ?? 0) + 1, text: pool[Math.floor(Math.random() * pool.length)] };
@@ -201,6 +218,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
         setPhase({ kind: 'review', result, typed });
         setValue('');
         shake(answerRow.current, inputRef.current);
+        flashEdge('wrong');
       }
       return;
     }
@@ -208,11 +226,13 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
     // Review: the learner must type the correct word before moving on; it then waits for the next round.
     if (isCorrect(typed, current.word.ko)) {
       glow(inputRef.current);
+      flashEdge('right');
       setValue('');
       setPhase({ kind: 'ask' });
       advance(queue.slice(1), [...nextRound, current]);
     } else {
       shake(answerRow.current, inputRef.current);
+      flashEdge('wrong');
       setValue('');
     }
   };
@@ -227,11 +247,12 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
     setPhase({ kind: 'review', result: checkAnswer('', current.word.ko), typed: '' });
     setValue('');
     shake(answerRow.current, inputRef.current);
+    flashEdge('skip');
     inputRef.current?.focus({ preventScroll: true });
   };
 
   const toggleKeyboard = (open = !kbOpen) => {
-    setKbOpen(open);
+    setKbPref(open);
     try {
       localStorage.setItem(KEYBOARD_KEY, open ? '1' : '0');
     } catch {
@@ -419,6 +440,17 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
 
   return (
     <div className="mx-auto flex h-full w-full max-w-2xl flex-col px-4">
+      {edge && (
+        <div
+          key={edge.id}
+          aria-hidden
+          onAnimationEnd={() => setEdge((e) => (e?.id === edge.id ? null : e))}
+          className="anim-edge pointer-events-none fixed inset-x-0 bottom-0 z-[45] h-[42vh]"
+        >
+          <div className={`absolute inset-0 bg-gradient-to-t to-transparent ${EDGE_TONE[edge.kind].glow}`} />
+          <div className={`absolute inset-x-0 bottom-0 h-1.5 ${EDGE_TONE[edge.kind].bar}`} />
+        </div>
+      )}
       {header}
 
       <section className={cardCls}>
@@ -428,9 +460,9 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               key={praise.id}
               lang={/[가-힣]/.test(praise.text) ? 'ko' : undefined}
               onAnimationEnd={() => setPraise((p) => (p?.id === praise.id ? null : p))}
-              className="anim-praise flex items-center gap-1.5 whitespace-nowrap rounded-full border border-accent/50 bg-accent-wash px-3.5 py-1.5 text-[14px] font-bold text-accent-text"
+              className="anim-praise flex items-center gap-2 whitespace-nowrap rounded-full border border-accent/60 bg-accent-wash px-5 py-2.5 text-[19px] font-bold text-accent-text shadow-[0_0_28px_rgba(16,185,129,0.35)]"
             >
-              <Sparkles size={14} strokeWidth={2.4} aria-hidden />
+              <Sparkles size={20} strokeWidth={2.4} aria-hidden />
               {praise.text}
             </span>
           </div>
@@ -453,6 +485,19 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
             <div aria-live="polite" className={kbOpen ? 'mt-5' : 'mt-7'}>
               {phase.kind === 'review' ? (
                 <div>
+                  {phase.typed ? (
+                    <p className="anim-cell mb-4 flex items-center gap-2 text-[15px] font-bold text-danger-text">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-danger text-ink">
+                        <X size={15} strokeWidth={3} aria-hidden />
+                      </span>
+                      {t.notQuite}
+                    </p>
+                  ) : (
+                    <p className="anim-cell mb-1 flex items-center gap-2 text-[15px] font-bold text-amber">
+                      <CircleHelp size={22} aria-hidden className="shrink-0" />
+                      {t.revealed}
+                    </p>
+                  )}
                   {phase.typed ? <DiffView key={`${current.n}-${reviewTarget}-${phase.typed}`} t={t} cells={phase.result.cells} /> : null}
                   <div className="mt-5 flex items-baseline gap-3 border-t border-rule pt-4">
                     <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">{t.correctAnswer}</span>
@@ -492,6 +537,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               {phase.kind === 'review' ? t.retypeLabel : t.typeInKorean}
             </label>
             <span className="tabular shrink-0 whitespace-nowrap normal-case tracking-normal">{t.remaining(left)}</span>
+            {!touch && (
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
@@ -508,6 +554,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
                 한글
               </span>
             </button>
+            )}
           </div>
           <div ref={answerRow} className="flex gap-2">
             <input
@@ -516,6 +563,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               lang="ko"
               // An open onscreen keyboard replaces the phone's own, so it doesn't cover the screen.
               inputMode={kbOpen ? 'none' : 'text'}
+              readOnly={touch}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
@@ -576,7 +624,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
                   className="flex h-9 items-center gap-1.5 border border-rule px-3 text-[13px] font-semibold text-hanji-2 hover:border-hanji-2 hover:text-hanji"
                 >
                   <SkipForward size={15} aria-hidden /> {t.dontKnow}
-                  <kbd aria-hidden className="ml-1 hidden border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji md:inline">Esc</kbd>
+                  {!touch && <kbd aria-hidden className="ml-1 hidden border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji md:inline">Esc</kbd>}
                 </button>
               ) : (
                 <span />
@@ -596,6 +644,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               onEnter={() => document.getElementById('answer-submit')?.click()}
               enterLabel={phase.kind === 'review' ? t.continue : t.check}
               flash={keyFlash}
+              touch={touch}
             />
           )}
         </form>

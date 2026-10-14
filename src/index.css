@@ -186,6 +186,21 @@ select {
     border-color: var(--color-accent);
   }
 }
+/* Screen-edge verdict glow: blooms up from the bottom, then fades. Opacity only, so it also runs with reduced motion. */
+@keyframes edge-glow {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 @keyframes sheet-in {
   from {
     transform: translateY(24px);
@@ -201,6 +216,9 @@ select {
 }
 .anim-seal {
   animation: seal-in 520ms var(--ease-out-expo) both;
+}
+.anim-edge {
+  animation: edge-glow 1100ms ease-out both;
 }
 .anim-keyflash {
   animation: key-flash 260ms ease-out;

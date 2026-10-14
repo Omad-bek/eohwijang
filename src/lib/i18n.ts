@@ -98,6 +98,8 @@ export interface Strings {
   kbShift: string;
   kbBackspace: string;
   kbSpace: string;
+  notQuite: string;
+  revealed: string;
   offline: string;
 }
 
@@ -199,6 +201,8 @@ const en: Strings = {
   kbShift: 'Shift (ㅃ ㅉ ㄸ ㄲ ㅆ ㅒ ㅖ)',
   kbBackspace: 'Delete',
   kbSpace: 'Space',
+  notQuite: 'Not quite: compare it letter by letter',
+  revealed: "Here's the word: type it once to remember it",
 };
 
 const ru: Strings = {
@@ -299,6 +303,8 @@ const ru: Strings = {
   kbShift: 'Shift (ㅃ ㅉ ㄸ ㄲ ㅆ ㅒ ㅖ)',
   kbBackspace: 'Стереть',
   kbSpace: 'Пробел',
+  notQuite: 'Не совсем: сравните по буквам',
+  revealed: 'Вот это слово: наберите его, чтобы запомнить',
 };
 
 const uz: Strings = {
@@ -399,6 +405,8 @@ const uz: Strings = {
   kbShift: 'Shift (ㅃ ㅉ ㄸ ㄲ ㅆ ㅒ ㅖ)',
   kbBackspace: "O'chirish",
   kbSpace: "Bo'sh joy",
+  notQuite: "Biroz xato: harfma-harf solishtiring",
+  revealed: "Mana bu so'z: eslab qolish uchun bir marta yozing",
 };
 
 const ko: Strings = {
@@ -499,6 +507,8 @@ const ko: Strings = {
   kbShift: 'Shift (ㅃ ㅉ ㄸ ㄲ ㅆ ㅒ ㅖ)',
   kbBackspace: '지우기',
   kbSpace: '띄어쓰기',
+  notQuite: '아쉬워요: 자모를 하나씩 비교해 보세요',
+  revealed: '정답이에요: 한 번 따라 써 보세요',
 };
 
 export const STRINGS: Record<UiLang, Strings> = { en, ru, uz, ko };
