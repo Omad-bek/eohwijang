@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Check, CornerDownLeft, RotateCcw, SkipForward } from 'lucide-react';
 import type { PromptLang, Settings, Stage, VocabEntry } from '../types';
 import type { Strings } from '../lib/i18n';
+import type { Outcome } from '../lib/srs';
 import { checkAnswer, isCorrect, type DiffResult } from '../utils/hangulDiff';
 import { DiffView } from './DiffView';
 import { Seal } from './Seal';
@@ -10,7 +11,8 @@ interface Props {
   t: Strings;
   stage: Stage;
   settings: Settings;
-  onMastered: (w: VocabEntry) => void;
+  /** Called as each word's fate in this session is decided (see Outcome). */
+  onResult: (w: VocabEntry, outcome: Outcome) => void;
   onComplete: (firstTryShare: number) => void;
   onExit: () => void;
   nextStage: Stage | null;
@@ -58,8 +60,11 @@ function Prompt({ word, lang }: { word: VocabEntry; lang: PromptLang }) {
   );
 }
 
-export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextStage, onNext }: Props) {
+export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextStage, onNext }: Props) {
+  /** The current round, in order. Misses wait in `nextRound` (FIFO) until every word in this round has been seen. */
   const [queue, setQueue] = useState<Item[]>(() => shuffle(stage.words.map((word, n) => ({ word, n }))));
+  const [nextRound, setNextRound] = useState<Item[]>([]);
+  const [round, setRound] = useState(1);
   const [phase, setPhase] = useState<Phase>({ kind: 'ask' });
   const [value, setValue] = useState('');
   const [missed, setMissed] = useState<Set<number>>(() => new Set());
@@ -74,8 +79,9 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
   const gloss = (w: VocabEntry) => w[glossLang] || w.uz || w.ru || w.en;
   const total = stage.words.length;
   const current = queue[0];
-  const pendingSet = new Set(queue.map((q) => q.n));
+  const pendingSet = new Set([...queue, ...nextRound].map((q) => q.n));
   const cleared = total - pendingSet.size;
+  const left = pendingSet.size;
 
   useEffect(() => {
     if (phase.kind !== 'done') inputRef.current?.focus({ preventScroll: true });
@@ -85,6 +91,31 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
     const share = (total - missedSet.size) / total;
     setPhase({ kind: 'done', firstTry: share });
     onComplete(share);
+  };
+
+  /** Move past the current word; when the round runs out, the misses become the next round. */
+  const advance = (rest: Item[], later: Item[]) => {
+    if (rest.length) {
+      setQueue(rest);
+      setNextRound(later);
+    } else if (later.length) {
+      setQueue(later);
+      setNextRound([]);
+      setRound((r) => r + 1);
+    } else {
+      setQueue([]);
+      setNextRound([]);
+      finish(missed);
+    }
+  };
+
+  /** Count a miss once per word: the first one also drops a learned word back to level 1. */
+  const miss = () => {
+    if (missed.has(current.n)) return;
+    const next = new Set(missed);
+    next.add(current.n);
+    setMissed(next);
+    onResult(current.word, 'missed');
   };
 
   const submit = () => {
@@ -103,16 +134,12 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
     if (phase.kind === 'ask') {
       const result = checkAnswer(typed, current.word.ko);
       if (result.correct) {
-        onMastered(current.word);
+        onResult(current.word, missed.has(current.n) ? 'relearned' : 'firstTry');
         setLastRight({ prompt: gloss(current.word), ko: result.target });
         setValue('');
-        const rest = queue.slice(1);
-        setQueue(rest);
-        if (!rest.length) finish(missed);
+        advance(queue.slice(1), nextRound);
       } else {
-        const next = new Set(missed);
-        next.add(current.n);
-        setMissed(next);
+        miss();
         setLastRight(null);
         setPhase({ kind: 'review', result, typed });
         setValue('');
@@ -120,11 +147,11 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
       return;
     }
 
-    // Review: the learner must type the correct word before moving on.
+    // Review: the learner must type the correct word before moving on; it then waits for the next round.
     if (isCorrect(typed, current.word.ko)) {
       setValue('');
-      setQueue([...queue.slice(1), current]);
       setPhase({ kind: 'ask' });
+      advance(queue.slice(1), [...nextRound, current]);
     } else {
       setNudge((n) => n + 1);
       setValue('');
@@ -135,9 +162,7 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
   const skip = () => {
     if (!current || phase.kind !== 'ask') return;
     setImeHint(false);
-    const next = new Set(missed);
-    next.add(current.n);
-    setMissed(next);
+    miss();
     setLastRight(null);
     setPhase({ kind: 'review', result: checkAnswer('', current.word.ko), typed: '' });
     setValue('');
@@ -178,7 +203,7 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
 
   const track = (
     /* One seal per word: the stage visibly fills as words are mastered. */
-    <ol className="flex items-center gap-[3px]" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={cleared} aria-label={t.remaining(queue.length)}>
+    <ol className="flex items-center gap-[3px]" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={cleared} aria-label={t.remaining(left)}>
       {stage.words.map((_, n) => {
         const done = !pendingSet.has(n);
         const now = current?.n === n && phase.kind !== 'done';
@@ -223,6 +248,17 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
         </p>
       </div>
       {track}
+      {phase.kind !== 'done' && (
+        <p aria-live="polite" className="tabular mt-2 flex items-center gap-2 text-[12px] font-semibold text-hanji-2">
+          <span className={round > 1 ? 'text-cinnabar-text' : ''}>{t.round(round)}</span>
+          {round > 1 && (
+            <>
+              <span aria-hidden>·</span>
+              <span>{t.mistakesLeft(left)}</span>
+            </>
+          )}
+        </p>
+      )}
     </header>
   );
 
@@ -339,7 +375,7 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
         >
           <label htmlFor="answer" className="mb-1.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">
             <span className={phase.kind === 'review' ? 'text-cinnabar-text' : ''}>{phase.kind === 'review' ? t.retypeLabel : t.typeInKorean}</span>
-            <span className="tabular shrink-0 whitespace-nowrap pl-3 normal-case tracking-normal">{t.remaining(queue.length)}</span>
+            <span className="tabular shrink-0 whitespace-nowrap pl-3 normal-case tracking-normal">{t.remaining(left)}</span>
           </label>
           <div key={nudge} className={`flex gap-2 ${nudge ? 'anim-nudge' : ''}`}>
             <input

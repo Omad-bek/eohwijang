@@ -45,11 +45,22 @@ export interface StageRecord {
   bestFirstTry?: number;
 }
 
+/** 0 = new, 1 = short-term, 2 = consolidated, 3 = long-term (max). */
+export type MemoryLevel = 0 | 1 | 2 | 3;
+
+/** Spaced-repetition state of one word. Words without a record are level 0. */
+export interface WordMemory {
+  level: 1 | 2 | 3;
+  lastReviewedAt: number;
+  /** When a first-try recall earns the next level. Not used at level 3. */
+  nextReviewAt: number;
+}
+
 export interface UserData {
-  version: 1;
+  version: 2;
   settings: Settings;
-  /** Word ids (`${bookId}|${unit}|${ko}`) recalled correctly from memory at least once. */
-  mastered: string[];
+  /** Keyed by word id (`${bookId}|${unit}|${ko}`). */
+  memory: Record<string, WordMemory>;
   stages: Record<string, StageRecord>;
   /** Books the learner added (1B, 2A …). */
   customBooks: Book[];

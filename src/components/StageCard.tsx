@@ -1,12 +1,14 @@
 import { Eye, Play, RotateCcw } from 'lucide-react';
 import type { Stage } from '../types';
 import type { Strings } from '../lib/i18n';
+import type { MemoryStats } from '../lib/srs';
+import { DueBadge, LevelBar, LevelChips } from './Levels';
 import { Seal } from './Seal';
 
 interface Props {
   t: Strings;
   stage: Stage;
-  mastered: number;
+  stats: MemoryStats;
   onPreview: () => void;
   onStart: () => void;
 }
@@ -16,8 +18,9 @@ const SAMPLE = 4;
 /** First form of a slash alternative, so chips stay short ("아래/ 밑" → "아래"). */
 const firstForm = (ko: string) => ko.split('/')[0].trim();
 
-export function StageCard({ t, stage, mastered, onPreview, onStart }: Props) {
+export function StageCard({ t, stage, stats, onPreview, onStart }: Props) {
   const total = stage.words.length;
+  const mastered = stats.learned;
   const complete = mastered === total;
   const pct = total ? Math.round((mastered / total) * 100) : 0;
   const titleId = `stage-${stage.key}`;
@@ -43,6 +46,12 @@ export function StageCard({ t, stage, mastered, onPreview, onStart }: Props) {
         )}
       </header>
 
+      {stats.due > 0 && (
+        <div className="mt-3">
+          <DueBadge t={t} due={stats.due} />
+        </div>
+      )}
+
       <ul className="mt-4 flex flex-wrap gap-1.5" aria-label={t.study}>
         {stage.words.slice(0, SAMPLE).map((w, i) => (
           <li key={`${w.ko}-${i}`} lang="ko" className="border border-rule-soft bg-ink px-2 py-1 font-serif text-[15px] font-bold leading-none text-hanji/90">
@@ -53,15 +62,16 @@ export function StageCard({ t, stage, mastered, onPreview, onStart }: Props) {
       </ul>
 
       <div className="mt-5">
-        <div className="h-[3px] bg-rule-soft">
-          <div className={`h-full transition-[width] duration-500 ${complete ? 'bg-cinnabar-deep' : 'bg-hanji'}`} style={{ width: `${pct}%` }} />
-        </div>
+        <LevelBar stats={stats} total={total} />
         <p className="tabular mt-2 flex justify-between text-[13px]">
           <span className="text-hanji-2">
             {t.mastered} <span className="font-semibold text-hanji">{mastered}</span> / {total}
           </span>
           <span className={complete ? 'font-bold text-cinnabar-text' : 'font-semibold text-hanji'}>{pct}%</span>
         </p>
+        <div className="mt-2.5">
+          <LevelChips t={t} stats={stats} />
+        </div>
       </div>
 
       <div className="mt-auto grid grid-cols-2 gap-2 pt-5">

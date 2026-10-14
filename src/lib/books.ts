@@ -54,7 +54,3 @@ export function stagesForUnit(book: Book, unit: string, size: number): Stage[] {
     words: words.slice(start, end),
   }));
 }
-
-export function masteredCount(stageWords: VocabEntry[], bookId: string, mastered: Set<string>): number {
-  return stageWords.reduce((n, w) => n + (mastered.has(wordId(bookId, w)) ? 1 : 0), 0);
-}

@@ -21,6 +21,13 @@ export interface Strings {
   retypeHint: string;
   correctAnswer: string;
   dontKnow: string;
+  round: (n: number) => string;
+  mistakesLeft: (n: number) => string;
+  level: (n: 1 | 2 | 3) => string;
+  newWords: string;
+  memoryLevels: string;
+  dueReview: (n: number) => string;
+  dueShort: (n: number) => string;
   youTyped: string;
   correct: string;
   requeued: string;
@@ -101,9 +108,16 @@ const en: Strings = {
   continue: 'Continue',
   typeInKorean: 'Type it in Korean',
   retypeLabel: 'Type the correct word',
-  retypeHint: 'This word returns at the end of the stage.',
+  retypeHint: 'This word returns in the next round.',
   correctAnswer: 'Correct answer',
   dontKnow: "Don't know (Skip)",
+  round: (n) => `Round ${n}`,
+  mistakesLeft: (n) => `Mistakes: ${n} left`,
+  level: (n) => (n === 3 ? 'Lvl 3 MAX' : `Lvl ${n}`),
+  newWords: 'New',
+  memoryLevels: 'Memory levels',
+  dueReview: (n) => `Ready for Level-Up Review (${n} ${n === 1 ? 'word' : 'words'} due)`,
+  dueShort: (n) => `${n} due`,
   youTyped: 'You typed',
   correct: 'Correct',
   requeued: 'Back in the queue',
@@ -184,9 +198,16 @@ const ru: Strings = {
   continue: 'Дальше',
   typeInKorean: 'Напишите по-корейски',
   retypeLabel: 'Наберите правильное слово',
-  retypeHint: 'Это слово вернётся в конце этапа.',
+  retypeHint: 'Это слово вернётся в следующем раунде.',
   correctAnswer: 'Правильный ответ',
   dontKnow: 'Не знаю (Пропустить)',
+  round: (n) => `Раунд ${n}`,
+  mistakesLeft: (n) => `Ошибки: осталось ${n}`,
+  level: (n) => (n === 3 ? 'Ур. 3 MAX' : `Ур. ${n}`),
+  newWords: 'Новые',
+  memoryLevels: 'Уровни памяти',
+  dueReview: (n) => `Готово к повышению уровня (к повторению: ${n})`,
+  dueShort: (n) => `${n} к повтору`,
   youTyped: 'Вы написали',
   correct: 'Верно',
   requeued: 'Снова в очереди',
@@ -267,9 +288,16 @@ const uz: Strings = {
   continue: 'Davom etish',
   typeInKorean: 'Koreyscha yozing',
   retypeLabel: "To'g'ri so'zni yozing",
-  retypeHint: "Bu so'z bosqich oxirida yana chiqadi.",
+  retypeHint: "Bu so'z keyingi raundda yana chiqadi.",
   correctAnswer: "To'g'ri javob",
   dontKnow: "Bilmayman (O'tkazish)",
+  round: (n) => `${n}-raund`,
+  mistakesLeft: (n) => `Xatolar: ${n} ta qoldi`,
+  level: (n) => (n === 3 ? '3-daraja MAX' : `${n}-daraja`),
+  newWords: 'Yangi',
+  memoryLevels: 'Xotira darajalari',
+  dueReview: (n) => `Darajani oshirish vaqti keldi (${n} ta so'z takrorga tayyor)`,
+  dueShort: (n) => `${n} ta takrorga`,
   youTyped: 'Siz yozdingiz',
   correct: "To'g'ri",
   requeued: 'Navbatga qaytdi',
@@ -350,9 +378,16 @@ const ko: Strings = {
   continue: '계속',
   typeInKorean: '한국어로 쓰세요',
   retypeLabel: '정답을 다시 입력하세요',
-  retypeHint: '이 단어는 단계 끝에 다시 나옵니다.',
+  retypeHint: '이 단어는 다음 회차에 다시 나옵니다.',
   correctAnswer: '정답',
   dontKnow: '모르겠어요 (건너뛰기)',
+  round: (n) => `${n}회차`,
+  mistakesLeft: (n) => `틀린 단어 ${n}개 남음`,
+  level: (n) => (n === 3 ? '레벨 3 MAX' : `레벨 ${n}`),
+  newWords: '새 단어',
+  memoryLevels: '기억 레벨',
+  dueReview: (n) => `레벨 업 복습 가능 (${n}개 단어)`,
+  dueShort: (n) => `복습 ${n}개`,
   youTyped: '입력한 답',
   correct: '정답',
   requeued: '다시 대기열로',

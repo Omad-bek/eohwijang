@@ -1,19 +1,21 @@
 import { useEffect, useRef } from 'react';
 import { Play, X } from 'lucide-react';
-import type { Stage } from '../types';
+import type { Stage, WordMemory } from '../types';
 import type { Strings } from '../lib/i18n';
 import { wordId } from '../lib/books';
-import { Seal } from './Seal';
+import { isDue, levelOf, memoryStats } from '../lib/srs';
+import { DueBadge, LevelBadge, LevelChips } from './Levels';
 
 interface Props {
   t: Strings;
   stage: Stage;
-  mastered: Set<string>;
+  memory: Record<string, WordMemory>;
+  now: number;
   onClose: () => void;
   onStart: () => void;
 }
 
-export function StagePreview({ t, stage, mastered, onClose, onStart }: Props) {
+export function StagePreview({ t, stage, memory, now, onClose, onStart }: Props) {
   const startRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -29,7 +31,8 @@ export function StagePreview({ t, stage, mastered, onClose, onStart }: Props) {
     };
   }, [onClose]);
 
-  const done = stage.words.filter((w) => mastered.has(wordId(stage.bookId, w))).length;
+  const stats = memoryStats(stage.words, stage.bookId, memory, now);
+  const done = stats.learned;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ height: 'var(--app-h)' }}>
@@ -49,6 +52,10 @@ export function StagePreview({ t, stage, mastered, onClose, onStart }: Props) {
               <span className="font-serif">{stage.unit}</span>
               <span>{t.stage(stage.index + 1)}</span>
             </h2>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <LevelChips t={t} stats={stats} />
+              <DueBadge t={t} due={stats.due} />
+            </div>
           </div>
           <button type="button" onClick={onClose} aria-label={t.close} className="-mr-2 -mt-1 p-2 text-hanji-2 hover:text-hanji">
             <X size={22} />
@@ -69,15 +76,22 @@ export function StagePreview({ t, stage, mastered, onClose, onStart }: Props) {
             </thead>
             <tbody>
               {stage.words.map((w, i) => {
-                const m = mastered.has(wordId(stage.bookId, w));
+                const m = memory[wordId(stage.bookId, w)];
+                const level = levelOf(m);
+                const due = isDue(m, now);
                 return (
                   <tr key={`${w.ko}-${i}`} className="border-b border-rule-soft align-top">
                     <td className="tabular py-2.5 pl-4 pr-1 text-[12px] text-hanji-2">
                       <span className="block">{stage.from + i}</span>
-                      {m && (
-                        <span className="mt-1.5 block" title={t.mastered}>
-                          <Seal size={18} label="익" />
-                          <span className="sr-only">{t.mastered}</span>
+                      {level > 0 && (
+                        <span className="mt-1.5 flex flex-col items-start gap-1">
+                          <LevelBadge t={t} level={level as 1 | 2 | 3} compact />
+                          {due && (
+                            <span title={t.dueReview(1)} className="font-bold text-celadon">
+                              <span aria-hidden>↑</span>
+                              <span className="sr-only">{t.dueReview(1)}</span>
+                            </span>
+                          )}
                         </span>
                       )}
                     </td>

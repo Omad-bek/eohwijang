@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Settings, Stage, VocabEntry } from './types';
 import { STRINGS } from './lib/i18n';
 import { allBooks, stagesForUnit, wordId } from './lib/books';
-import { useOnline, useUserData, useVisualViewportHeight } from './lib/hooks';
+import { useNow, useOnline, useUserData, useVisualViewportHeight } from './lib/hooks';
+import { applyOutcome, type Outcome } from './lib/srs';
 import { Home } from './components/Home';
 import { Manager } from './components/Manager';
 import { Navbar } from './components/Navbar';
@@ -27,7 +28,7 @@ export default function App() {
   const online = useOnline();
   const t = STRINGS[data.settings.uiLang];
   const books = useMemo(() => allBooks(data), [data]);
-  const mastered = useMemo(() => new Set(data.mastered), [data.mastered]);
+  const now = useNow();
 
   const [bookId, setBookId] = useState(() => readBook() ?? '1A');
   const [view, setView] = useState<View>({ kind: 'home' });
@@ -54,10 +55,13 @@ export default function App() {
     [update],
   );
 
-  const markMastered = useCallback(
-    (stage: Stage, w: VocabEntry) => {
+  const recordResult = useCallback(
+    (stage: Stage, w: VocabEntry, outcome: Outcome) => {
       const id = wordId(stage.bookId, w);
-      update((d) => (d.mastered.includes(id) ? d : { ...d, mastered: [...d.mastered, id] }));
+      update((d) => {
+        const next = applyOutcome(d.memory[id], outcome, Date.now());
+        return next ? { ...d, memory: { ...d.memory, [id]: next } } : d;
+      });
     },
     [update],
   );
@@ -121,7 +125,8 @@ export default function App() {
               t={t}
               books={books}
               data={data}
-              mastered={mastered}
+              memory={data.memory}
+              now={now}
               bookId={activeBook.id}
               onBook={chooseBook}
               onPreview={setPreview}
@@ -136,7 +141,7 @@ export default function App() {
               t={t}
               stage={view.stage}
               settings={data.settings}
-              onMastered={(w) => markMastered(view.stage, w)}
+              onResult={(w, outcome) => recordResult(view.stage, w, outcome)}
               onComplete={(share) => completeStage(view.stage, share)}
               onExit={() => setView({ kind: 'home' })}
               nextStage={nextStageAfter(view.stage)}
@@ -162,7 +167,7 @@ export default function App() {
         </div>
       </div>
 
-      {preview && <StagePreview t={t} stage={preview} mastered={mastered} onClose={() => setPreview(null)} onStart={() => startStage(preview)} />}
+      {preview && <StagePreview t={t} stage={preview} memory={data.memory} now={now} onClose={() => setPreview(null)} onStart={() => startStage(preview)} />}
     </div>
   );
 }

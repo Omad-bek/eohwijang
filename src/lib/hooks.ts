@@ -57,3 +57,18 @@ export function useOnline() {
   }, []);
   return online;
 }
+
+/** Current time, refreshed every minute so review timers come due while the app stays open. */
+export function useNow(intervalMs = 60_000) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), intervalMs);
+    const onShow = () => document.visibilityState === 'visible' && setNow(Date.now());
+    document.addEventListener('visibilitychange', onShow);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onShow);
+    };
+  }, [intervalMs]);
+  return now;
+}

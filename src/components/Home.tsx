@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
-import type { Book, Stage, UserData } from '../types';
+import type { Book, Stage, UserData, WordMemory } from '../types';
 import type { Strings } from '../lib/i18n';
-import { masteredCount, stagesForUnit } from '../lib/books';
+import { stagesForUnit } from '../lib/books';
+import { addStats, EMPTY_STATS, memoryStats, type MemoryStats } from '../lib/srs';
+import { DueBadge } from './Levels';
 import { Seal } from './Seal';
 import { StageCard } from './StageCard';
 
@@ -10,7 +12,8 @@ interface Props {
   t: Strings;
   books: Book[];
   data: UserData;
-  mastered: Set<string>;
+  memory: Record<string, WordMemory>;
+  now: number;
   bookId: string;
   onBook: (id: string) => void;
   onPreview: (s: Stage) => void;
@@ -21,6 +24,8 @@ interface Props {
 interface UnitSummary {
   unit: string;
   stages: Stage[];
+  stats: MemoryStats[];
+  due: number;
   total: number;
   done: number;
   pct: number;
@@ -68,7 +73,7 @@ function BookTabs({ t, books, bookId, onBook, onAddBook }: Pick<Props, 't' | 'bo
   );
 }
 
-export function Home({ t, books, data, mastered, bookId, onBook, onPreview, onStart, onAddBook }: Props) {
+export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, onStart, onAddBook }: Props) {
   const book = books.find((b) => b.id === bookId) ?? books[0];
   const size = data.settings.stageSize;
 
@@ -77,12 +82,13 @@ export function Home({ t, books, data, mastered, bookId, onBook, onPreview, onSt
       book.units
         .map((unit) => {
           const stages = stagesForUnit(book, unit, size);
+          const stats = stages.map((s) => memoryStats(s.words, book.id, memory, now));
+          const sum = stats.reduce(addStats, EMPTY_STATS);
           const total = stages.reduce((n, s) => n + s.words.length, 0);
-          const done = stages.reduce((n, s) => n + masteredCount(s.words, book.id, mastered), 0);
-          return { unit, stages, total, done, pct: total ? Math.round((done / total) * 100) : 0 };
+          return { unit, stages, stats, due: sum.due, total, done: sum.learned, pct: total ? Math.round((sum.learned / total) * 100) : 0 };
         })
         .filter((u) => u.total > 0),
-    [book, size, mastered],
+    [book, size, memory, now],
   );
 
   const [picked, setPicked] = useState<string | null>(() => readUnit(book.id));
@@ -145,8 +151,9 @@ export function Home({ t, books, data, mastered, bookId, onBook, onPreview, onSt
                   >
                     <span className={`w-14 shrink-0 font-serif text-[20px] font-bold leading-none ${on ? 'text-hanji' : 'text-hanji/80'}`}>{u.unit}</span>
                     <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-                      <span className="tabular flex justify-between text-[12px]">
+                      <span className="tabular flex items-center justify-between gap-2 text-[12px]">
                         <span className="text-hanji-2">{t.wordCount(u.total)}</span>
+                        {u.due > 0 && <span className="ml-auto"><DueBadge t={t} due={u.due} short /></span>}
                         <span className={complete ? 'font-bold text-cinnabar-text' : 'font-semibold text-hanji'}>{u.pct}%</span>
                       </span>
                       <span className="block h-[3px] bg-rule-soft">
@@ -187,6 +194,12 @@ export function Home({ t, books, data, mastered, bookId, onBook, onPreview, onSt
                       <span className={`tabular text-[12px] font-semibold ${on ? 'text-ink/70' : u.pct === 100 ? 'text-cinnabar-text' : 'text-hanji-2'}`}>
                         {u.pct}%
                       </span>
+                      {u.due > 0 && (
+                        <span title={t.dueReview(u.due)} className="tabular flex h-5 min-w-5 items-center justify-center bg-celadon px-1 text-[11px] font-bold text-ink">
+                          <span aria-hidden>↑{u.due}</span>
+                          <span className="sr-only">{t.dueReview(u.due)}</span>
+                        </span>
+                      )}
                     </button>
                   </li>
                 );
@@ -210,6 +223,7 @@ export function Home({ t, books, data, mastered, bookId, onBook, onPreview, onSt
                   {selected.unit}
                 </h2>
                 {selected.pct === 100 && <Seal size={40} />}
+                <DueBadge t={t} due={selected.due} />
               </div>
               <div className="min-w-[12rem] flex-1 md:max-w-xs">
                 <p className="tabular flex justify-between text-[13px] text-hanji-2">
@@ -225,12 +239,12 @@ export function Home({ t, books, data, mastered, bookId, onBook, onPreview, onSt
             </header>
 
             <div className="mt-5 grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-3 md:mt-6">
-              {selected.stages.map((s) => (
+              {selected.stages.map((s, i) => (
                 <StageCard
                   key={s.key}
                   t={t}
                   stage={s}
-                  mastered={masteredCount(s.words, book.id, mastered)}
+                  stats={selected.stats[i]}
                   onPreview={() => onPreview(s)}
                   onStart={() => onStart(s)}
                 />

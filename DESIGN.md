@@ -17,6 +17,8 @@ colors:
   celadon-wash: "#1b2a25"
   ochre: "#e0b14a"
   ochre-wash: "#2e2512"
+  silver: "#a9bccf"
+  silver-wash: "#1c232b"
 typography:
   display-unit:
     fontFamily: "'Gowun Batang', 'Nanum Myeongjo', 'AppleMyungjo', 'Batang', serif"

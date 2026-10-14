@@ -1,4 +1,4 @@
-import type { Book, PromptLang, Settings, UiLang, UserData, VocabEntry } from '../types';
+import type { Book, PromptLang, Settings, UiLang, UserData, VocabEntry, WordMemory } from '../types';
 import { DEFAULT_STAGE, MAX_STAGE, MIN_STAGE } from './books';
 
 const KEY = 'project-vocab:v1';
@@ -15,9 +15,9 @@ export function emptyData(): UserData {
   const ui = defaultUiLang();
   const prompt: PromptLang = ui === 'ru' ? 'ru' : ui === 'en' ? 'en' : 'uz';
   return {
-    version: 1,
+    version: 2,
     settings: { uiLang: ui, promptLang: prompt, stageSize: DEFAULT_STAGE },
-    mastered: [],
+    memory: {},
     stages: {},
     customBooks: [],
     extraWords: {},
@@ -60,6 +60,19 @@ function sanitizeBook(raw: unknown): Book | null {
   return { id: b.id.trim(), title: typeof b.title === 'string' && b.title.trim() ? b.title.trim() : b.id.trim(), units, words, builtIn: false };
 }
 
+function sanitizeMemory(raw: unknown): Record<string, WordMemory> {
+  const out: Record<string, WordMemory> = {};
+  if (!raw || typeof raw !== 'object') return out;
+  for (const [id, v] of Object.entries(raw as Record<string, Partial<WordMemory>>)) {
+    const level = Number(v?.level);
+    if (level !== 1 && level !== 2 && level !== 3) continue;
+    const last = Number(v.lastReviewedAt);
+    const next = Number(v.nextReviewAt);
+    out[id] = { level, lastReviewedAt: Number.isFinite(last) ? last : 0, nextReviewAt: Number.isFinite(next) ? next : 0 };
+  }
+  return out;
+}
+
 /** Validate anything that claims to be UserData (from localStorage or an imported backup). */
 export function sanitizeData(raw: unknown): UserData {
   const base = emptyData();
@@ -71,10 +84,17 @@ export function sanitizeData(raw: unknown): UserData {
       if (Array.isArray(v)) extraWords[k] = v.filter(isEntry).map(cleanEntry);
     }
   }
+  const memory = sanitizeMemory(d.memory);
+  // v1 kept a flat list of mastered word ids: carry each over as level 1, due for review now.
+  const legacy = (d as { mastered?: unknown }).mastered;
+  if (Array.isArray(legacy)) {
+    const now = Date.now();
+    for (const id of legacy) if (typeof id === 'string' && !memory[id]) memory[id] = { level: 1, lastReviewedAt: now, nextReviewAt: now };
+  }
   return {
-    version: 1,
+    version: 2,
     settings: sanitizeSettings(d.settings, base.settings),
-    mastered: Array.isArray(d.mastered) ? d.mastered.filter((x) => typeof x === 'string') : [],
+    memory,
     stages: d.stages && typeof d.stages === 'object' ? d.stages : {},
     customBooks: Array.isArray(d.customBooks) ? (d.customBooks.map(sanitizeBook).filter(Boolean) as Book[]) : [],
     extraWords,

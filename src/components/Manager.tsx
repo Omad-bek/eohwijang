@@ -269,7 +269,7 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
                 readFile(f, (s) => {
                   try {
                     const json = JSON.parse(s);
-                    if (!json || typeof json !== 'object' || !('settings' in json || 'mastered' in json)) throw new Error('not a backup');
+                    if (!json || typeof json !== 'object' || !('settings' in json || 'memory' in json || 'mastered' in json)) throw new Error('not a backup');
                     setPendingBackup(sanitizeData(json));
                     setBackupStatus(null);
                   } catch {
@@ -281,7 +281,7 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
           </div>
           {pendingBackup && (
             <p className="tabular mt-2 text-[13px] text-hanji">
-              {t.mastered}: {pendingBackup.mastered.length}
+              {t.mastered}: {Object.keys(pendingBackup.memory).length}
               {pendingBackup.customBooks.length > 0 && ` · ${t.books}: ${pendingBackup.customBooks.map((b) => b.id).join(', ')}`}
             </p>
           )}
