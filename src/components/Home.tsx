@@ -176,7 +176,7 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
           {notice}
         </div>
         {units.length > 0 && (
-          <nav aria-label={t.units} className="sticky top-0 z-10 mt-4 border-b border-rule bg-ink md:hidden">
+          <nav aria-label={t.units} className="sticky top-0 z-10 mt-4 border-b border-rule bg-ink/85 backdrop-blur-sm md:hidden">
             <ul className="flex gap-2 overflow-x-auto px-4 py-3">
               {units.map((u) => {
                 const on = u.unit === selected?.unit;

@@ -50,6 +50,30 @@ body {
   overflow: hidden;
 }
 
+/*
+ * 원고지 (manuscript paper): rows of square cells with a narrow gutter between rows,
+ * drawn in faint slate behind everything. Panels sit on top as solid ink, so the paper
+ * only shows in the open ground and never under text.
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='34'%3E%3Cpath d='M.5 0v28M0 .5h28M0 27.5h28' fill='none' stroke='%2394a3b8' stroke-opacity='.075'/%3E%3C/svg%3E");
+  background-size: 28px 34px;
+  background-position: center 10px;
+  /* Fade toward the edges so the grid reads as paper, not as a UI element. */
+  -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 40%, #000 45%, rgb(0 0 0 / 0.35) 100%);
+  mask-image: radial-gradient(ellipse 120% 90% at 50% 40%, #000 45%, rgb(0 0 0 / 0.35) 100%);
+}
+
+@media print {
+  body::before {
+    display: none;
+  }
+}
+
 #root {
   position: fixed;
   inset: 0 0 auto 0;
