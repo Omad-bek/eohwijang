@@ -149,16 +149,34 @@ select {
     transform: scale(1) rotate(-6deg);
   }
 }
-@keyframes nudge {
-  0%,
-  100% {
+/* Encouragement badge: pops in, rests, then drifts up and fades. */
+@keyframes praise {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.9);
+  }
+  14% {
+    opacity: 1;
+    transform: translateY(0) scale(1.04);
+  }
+  22%,
+  72% {
+    opacity: 1;
     transform: none;
   }
-  25% {
-    transform: translateX(-5px);
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
   }
+}
+@keyframes praise-fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  15%,
   75% {
-    transform: translateX(5px);
+    opacity: 1;
   }
 }
 @keyframes sheet-in {
@@ -177,18 +195,20 @@ select {
 .anim-seal {
   animation: seal-in 520ms var(--ease-out-expo) both;
 }
-.anim-nudge {
-  animation: nudge 260ms ease-in-out;
+.anim-praise {
+  animation: praise 1300ms var(--ease-out-expo) both;
 }
 .anim-sheet {
   animation: sheet-in 320ms var(--ease-out-expo) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .anim-praise {
+    animation: praise-fade 1300ms linear both;
+  }
   .anim-cell,
   .anim-slot,
   .anim-seal,
-  .anim-nudge,
   .anim-sheet {
     animation: none;
   }

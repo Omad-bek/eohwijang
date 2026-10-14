@@ -90,6 +90,8 @@ export interface Strings {
   dropHint: string;
   dropActive: string;
   loadedFiles: (names: string) => string;
+  /** Short cheers flashed on a right answer; one is picked at random. */
+  praise: string[];
   offline: string;
 }
 
@@ -184,6 +186,7 @@ const en: Strings = {
   dropHint: 'Drop .txt, .tsv or .json files here',
   dropActive: 'Drop to load the words',
   loadedFiles: (names) => `Loaded ${names}`,
+  praise: ['정답!', 'Great!', 'Nice!', 'Awesome!', 'Spot on!', '잘했어요!'],
 };
 
 const ru: Strings = {
@@ -277,6 +280,7 @@ const ru: Strings = {
   dropHint: 'Перетащите сюда файлы .txt, .tsv или .json',
   dropActive: 'Отпустите, чтобы загрузить слова',
   loadedFiles: (names) => `Загружено: ${names}`,
+  praise: ['정답!', 'Отлично!', 'Верно!', 'Здорово!', 'Супер!', '잘했어요!'],
 };
 
 const uz: Strings = {
@@ -370,6 +374,7 @@ const uz: Strings = {
   dropHint: ".txt, .tsv yoki .json fayllarni shu yerga tashlang",
   dropActive: "So'zlarni yuklash uchun qo'yib yuboring",
   loadedFiles: (names) => `Yuklandi: ${names}`,
+  praise: ['정답!', 'Zo‘r!', 'Barakalla!', 'Ajoyib!', 'To‘g‘ri!', '잘했어요!'],
 };
 
 const ko: Strings = {
@@ -463,6 +468,7 @@ const ko: Strings = {
   dropHint: '.txt, .tsv, .json 파일을 여기에 놓으세요',
   dropActive: '놓으면 단어를 불러옵니다',
   loadedFiles: (names) => `불러옴: ${names}`,
+  praise: ['정답!', '잘했어요!', '좋아요!', '완벽해요!', '최고예요!', '맞아요!'],
 };
 
 export const STRINGS: Record<UiLang, Strings> = { en, ru, uz, ko };

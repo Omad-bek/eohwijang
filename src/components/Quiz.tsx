@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Check, CornerDownLeft, RotateCcw, SkipForward } from 'lucide-react';
+import { ArrowLeft, Check, CornerDownLeft, RotateCcw, Sparkles, SkipForward } from 'lucide-react';
 import type { PromptLang, Settings, Stage, VocabEntry } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { Outcome } from '../lib/srs';
@@ -36,6 +36,36 @@ function shuffle<T>(xs: T[]): T[] {
   return a;
 }
 
+const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** A ring that holds, then fades; `bloom` adds a soft halo spreading outward. Linear overall, eased per keyframe. */
+function ring(el: HTMLElement | null, rgb: string, bloom: boolean, duration: number) {
+  const halo = (spread: number, a: number) => (bloom ? `, 0 0 0 ${spread}px rgb(${rgb} / ${a})` : '');
+  el?.animate(
+    [
+      { boxShadow: `0 0 0 2px rgb(${rgb} / 0.5)${halo(0, 0.35)}`, easing: 'ease-out' },
+      { boxShadow: `0 0 0 2px rgb(${rgb} / 0.5)${halo(10, 0)}`, offset: 0.55, easing: 'ease-in' },
+      { boxShadow: `0 0 0 2px rgb(${rgb} / 0)${halo(10, 0)}` },
+    ],
+    { duration, easing: 'linear' },
+  );
+}
+
+/** Emerald glow on a right answer: "yes, that's it". */
+const glow = (el: HTMLElement | null) => ring(el, '16 185 129', !reducedMotion(), 800);
+
+/**
+ * A small, damped side-to-side shake: "try again", not "wrong!". With reduced motion it becomes
+ * a still amber ring flash on the field, so the signal survives without movement.
+ */
+function shake(row: HTMLElement | null, field: HTMLElement | null) {
+  if (reducedMotion()) return ring(field, '251 191 36', false, 700);
+  row?.animate(
+    [{ transform: 'none' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(-3px)' }, { transform: 'translateX(2px)' }, { transform: 'none' }],
+    { duration: 380, easing: 'ease-out' },
+  );
+}
+
 function Prompt({ word, lang }: { word: VocabEntry; lang: PromptLang }) {
   const langs = (['uz', 'ru', 'en'] as const).filter((l) => word[l]);
   if (lang === 'all' || !word[lang as 'uz' | 'ru' | 'en']) {
@@ -68,10 +98,12 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   const [phase, setPhase] = useState<Phase>({ kind: 'ask' });
   const [value, setValue] = useState('');
   const [missed, setMissed] = useState<Set<number>>(() => new Set());
-  const [nudge, setNudge] = useState(0);
+  /** The encouragement badge; `id` restarts its animation on every right answer. */
+  const [praise, setPraise] = useState<{ id: number; text: string } | null>(null);
   const [lastRight, setLastRight] = useState<{ prompt: string; ko: string } | null>(null);
   const [imeHint, setImeHint] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const answerRow = useRef<HTMLDivElement>(null);
   const composing = useRef(false);
   const pendingSubmit = useRef(false);
 
@@ -86,6 +118,14 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   useEffect(() => {
     if (phase.kind !== 'done') inputRef.current?.focus({ preventScroll: true });
   }, [phase.kind, current]);
+
+  const cheer = () => {
+    glow(inputRef.current);
+    setPraise((prev) => {
+      const pool = t.praise.filter((p) => p !== prev?.text);
+      return { id: (prev?.id ?? 0) + 1, text: pool[Math.floor(Math.random() * pool.length)] };
+    });
+  };
 
   const finish = (missedSet: Set<number>) => {
     const share = (total - missedSet.size) / total;
@@ -126,7 +166,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
     // Latin/Cyrillic input means the keyboard isn't on Korean: say so instead of scoring a miss.
     if (!/[ᄀ-ᇿ㄰-㆏가-힣]/.test(typed)) {
       setImeHint(true);
-      setNudge((n) => n + 1);
+      shake(answerRow.current, inputRef.current);
       return;
     }
     setImeHint(false);
@@ -136,24 +176,28 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
       if (result.correct) {
         onResult(current.word, missed.has(current.n) ? 'relearned' : 'firstTry');
         setLastRight({ prompt: gloss(current.word), ko: result.target });
+        cheer();
         setValue('');
         advance(queue.slice(1), nextRound);
       } else {
         miss();
         setLastRight(null);
+        setPraise(null);
         setPhase({ kind: 'review', result, typed });
         setValue('');
+        shake(answerRow.current, inputRef.current);
       }
       return;
     }
 
     // Review: the learner must type the correct word before moving on; it then waits for the next round.
     if (isCorrect(typed, current.word.ko)) {
+      glow(inputRef.current);
       setValue('');
       setPhase({ kind: 'ask' });
       advance(queue.slice(1), [...nextRound, current]);
     } else {
-      setNudge((n) => n + 1);
+      shake(answerRow.current, inputRef.current);
       setValue('');
     }
   };
@@ -164,8 +208,10 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
     setImeHint(false);
     miss();
     setLastRight(null);
+    setPraise(null);
     setPhase({ kind: 'review', result: checkAnswer('', current.word.ko), typed: '' });
     setValue('');
+    shake(answerRow.current, inputRef.current);
     inputRef.current?.focus({ preventScroll: true });
   };
 
@@ -265,7 +311,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   const missedWords = useMemo(() => stage.words.filter((_, n) => missed.has(n)), [missed, stage.words]);
 
   /** The flashcard: full-bleed on phones, a bordered centered card on wider screens. */
-  const cardCls = 'flex min-h-0 flex-1 flex-col md:mb-6 md:border md:border-rule md:bg-ink-2';
+  const cardCls = 'relative flex min-h-0 flex-1 flex-col md:mb-6 md:border md:border-rule md:bg-ink-2';
 
   if (phase.kind === 'done') {
     const pct = Math.round(phase.firstTry * 100);
@@ -321,6 +367,19 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
       {header}
 
       <section className={cardCls}>
+        {praise && (
+          <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2">
+            <span
+              key={praise.id}
+              lang={/[가-힣]/.test(praise.text) ? 'ko' : undefined}
+              onAnimationEnd={() => setPraise((p) => (p?.id === praise.id ? null : p))}
+              className="anim-praise flex items-center gap-1.5 whitespace-nowrap rounded-full border border-accent/50 bg-accent-wash px-3.5 py-1.5 text-[14px] font-bold text-accent-text"
+            >
+              <Sparkles size={14} strokeWidth={2.4} aria-hidden />
+              {praise.text}
+            </span>
+          </div>
+        )}
         <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-4 pt-6 md:px-8 md:pt-8">
           <div aria-hidden className="pointer-events-none absolute inset-0 flex px-1 md:px-8">
             {[0, 1, 2, 3].map((i) => (
@@ -377,7 +436,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
             <span className={phase.kind === 'review' ? 'text-amber' : ''}>{phase.kind === 'review' ? t.retypeLabel : t.typeInKorean}</span>
             <span className="tabular shrink-0 whitespace-nowrap pl-3 normal-case tracking-normal">{t.remaining(left)}</span>
           </label>
-          <div key={nudge} className={`flex gap-2 ${nudge ? 'anim-nudge' : ''}`}>
+          <div ref={answerRow} className="flex gap-2">
             <input
               ref={inputRef}
               id="answer"
@@ -398,7 +457,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               onCompositionStart={() => (composing.current = true)}
               onCompositionEnd={onCompositionEnd}
               placeholder={phase.kind === 'review' ? correctForm : '한국어'}
-              className={`h-14 min-w-0 flex-1 border-[1.5px] bg-ink-2 px-4 text-[24px] font-semibold text-hanji placeholder:font-normal placeholder:text-hanji-2/85 focus:outline-none md:bg-ink ${
+              className={`h-14 min-w-0 flex-1 border-[1.5px] bg-ink-2 px-4 transition-colors duration-300 text-[24px] font-semibold text-hanji placeholder:font-normal placeholder:text-hanji-2/85 focus:outline-none md:bg-ink ${
                 phase.kind === 'review' ? 'border-amber' : 'border-hanji/70 focus:border-hanji'
               }`}
             />
