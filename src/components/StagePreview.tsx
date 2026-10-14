@@ -41,7 +41,7 @@ export function StagePreview({ t, stage, memory, now, onClose, onStart }: Props)
         role="dialog"
         aria-modal="true"
         aria-labelledby="stage-title"
-        className="anim-sheet relative flex max-h-[92%] w-full max-w-2xl flex-col border-t-[1.5px] border-cinnabar-deep bg-ink sm:max-h-[86%] sm:border-[1.5px]"
+        className="anim-sheet relative flex max-h-[92%] w-full max-w-2xl flex-col border-t border-rule bg-ink sm:max-h-[86%] sm:border"
       >
         <header className="flex items-start gap-3 border-b border-rule px-5 pb-4 pt-5">
           <div className="min-w-0 flex-1">
@@ -87,7 +87,7 @@ export function StagePreview({ t, stage, memory, now, onClose, onStart }: Props)
                         <span className="mt-1.5 flex flex-col items-start gap-1">
                           <LevelBadge t={t} level={level as 1 | 2 | 3} compact />
                           {due && (
-                            <span title={t.dueReview(1)} className="font-bold text-celadon">
+                            <span title={t.dueReview(1)} className="font-bold text-sky">
                               <span aria-hidden>↑</span>
                               <span className="sr-only">{t.dueReview(1)}</span>
                             </span>
@@ -113,7 +113,7 @@ export function StagePreview({ t, stage, memory, now, onClose, onStart }: Props)
             ref={startRef}
             type="button"
             onClick={onStart}
-            className="flex h-13 w-full items-center justify-center gap-2 bg-cinnabar text-[15px] font-bold tracking-[0.04em] text-ink transition-colors hover:bg-cinnabar-text"
+            className="flex h-13 w-full items-center justify-center gap-2 bg-accent text-[15px] font-bold tracking-[0.04em] text-ink transition-colors hover:bg-accent-text"
           >
             <Play size={18} fill="currentColor" aria-hidden />
             {done === stage.words.length ? t.replay : t.start}

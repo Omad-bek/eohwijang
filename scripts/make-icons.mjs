@@ -1,11 +1,11 @@
 // Renders the app icon (the syllable 어 built from a ㅇ ring and a ㅓ stem inside
-// a cinnabar double frame) to PNG without native deps. Run: node scripts/make-icons.mjs
+// an emerald double frame) to PNG without native deps. Run: node scripts/make-icons.mjs
 import { deflateSync } from 'node:zlib';
 import { writeFileSync, mkdirSync } from 'node:fs';
 
-const INK = [0x12, 0x11, 0x10];
-const HANJI = [0xec, 0xe4, 0xd3];
-const CINNABAR = [0xd4, 0x45, 0x2a];
+const INK = [0x0f, 0x17, 0x2a];
+const HANJI = [0xe2, 0xe8, 0xf0];
+const CINNABAR = [0x10, 0xb9, 0x81];
 
 // Geometry in a 0..1 unit square. `pad` shrinks the art for maskable safe zones.
 function shapes(pad) {

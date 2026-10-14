@@ -32,8 +32,8 @@ export default defineConfig({
         scope: base,
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#121110',
-        theme_color: '#121110',
+        background_color: '#0f172a',
+        theme_color: '#0f172a',
         // Relative to the manifest, so they resolve under the base path.
         icons: [
           { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },

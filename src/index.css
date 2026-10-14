@@ -1,23 +1,27 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-ink: #121110;
-  --color-ink-2: #1c1a18;
-  --color-ink-3: #26231f;
-  --color-rule: #3a342d;
-  --color-rule-soft: #2a2622;
-  --color-hanji: #ece4d3;
-  --color-hanji-2: #a39a89;
-  --color-cinnabar: #e0553a;
-  --color-cinnabar-deep: #d4452a;
-  --color-cinnabar-text: #f07457;
-  --color-cinnabar-wash: #3a1a14;
-  --color-celadon: #7fb8a4;
-  --color-celadon-wash: #1b2a25;
-  --color-ochre: #e0b14a;
-  --color-ochre-wash: #2e2512;
-  --color-silver: #a9bccf;
-  --color-silver-wash: #1c232b;
+  /* Calm slate ground; emerald carries progress and main actions. */
+  --color-ink: #0f172a;
+  --color-ink-2: #141e33;
+  --color-ink-3: #1e293b;
+  --color-rule: #1e293b;
+  --color-rule-soft: #18223a;
+  --color-hanji: #e2e8f0;
+  --color-hanji-2: #94a3b8;
+  --color-accent: #10b981;
+  --color-accent-text: #34d399;
+  --color-accent-wash: #0c2a2a;
+  /* Red is reserved for wrong syllables in the typing diff and real errors. */
+  --color-danger: #ef4444;
+  --color-danger-text: #f87171;
+  --color-danger-wash: #2b1622;
+  --color-amber: #fbbf24;
+  --color-amber-wash: #2a2416;
+  --color-indigo: #a5b4fc;
+  --color-indigo-wash: #1c2145;
+  --color-sky: #7dd3fc;
+  --color-sky-wash: #0f2639;
 
   --font-sans: system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Noto Sans CJK KR', Roboto, sans-serif;
   --font-serif: 'Gowun Batang', 'Nanum Myeongjo', 'AppleMyungjo', 'Batang', serif;
@@ -53,20 +57,20 @@ body {
 }
 
 ::selection {
-  background: var(--color-cinnabar-deep);
+  background: var(--color-accent);
   color: var(--color-ink);
 }
 
 input,
 textarea,
 select {
-  caret-color: var(--color-cinnabar);
+  caret-color: var(--color-accent);
 }
 
 /* Layered so component utilities (e.g. focus:outline-none on fields that draw their own focus border) win. */
 @layer base {
   :focus-visible {
-    outline: 2px solid var(--color-cinnabar);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 
@@ -80,19 +84,14 @@ select {
   font-variant-numeric: tabular-nums;
 }
 
-/* The double boxed rule (광곽) around the whole screen. */
+/* A quiet slate outline around the whole screen. */
 .frame-rule {
   position: absolute;
   inset: max(6px, env(safe-area-inset-top)) 6px max(6px, env(safe-area-inset-bottom)) 6px;
-  border: 1.5px solid var(--color-cinnabar-deep);
+  border: 1px solid var(--color-rule);
+  border-radius: 14px;
   pointer-events: none;
   z-index: 40;
-}
-.frame-rule::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  border: 1px solid #4a2219;
 }
 
 /* Signature move: a syllable splits into its jamo slots. */

@@ -73,7 +73,7 @@ function UiLangMenu({ t, value, onChange }: { t: Strings; value: UiLang; onChang
               <span lang={l.value} className="flex-1">
                 {l.name}
               </span>
-              {l.value === value && <Check size={15} className="text-cinnabar-text" aria-hidden />}
+              {l.value === value && <Check size={15} className="text-accent-text" aria-hidden />}
             </button>
           ))}
         </div>
@@ -121,7 +121,7 @@ export function Navbar({ t, settings, online, onChange, onHome, onData }: Props)
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => onChange({ promptLang: o.value })}
                   className={`h-[34px] min-w-8 px-1.5 text-[11px] font-bold tracking-[0.05em] transition-colors sm:min-w-10 sm:px-2 ${
-                    on ? 'bg-cinnabar text-ink' : 'text-hanji-2 hover:bg-ink-3 hover:text-hanji'
+                    on ? 'bg-accent text-ink' : 'text-hanji-2 hover:bg-ink-3 hover:text-hanji'
                   }`}
                 >
                   {o.label}

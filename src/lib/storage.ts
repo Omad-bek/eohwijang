@@ -123,11 +123,13 @@ export function saveData(data: UserData): boolean {
 export interface ParsedWords {
   words: VocabEntry[];
   skipped: number;
+  /** Book name carried by a `{ "book": "1B", "words": [...] }` JSON file, if any. */
+  book?: string;
 }
 
 /**
  * Accepts:
- *  - JSON: an array of { unit, ko, uz, ru, en }, or { words: [...] }
+ *  - JSON: an array of { unit, ko, uz, ru, en }, or { book?: "1B", words: [...] } (`id` or `title` also name the book)
  *  - TSV/CSV-with-tabs: one word per line, columns unit, ko, uz, ru, en (a header row is skipped)
  */
 export function parseWords(text: string): ParsedWords {
@@ -137,7 +139,8 @@ export function parseWords(text: string): ParsedWords {
     const json = JSON.parse(trimmed);
     const list: unknown[] = Array.isArray(json) ? json : Array.isArray(json?.words) ? json.words : [];
     const words = list.filter(isEntry).map(cleanEntry);
-    return { words, skipped: list.length - words.length };
+    const name = Array.isArray(json) ? undefined : [json?.book, json?.id, json?.title].find((v) => typeof v === 'string' && v.trim());
+    return { words, skipped: list.length - words.length, book: name?.trim() };
   }
   const words: VocabEntry[] = [];
   let skipped = 0;

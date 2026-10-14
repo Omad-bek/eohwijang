@@ -13,7 +13,7 @@ export function wordId(bookId: string, w: VocabEntry): string {
   return `${bookId}|${w.unit}|${w.ko.normalize('NFC').trim()}`;
 }
 
-/** Built-in books with appended words, followed by learner-added books. */
+/** Every book (built-in with appended words, plus learner-added) in textbook order: 1A, 1B, 2A … */
 export function allBooks(data: UserData): Book[] {
   const builtIn = BUILT_IN_BOOKS.map((b) => {
     const extra = data.extraWords[b.id] ?? [];
@@ -22,7 +22,7 @@ export function allBooks(data: UserData): Book[] {
     for (const w of extra) if (!units.includes(w.unit)) units.push(w.unit);
     return { ...b, units, words: [...b.words, ...extra] };
   });
-  return [...builtIn, ...data.customBooks];
+  return [...builtIn, ...data.customBooks].sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
 }
 
 /**

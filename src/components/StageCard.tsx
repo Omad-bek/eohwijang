@@ -29,7 +29,7 @@ export function StageCard({ t, stage, stats, onPreview, onStart }: Props) {
     <article
       aria-labelledby={titleId}
       className={`group flex flex-col border bg-ink-2 p-4 transition-colors duration-200 sm:p-5 ${
-        complete ? 'border-cinnabar-deep/45 hover:border-cinnabar-deep' : 'border-rule hover:border-hanji-2/70'
+        complete ? 'border-accent/45 hover:border-accent' : 'border-rule hover:border-hanji-2/70'
       }`}
     >
       <header className="flex items-start justify-between gap-3">
@@ -67,7 +67,7 @@ export function StageCard({ t, stage, stats, onPreview, onStart }: Props) {
           <span className="text-hanji-2">
             {t.mastered} <span className="font-semibold text-hanji">{mastered}</span> / {total}
           </span>
-          <span className={complete ? 'font-bold text-cinnabar-text' : 'font-semibold text-hanji'}>{pct}%</span>
+          <span className={complete ? 'font-bold text-accent-text' : 'font-semibold text-hanji'}>{pct}%</span>
         </p>
         <div className="mt-2.5">
           <LevelChips t={t} stats={stats} />
@@ -86,7 +86,7 @@ export function StageCard({ t, stage, stats, onPreview, onStart }: Props) {
         <button
           type="button"
           onClick={onStart}
-          className="flex h-11 items-center justify-center gap-2 bg-cinnabar text-[14px] font-bold text-ink transition-colors hover:bg-cinnabar-text"
+          className="flex h-11 items-center justify-center gap-2 bg-accent text-[14px] font-bold text-ink transition-colors hover:bg-accent-text"
         >
           {complete ? <RotateCcw size={16} aria-hidden /> : <Play size={15} fill="currentColor" aria-hidden />}
           {complete ? t.replay : t.startQuiz}

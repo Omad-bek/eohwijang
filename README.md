@@ -40,4 +40,4 @@ Stored in `localStorage` per browser, per word, so changing the stage size (20�
 
 ## Icons
 
-`node scripts/make-icons.mjs` regenerates `public/` icons (the 어 mark in the cinnabar frame).
+`node scripts/make-icons.mjs` regenerates `public/` icons (the 어 mark in the emerald frame).

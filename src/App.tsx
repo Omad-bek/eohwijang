@@ -105,7 +105,7 @@ export default function App() {
 
       <div className="relative flex min-h-0 flex-1 flex-col px-[10px] pb-[8px] pt-[max(8px,env(safe-area-inset-top))]">
         {saveFailed && (
-          <p role="alert" className="shrink-0 bg-cinnabar-wash px-5 py-2 text-[13px] text-cinnabar-text">
+          <p role="alert" className="shrink-0 bg-danger-wash px-5 py-2 text-[13px] text-danger-text">
             {t.storageFull}
           </p>
         )}
@@ -161,6 +161,7 @@ export default function App() {
               startWithNewBook={view.newBook}
               update={update}
               replace={replace}
+              onBookCreated={chooseBook}
               onBack={() => setView({ kind: 'home' })}
             />
           )}

@@ -12,6 +12,8 @@ interface Props {
   startWithNewBook: boolean;
   update: (fn: (d: UserData) => UserData) => void;
   replace: (d: UserData) => void;
+  /** Called after words land in a book that did not exist yet, so the dashboard can open it. */
+  onBookCreated: (id: string) => void;
   onBack: () => void;
 }
 
@@ -36,7 +38,7 @@ function ConfirmButton({ label, confirmLabel, onConfirm, icon }: { label: string
       onClick={() => (armed ? (setArmed(false), onConfirm()) : setArmed(true))}
       onBlur={() => setArmed(false)}
       className={`flex h-11 items-center gap-2 border px-4 text-[14px] font-semibold transition-colors ${
-        armed ? 'border-cinnabar bg-cinnabar text-ink' : 'border-rule text-hanji hover:border-hanji-2'
+        armed ? 'border-danger bg-danger text-ink' : 'border-rule text-hanji hover:border-hanji-2'
       }`}
     >
       {icon}
@@ -48,7 +50,7 @@ function ConfirmButton({ label, confirmLabel, onConfirm, icon }: { label: string
 const fieldCls = 'w-full border border-rule bg-ink-2 px-3 text-[16px] text-hanji placeholder:text-hanji-2/85 focus:border-hanji focus:outline-none';
 const labelCls = 'mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2';
 
-export function Manager({ t, data, books, startWithNewBook, update, replace, onBack }: Props) {
+export function Manager({ t, data, books, startWithNewBook, update, replace, onBookCreated, onBack }: Props) {
   const [target, setTarget] = useState(startWithNewBook ? NEW : books[0]?.id ?? NEW);
   const [newId, setNewId] = useState('');
   const [text, setText] = useState('');
@@ -67,7 +69,7 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
     }
   }, [text]);
 
-  const cleanNewId = newId.trim().toUpperCase();
+  const cleanNewId = (newId.trim() || parsed?.book || '').trim().toUpperCase().slice(0, 12);
   const existingForNew = target === NEW ? books.find((b) => b.id.toUpperCase() === cleanNewId) : undefined;
   const canImport = !!parsed && parsed.words.length > 0 && (target !== NEW || cleanNewId.length > 0);
 
@@ -103,6 +105,7 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
       for (const w of fresh) if (!units.includes(w.unit)) units.push(w.unit);
       return { ...d, customBooks: [...d.customBooks, { id: bookId, title: bookId, units, words: fresh, builtIn: false }] };
     });
+    if (!book) onBookCreated(bookId);
     setStatus({ tone: 'ok', msg: t.imported(fresh.length) });
     setText('');
     setTarget(bookId);
@@ -138,7 +141,7 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
               value={data.settings.stageSize}
               onChange={(e) => update((d) => ({ ...d, settings: { ...d.settings, stageSize: Number(e.target.value) } }))}
               aria-label={t.stageSize}
-              className="h-2 flex-1 accent-[var(--color-cinnabar)]"
+              className="h-2 flex-1 accent-[var(--color-accent)]"
             />
             <output className="tabular w-10 text-right font-serif text-[26px] font-bold">{data.settings.stageSize}</output>
           </div>
@@ -168,8 +171,9 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
                   id="newbook"
                   value={newId}
                   onChange={(e) => setNewId(e.target.value)}
-                  placeholder={t.bookIdHint}
+                  placeholder={parsed?.book ? parsed.book.toUpperCase() : t.bookIdHint}
                   maxLength={12}
+                  autoFocus={startWithNewBook}
                   autoComplete="off"
                   className={`${fieldCls} h-11`}
                 />
@@ -194,16 +198,16 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
             className={`${fieldCls} resize-y py-2.5 font-mono text-[14px] leading-relaxed`}
           />
           <div className="mt-2 min-h-5 text-[13px]" aria-live="polite">
-            {parsed && parsed.skipped === -1 && <span className="text-cinnabar-text">{t.invalidFile}</span>}
+            {parsed && parsed.skipped === -1 && <span className="text-danger-text">{t.invalidFile}</span>}
             {parsed && parsed.skipped >= 0 && <span className="text-hanji-2">{t.preview(parsed.words.length, parsed.skipped)}</span>}
-            {!parsed && status && <span className={status.tone === 'ok' ? 'text-celadon' : 'text-cinnabar-text'}>{status.msg}</span>}
+            {!parsed && status && <span className={status.tone === 'ok' ? 'text-accent-text' : 'text-danger-text'}>{status.msg}</span>}
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
               disabled={!canImport}
               onClick={doImport}
-              className="flex h-11 items-center gap-2 bg-cinnabar px-5 text-[14px] font-bold text-ink hover:bg-cinnabar-text disabled:cursor-not-allowed disabled:bg-ink-3 disabled:text-hanji-2"
+              className="flex h-11 items-center gap-2 bg-accent px-5 text-[14px] font-bold text-ink hover:bg-accent-text disabled:cursor-not-allowed disabled:bg-ink-3 disabled:text-hanji-2"
             >
               <Upload size={16} aria-hidden /> {t.importWords}
             </button>
@@ -286,7 +290,7 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
             </p>
           )}
           {backupStatus && (
-            <p aria-live="polite" className={`mt-2 text-[13px] ${backupStatus.tone === 'ok' ? 'text-celadon' : 'text-cinnabar-text'}`}>
+            <p aria-live="polite" className={`mt-2 text-[13px] ${backupStatus.tone === 'ok' ? 'text-accent-text' : 'text-danger-text'}`}>
               {backupStatus.msg}
             </p>
           )}

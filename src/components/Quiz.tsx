@@ -43,7 +43,7 @@ function Prompt({ word, lang }: { word: VocabEntry; lang: PromptLang }) {
       <dl className="space-y-2.5">
         {langs.map((l) => (
           <div key={l} className="flex items-baseline gap-3">
-            <dt className="w-7 shrink-0 text-[11px] font-bold uppercase tracking-[0.12em] text-cinnabar-text">{l}</dt>
+            <dt className="w-7 shrink-0 text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">{l}</dt>
             <dd lang={l} className="text-[24px] font-bold leading-tight">
               {word[l]}
             </dd>
@@ -212,11 +212,11 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
             <span
               className={`block aspect-square w-full max-w-[14px] transition-all duration-300 ${
                 done
-                  ? 'rotate-[-6deg] bg-cinnabar-deep'
+                  ? 'rotate-[-6deg] bg-accent'
                   : now
-                    ? `bg-hanji ${missed.has(n) ? 'ring-2 ring-cinnabar-deep ring-offset-1 ring-offset-ink' : ''}`
+                    ? `bg-hanji ${missed.has(n) ? 'ring-2 ring-amber ring-offset-1 ring-offset-ink' : ''}`
                     : missed.has(n)
-                      ? 'ring-1 ring-inset ring-cinnabar-deep'
+                      ? 'ring-1 ring-inset ring-amber'
                       : 'bg-rule-soft'
               }`}
             />
@@ -250,7 +250,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
       {track}
       {phase.kind !== 'done' && (
         <p aria-live="polite" className="tabular mt-2 flex items-center gap-2 text-[12px] font-semibold text-hanji-2">
-          <span className={round > 1 ? 'text-cinnabar-text' : ''}>{t.round(round)}</span>
+          <span className={round > 1 ? 'text-amber' : ''}>{t.round(round)}</span>
           {round > 1 && (
             <>
               <span aria-hidden>·</span>
@@ -301,12 +301,12 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
             <button
               type="button"
               onClick={onExit}
-              className={`h-12 border text-[14px] font-semibold md:order-1 ${nextStage ? 'border-rule text-hanji hover:border-hanji-2' : 'border-cinnabar bg-cinnabar text-ink md:col-span-2'}`}
+              className={`h-12 border text-[14px] font-semibold md:order-1 ${nextStage ? 'border-rule text-hanji hover:border-hanji-2' : 'border-accent bg-accent text-ink md:col-span-2'}`}
             >
               {t.backToLevels}
             </button>
             {nextStage && (
-              <button type="button" onClick={onNext} className="h-12 bg-cinnabar text-[15px] font-bold text-ink hover:bg-cinnabar-text md:order-2">
+              <button type="button" onClick={onNext} className="h-12 bg-accent text-[15px] font-bold text-ink hover:bg-accent-text md:order-2">
                 {t.nextStage} · <span className="font-serif">{nextStage.unit}</span> {t.stage(nextStage.index + 1)}
               </button>
             )}
@@ -353,10 +353,10 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               ) : (
                 lastRight && (
                   <p key={lastRight.ko + cleared} className="anim-cell flex items-center gap-2 border-t border-rule-soft pt-3 text-[14px] text-hanji-2">
-                    <Check size={16} strokeWidth={2.6} className="text-celadon" aria-label={t.correct} />
+                    <Check size={16} strokeWidth={2.6} className="text-accent-text" aria-label={t.correct} />
                     <span className="truncate">{lastRight.prompt}</span>
                     <span aria-hidden>→</span>
-                    <span lang="ko" className="font-serif text-[19px] font-bold text-celadon">
+                    <span lang="ko" className="font-serif text-[19px] font-bold text-accent-text">
                       {lastRight.ko}
                     </span>
                   </p>
@@ -374,7 +374,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
           }}
         >
           <label htmlFor="answer" className="mb-1.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">
-            <span className={phase.kind === 'review' ? 'text-cinnabar-text' : ''}>{phase.kind === 'review' ? t.retypeLabel : t.typeInKorean}</span>
+            <span className={phase.kind === 'review' ? 'text-amber' : ''}>{phase.kind === 'review' ? t.retypeLabel : t.typeInKorean}</span>
             <span className="tabular shrink-0 whitespace-nowrap pl-3 normal-case tracking-normal">{t.remaining(left)}</span>
           </label>
           <div key={nudge} className={`flex gap-2 ${nudge ? 'anim-nudge' : ''}`}>
@@ -399,7 +399,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               onCompositionEnd={onCompositionEnd}
               placeholder={phase.kind === 'review' ? correctForm : '한국어'}
               className={`h-14 min-w-0 flex-1 border-[1.5px] bg-ink-2 px-4 text-[24px] font-semibold text-hanji placeholder:font-normal placeholder:text-hanji-2/85 focus:outline-none md:bg-ink ${
-                phase.kind === 'review' ? 'border-cinnabar' : 'border-hanji/70 focus:border-hanji'
+                phase.kind === 'review' ? 'border-amber' : 'border-hanji/70 focus:border-hanji'
               }`}
             />
             <button
@@ -407,7 +407,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               type="submit"
               onMouseDown={(e) => e.preventDefault()}
               aria-label={phase.kind === 'review' ? t.continue : t.check}
-              className="flex h-14 w-14 shrink-0 items-center justify-center bg-cinnabar text-ink hover:bg-cinnabar-text md:w-auto md:gap-2 md:px-5 md:text-[15px] md:font-bold"
+              className="flex h-14 w-14 shrink-0 items-center justify-center bg-accent text-ink hover:bg-accent-text md:w-auto md:gap-2 md:px-5 md:text-[15px] md:font-bold"
             >
               <CornerDownLeft size={22} strokeWidth={2.4} aria-hidden />
               <span className="hidden md:inline">{phase.kind === 'review' ? t.continue : t.check}</span>

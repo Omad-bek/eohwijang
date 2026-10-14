@@ -8,19 +8,19 @@ interface Props {
 }
 
 const syllableTone: Record<DiffCell['kind'], string> = {
-  exact: 'text-celadon',
-  partial: 'text-ochre',
-  wrong: 'text-cinnabar-text line-through decoration-2',
-  missing: 'text-cinnabar-text/45',
-  extra: 'text-cinnabar-text line-through decoration-2',
+  exact: 'text-accent-text',
+  partial: 'text-amber',
+  wrong: 'text-danger-text line-through decoration-2',
+  missing: 'text-danger-text/45',
+  extra: 'text-danger-text line-through decoration-2',
 };
 
 const cellFrame: Record<DiffCell['kind'], string> = {
-  exact: 'border-celadon/40 bg-celadon-wash',
-  partial: 'border-ochre/50 bg-ochre-wash',
-  wrong: 'border-cinnabar-deep/60 bg-cinnabar-wash',
-  missing: 'border-dashed border-cinnabar-deep/60',
-  extra: 'border-cinnabar-deep/60 bg-cinnabar-wash',
+  exact: 'border-accent-text/40 bg-accent-wash',
+  partial: 'border-amber/50 bg-amber-wash',
+  wrong: 'border-danger/60 bg-danger-wash',
+  missing: 'border-dashed border-danger/60',
+  extra: 'border-danger/60 bg-danger-wash',
 };
 
 function Slot({ check, empty, delay }: { check: JamoCheck; empty: string; delay: number }) {
@@ -28,17 +28,17 @@ function Slot({ check, empty, delay }: { check: JamoCheck; empty: string; delay:
   const expected = check.expected || empty;
   if (check.ok) {
     return (
-      <span className="anim-slot flex h-10 flex-1 items-center justify-center text-[15px] font-semibold text-celadon" style={{ animationDelay: `${delay}ms` }}>
+      <span className="anim-slot flex h-10 flex-1 items-center justify-center text-[15px] font-semibold text-accent-text" style={{ animationDelay: `${delay}ms` }}>
         {typed}
       </span>
     );
   }
   return (
     <span
-      className="anim-slot flex h-10 flex-1 flex-col items-center justify-center bg-cinnabar-wash leading-none"
+      className="anim-slot flex h-10 flex-1 flex-col items-center justify-center bg-danger-wash leading-none"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <span className="text-[12px] text-cinnabar-text line-through decoration-1">{typed}</span>
+      <span className="text-[12px] text-danger-text line-through decoration-1">{typed}</span>
       <span className="mt-1 text-[15px] font-bold text-hanji">{expected}</span>
     </span>
   );
@@ -79,21 +79,21 @@ export function DiffView({ t, cells }: Props) {
                 {isSpace ? '' : shown}
               </span>
               {c.kind === 'partial' && c.jamo && (
-                <span className="flex border-t border-ochre/40" lang="ko">
+                <span className="flex border-t border-amber/40" lang="ko">
                   {c.jamo.map((j, k) => (
                     <Slot key={j.slot} check={j} empty="·" delay={i * 70 + 200 + k * 60} />
                   ))}
                 </span>
               )}
               {strip && (
-                <span className="flex border-t border-celadon/30" lang="ko">
+                <span className="flex border-t border-accent-text/30" lang="ko">
                   {(['cho', 'jung', 'jong'] as const).map((slot, k) => (
                     <Slot key={slot} check={{ slot, expected: strip[slot], typed: strip[slot], ok: true }} empty="·" delay={i * 70 + 200 + k * 60} />
                   ))}
                 </span>
               )}
               {(c.kind === 'wrong' || c.kind === 'missing' || c.kind === 'extra') && (
-                <span className="flex h-10 items-center justify-center border-t border-cinnabar-deep/40 text-[12px] font-semibold text-hanji">
+                <span className="flex h-10 items-center justify-center border-t border-danger/40 text-[12px] font-semibold text-hanji">
                   {c.kind === 'wrong' ? <span lang="ko">→ {c.expected}</span> : c.kind === 'missing' ? t.missingSyl : t.extraSyl}
                 </span>
               )}

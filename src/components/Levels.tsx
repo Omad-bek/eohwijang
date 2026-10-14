@@ -2,11 +2,11 @@ import { ArrowUp } from 'lucide-react';
 import type { Strings } from '../lib/i18n';
 import type { MemoryStats } from '../lib/srs';
 
-/** Level 1 is ochre (bronze), level 2 silver, level 3 the cinnabar seal. */
+/** Level 1 is amber, level 2 indigo, level 3 the emerald seal. */
 const TONE: Record<1 | 2 | 3, { chip: string; bar: string }> = {
-  1: { chip: 'border-ochre/60 bg-ochre-wash text-ochre', bar: 'bg-ochre' },
-  2: { chip: 'border-silver/60 bg-silver-wash text-silver', bar: 'bg-silver' },
-  3: { chip: 'rotate-[-3deg] border-cinnabar-deep bg-cinnabar-deep text-ink', bar: 'bg-cinnabar-deep' },
+  1: { chip: 'border-amber/60 bg-amber-wash text-amber', bar: 'bg-amber' },
+  2: { chip: 'border-indigo/60 bg-indigo-wash text-indigo', bar: 'bg-indigo' },
+  3: { chip: 'rotate-[-3deg] border-accent bg-accent text-ink', bar: 'bg-accent' },
 };
 
 /** `compact` shows just the digit, for narrow table cells; the full name stays in the tooltip. */
@@ -59,7 +59,7 @@ export function DueBadge({ t, due, short = false }: { t: Strings; due: number; s
   return (
     <span
       title={t.dueReview(due)}
-      className="tabular inline-flex shrink-0 items-center gap-1 border border-celadon/60 bg-celadon-wash px-1.5 py-1 text-[12px] font-bold leading-tight text-celadon"
+      className="tabular inline-flex shrink-0 items-center gap-1 border border-sky/60 bg-sky-wash px-1.5 py-1 text-[12px] font-bold leading-tight text-sky"
     >
       <ArrowUp size={13} strokeWidth={2.6} aria-hidden className="shrink-0" />
       {short ? t.dueShort(due) : t.dueReview(due)}

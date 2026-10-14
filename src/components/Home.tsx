@@ -57,7 +57,7 @@ function BookTabs({ t, books, bookId, onBook, onAddBook }: Pick<Props, 't' | 'bo
             }`}
           >
             {b.title}
-            {on && <span className="absolute inset-x-2 bottom-0 h-[3px] bg-cinnabar" />}
+            {on && <span className="absolute inset-x-2 bottom-0 h-[3px] bg-accent" />}
           </button>
         );
       })}
@@ -118,7 +118,7 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
         <p className="tabular text-[22px] font-bold leading-none">{bookPct}%</p>
       </div>
       <div className="mt-2.5 h-[3px] bg-rule-soft">
-        <div className="h-full bg-hanji transition-[width] duration-700" style={{ width: `${bookPct}%` }} />
+        <div className="h-full bg-accent transition-[width] duration-700" style={{ width: `${bookPct}%` }} />
       </div>
       <p className="tabular mt-2 text-[12px] text-hanji-2">{t.masteredOf(bookDone, bookTotal)}</p>
     </div>
@@ -154,10 +154,10 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
                       <span className="tabular flex items-center justify-between gap-2 text-[12px]">
                         <span className="text-hanji-2">{t.wordCount(u.total)}</span>
                         {u.due > 0 && <span className="ml-auto"><DueBadge t={t} due={u.due} short /></span>}
-                        <span className={complete ? 'font-bold text-cinnabar-text' : 'font-semibold text-hanji'}>{u.pct}%</span>
+                        <span className={complete ? 'font-bold text-accent-text' : 'font-semibold text-hanji'}>{u.pct}%</span>
                       </span>
                       <span className="block h-[3px] bg-rule-soft">
-                        <span className={`block h-full ${complete ? 'bg-cinnabar-deep' : 'bg-hanji'}`} style={{ width: `${u.pct}%` }} />
+                        <span className={`block h-full ${complete ? 'bg-accent' : 'bg-accent/60'}`} style={{ width: `${u.pct}%` }} />
                       </span>
                     </span>
                   </button>
@@ -191,11 +191,11 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
                       }`}
                     >
                       <span className="font-serif text-[17px] font-bold leading-none">{u.unit}</span>
-                      <span className={`tabular text-[12px] font-semibold ${on ? 'text-ink/70' : u.pct === 100 ? 'text-cinnabar-text' : 'text-hanji-2'}`}>
+                      <span className={`tabular text-[12px] font-semibold ${on ? 'text-ink/70' : u.pct === 100 ? 'text-accent-text' : 'text-hanji-2'}`}>
                         {u.pct}%
                       </span>
                       {u.due > 0 && (
-                        <span title={t.dueReview(u.due)} className="tabular flex h-5 min-w-5 items-center justify-center bg-celadon px-1 text-[11px] font-bold text-ink">
+                        <span title={t.dueReview(u.due)} className="tabular flex h-5 min-w-5 items-center justify-center bg-sky px-1 text-[11px] font-bold text-ink">
                           <span aria-hidden>↑{u.due}</span>
                           <span className="sr-only">{t.dueReview(u.due)}</span>
                         </span>
@@ -233,7 +233,7 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
                   <span className="font-bold text-hanji">{selected.pct}%</span>
                 </p>
                 <div className="mt-2 h-[3px] bg-rule-soft">
-                  <div className="h-full bg-hanji transition-[width] duration-700" style={{ width: `${selected.pct}%` }} />
+                  <div className="h-full bg-accent transition-[width] duration-700" style={{ width: `${selected.pct}%` }} />
                 </div>
               </div>
             </header>
