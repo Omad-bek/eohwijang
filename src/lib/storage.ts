@@ -127,30 +127,57 @@ export interface ParsedWords {
   book?: string;
 }
 
+/** Unit used for plain word lists that never name a unit. */
+export const DEFAULT_UNIT = '1';
+
+const HANGUL = /[\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]/;
+/** "1과", "한글", "# Food", "Unit 2", "Урок 3", "Dars 4", "2단원" on a line of their own start a new unit. */
+const UNIT_HEADING = /^(#+\s*\S.*|\d+\s*과|한글|\d+\s*단원|(unit|lesson|урок|dars)\s*\d+.*)$/i;
+const HEADER_ROW = /^(unit|ko|korean|한국어|корейский|koreyscha)$/i;
+
+function splitColumns(line: string): string[] {
+  if (line.includes('\t')) return line.split('\t').map((c) => c.trim());
+  // Dashes need spaces around them so hyphenated words ("e-mail", "по-русски") survive.
+  return line.split(/\s+[-–—|]\s+/).map((c) => c.trim());
+}
+
 /**
  * Accepts:
- *  - JSON: an array of { unit, ko, uz, ru, en }, or { book?: "1B", words: [...] } (`id` or `title` also name the book)
- *  - TSV/CSV-with-tabs: one word per line, columns unit, ko, uz, ru, en (a header row is skipped)
+ *  - JSON: an array of { unit, ko, uz, ru, en }, or { book?: "1B", words: [...] } (`id` or `title` also name the collection)
+ *  - Plain lines: `ko - uz - ru - en` (spaced dash, en/em dash, "|" or tab between columns); missing
+ *    translations may be left out. A heading line such as "1과" or "# Unit 2" starts a new unit.
+ *  - Legacy tab lines with the unit first: unit, ko, uz, ru, en
  */
 export function parseWords(text: string): ParsedWords {
-  const trimmed = text.trim();
+  const trimmed = text.replace(/^\uFEFF/, '').trim();
   if (!trimmed) return { words: [], skipped: 0 };
   if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
     const json = JSON.parse(trimmed);
     const list: unknown[] = Array.isArray(json) ? json : Array.isArray(json?.words) ? json.words : [];
-    const words = list.filter(isEntry).map(cleanEntry);
+    const fallbackUnit = (x: unknown) => (x && typeof x === 'object' && !('unit' in x) ? { ...x, unit: DEFAULT_UNIT } : x);
+    const words = list.map(fallbackUnit).filter(isEntry).map(cleanEntry);
     const name = Array.isArray(json) ? undefined : [json?.book, json?.id, json?.title].find((v) => typeof v === 'string' && v.trim());
     return { words, skipped: list.length - words.length, book: name?.trim() };
   }
   const words: VocabEntry[] = [];
   let skipped = 0;
-  for (const line of trimmed.split(/\r?\n/)) {
-    if (!line.trim()) continue;
-    const cols = line.split('\t');
-    const [unit, ko, uz = '', ru = '', en = ''] = cols.map((c) => c.trim());
-    if (/^unit$/i.test(unit ?? '') && /^ko/i.test(ko ?? '')) continue;
-    const entry = { unit: unit ?? '', ko: ko ?? '', uz, ru, en };
-    if (isEntry(entry)) words.push(cleanEntry(entry));
+  let unit = DEFAULT_UNIT;
+  for (const raw of trimmed.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const cols = splitColumns(line);
+    if (cols.length === 1) {
+      const heading = line.replace(/[:：]$/, '').trim();
+      if (UNIT_HEADING.test(heading)) unit = heading.replace(/^#+\s*/, '');
+      else skipped++;
+      continue;
+    }
+    if (HEADER_ROW.test(cols[0])) continue;
+    // Unit-first rows: five columns, or a unit-looking first column followed by a Hangul word.
+    const unitFirst = cols.length >= 5 || (cols.length >= 3 && UNIT_HEADING.test(cols[0]) && !cols[0].startsWith('#') && HANGUL.test(cols[1]));
+    const [u, ko = '', uz = '', ru = '', en = ''] = unitFirst ? cols : [unit, ...cols];
+    const entry = { unit: u, ko, uz, ru, en };
+    if (isEntry(entry) && (uz || ru || en)) words.push(cleanEntry(entry));
     else skipped++;
   }
   return { words, skipped };

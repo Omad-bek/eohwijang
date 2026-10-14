@@ -18,6 +18,8 @@ interface Props {
 }
 
 const NEW = '__new__';
+const MAX_NAME = 24;
+const WORD_FILE = /\.(txt|tsv|csv|json)$/i;
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -55,6 +57,8 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
   const [newId, setNewId] = useState('');
   const [text, setText] = useState('');
   const [status, setStatus] = useState<{ tone: 'ok' | 'err'; msg: string } | null>(null);
+  const [loaded, setLoaded] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [pendingBackup, setPendingBackup] = useState<UserData | null>(null);
   const [backupStatus, setBackupStatus] = useState<{ tone: 'ok' | 'err'; msg: string } | null>(null);
   const wordsFile = useRef<HTMLInputElement>(null);
@@ -69,8 +73,9 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
     }
   }, [text]);
 
-  const cleanNewId = (newId.trim() || parsed?.book || '').trim().toUpperCase().slice(0, 12);
-  const existingForNew = target === NEW ? books.find((b) => b.id.toUpperCase() === cleanNewId) : undefined;
+  // "|" separates the parts of word and stage keys, so it cannot appear in a collection name.
+  const cleanNewId = (newId.trim() || parsed?.book || '').replace(/\|/g, '').replace(/\s+/g, ' ').trim().slice(0, MAX_NAME);
+  const existingForNew = target === NEW ? books.find((b) => b.id.toLowerCase() === cleanNewId.toLowerCase()) : undefined;
   const canImport = !!parsed && parsed.words.length > 0 && (target !== NEW || cleanNewId.length > 0);
 
   const doImport = () => {
@@ -108,6 +113,7 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
     if (!book) onBookCreated(bookId);
     setStatus({ tone: 'ok', msg: t.imported(fresh.length) });
     setText('');
+    setLoaded(null);
     setTarget(bookId);
     setNewId('');
   };
@@ -117,6 +123,26 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
     r.onload = () => then(String(r.result ?? ''));
     r.onerror = () => setStatus({ tone: 'err', msg: t.invalidFile });
     r.readAsText(file);
+  };
+
+  /** Load dropped or picked word files into the paste box; a single file names a new collection. */
+  const loadWordFiles = async (list: FileList) => {
+    const files = Array.from(list).filter((f) => WORD_FILE.test(f.name) || f.type.startsWith('text/') || f.type === 'application/json');
+    if (!files.length) {
+      setStatus({ tone: 'err', msg: t.invalidFile });
+      return;
+    }
+    try {
+      const texts = (await Promise.all(files.map((f) => f.text()))).map((x) => x.replace(/^﻿/, ''));
+      // JSON files cannot simply be joined, so several of them are merged into one word list.
+      const merge = texts.length > 1 && texts.some((x) => /^\s*[[{]/.test(x));
+      setText(merge ? JSON.stringify(texts.flatMap((x) => parseWords(x).words), null, 1) : texts.join('\n'));
+      setLoaded(files.map((f) => f.name).join(', '));
+      setStatus(null);
+      if (target === NEW && !newId.trim() && files.length === 1) setNewId(files[0].name.replace(/\.[^.]+$/, '').slice(0, MAX_NAME));
+    } catch {
+      setStatus({ tone: 'err', msg: t.invalidFile });
+    }
   };
 
   const customBooks = books.filter((b) => !b.builtIn);
@@ -131,22 +157,6 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
       </header>
 
       <div className="mx-auto min-h-0 w-full max-w-3xl flex-1 overflow-y-auto overscroll-contain px-5 pb-10 md:px-8">
-        <Section title={t.stageSize} hint={t.stageSizeHint}>
-          <div className="flex items-center gap-4">
-            <input
-              type="range"
-              min={MIN_STAGE}
-              max={MAX_STAGE}
-              step={1}
-              value={data.settings.stageSize}
-              onChange={(e) => update((d) => ({ ...d, settings: { ...d.settings, stageSize: Number(e.target.value) } }))}
-              aria-label={t.stageSize}
-              className="h-2 flex-1 accent-[var(--color-accent)]"
-            />
-            <output className="tabular w-10 text-right font-serif text-[26px] font-bold">{data.settings.stageSize}</output>
-          </div>
-        </Section>
-
         <Section title={t.addWords} hint={t.addWordsHint}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -171,8 +181,8 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
                   id="newbook"
                   value={newId}
                   onChange={(e) => setNewId(e.target.value)}
-                  placeholder={parsed?.book ? parsed.book.toUpperCase() : t.bookIdHint}
-                  maxLength={12}
+                  placeholder={parsed?.book || t.bookIdHint}
+                  maxLength={MAX_NAME}
                   autoFocus={startWithNewBook}
                   autoComplete="off"
                   className={`${fieldCls} h-11`}
@@ -182,24 +192,82 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
             )}
           </div>
 
-          <label htmlFor="words" className={`${labelCls} mt-4`}>
-            {t.paste}
-          </label>
-          <textarea
-            id="words"
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              setStatus(null);
+          <div
+            className="relative mt-4"
+            onDragEnter={(e) => {
+              if (!e.dataTransfer.types.includes('Files')) return;
+              e.preventDefault();
+              setDragging(true);
             }}
-            rows={7}
-            spellCheck={false}
-            placeholder={'1과\t학교\tmaktab\tшкола\tschool'}
-            className={`${fieldCls} resize-y py-2.5 font-mono text-[14px] leading-relaxed`}
-          />
+            onDragOver={(e) => {
+              if (!e.dataTransfer.types.includes('Files')) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'copy';
+            }}
+            onDragLeave={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false);
+            }}
+            onDrop={(e) => {
+              if (!e.dataTransfer.files.length) return;
+              e.preventDefault();
+              setDragging(false);
+              void loadWordFiles(e.dataTransfer.files);
+            }}
+          >
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border border-dashed border-rule bg-ink-2/50 px-4 py-4">
+              <p className="flex items-center gap-2.5 text-[14px] text-hanji-2">
+                <FileUp size={20} className="shrink-0 text-accent-text" aria-hidden />
+                {t.dropHint}
+              </p>
+              <button
+                type="button"
+                onClick={() => wordsFile.current?.click()}
+                className="flex h-10 items-center gap-2 border border-rule px-4 text-[14px] font-semibold hover:border-hanji-2"
+              >
+                {t.chooseFile}
+              </button>
+              <input
+                ref={wordsFile}
+                type="file"
+                multiple
+                accept=".json,.tsv,.txt,.csv,application/json,text/plain,text/tab-separated-values"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files?.length) void loadWordFiles(e.target.files);
+                  e.target.value = '';
+                }}
+              />
+            </div>
+            <label htmlFor="words" className={labelCls}>
+              {t.paste}
+            </label>
+            <textarea
+              id="words"
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+                setStatus(null);
+                if (!e.target.value) setLoaded(null);
+              }}
+              rows={7}
+              spellCheck={false}
+              placeholder={'1과\n학교 - maktab - школа - school\n선생님 - o‘qituvchi - учитель - teacher'}
+              className={`${fieldCls} resize-y py-2.5 font-mono text-[14px] leading-relaxed`}
+            />
+            {dragging && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center border-2 border-dashed border-accent bg-ink/90 text-[15px] font-semibold text-accent-text">
+                {t.dropActive}
+              </div>
+            )}
+          </div>
           <div className="mt-2 min-h-5 text-[13px]" aria-live="polite">
             {parsed && parsed.skipped === -1 && <span className="text-danger-text">{t.invalidFile}</span>}
-            {parsed && parsed.skipped >= 0 && <span className="text-hanji-2">{t.preview(parsed.words.length, parsed.skipped)}</span>}
+            {parsed && parsed.skipped >= 0 && (
+              <span className="text-hanji-2">
+                {loaded && `${t.loadedFiles(loaded)} · `}
+                {t.preview(parsed.words.length, parsed.skipped)}
+              </span>
+            )}
             {!parsed && status && <span className={status.tone === 'ok' ? 'text-accent-text' : 'text-danger-text'}>{status.msg}</span>}
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -211,24 +279,22 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
             >
               <Upload size={16} aria-hidden /> {t.importWords}
             </button>
-            <button
-              type="button"
-              onClick={() => wordsFile.current?.click()}
-              className="flex h-11 items-center gap-2 border border-rule px-4 text-[14px] font-semibold hover:border-hanji-2"
-            >
-              <FileUp size={16} aria-hidden /> {t.chooseFile}
-            </button>
+          </div>
+        </Section>
+
+        <Section title={t.stageSize} hint={t.stageSizeHint}>
+          <div className="flex items-center gap-4">
             <input
-              ref={wordsFile}
-              type="file"
-              accept=".json,.tsv,.txt,.csv,application/json,text/plain,text/tab-separated-values"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) readFile(f, setText);
-                e.target.value = '';
-              }}
+              type="range"
+              min={MIN_STAGE}
+              max={MAX_STAGE}
+              step={1}
+              value={data.settings.stageSize}
+              onChange={(e) => update((d) => ({ ...d, settings: { ...d.settings, stageSize: Number(e.target.value) } }))}
+              aria-label={t.stageSize}
+              className="h-2 flex-1 accent-[var(--color-accent)]"
             />
+            <output className="tabular w-10 text-right font-serif text-[26px] font-bold">{data.settings.stageSize}</output>
           </div>
         </Section>
 
