@@ -1,0 +1,170 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #121110;
+  --color-ink-2: #1c1a18;
+  --color-ink-3: #26231f;
+  --color-rule: #3a342d;
+  --color-rule-soft: #2a2622;
+  --color-hanji: #ece4d3;
+  --color-hanji-2: #a39a89;
+  --color-cinnabar: #e0553a;
+  --color-cinnabar-deep: #d4452a;
+  --color-cinnabar-text: #f07457;
+  --color-cinnabar-wash: #3a1a14;
+  --color-celadon: #7fb8a4;
+  --color-celadon-wash: #1b2a25;
+  --color-ochre: #e0b14a;
+  --color-ochre-wash: #2e2512;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Noto Sans CJK KR', Roboto, sans-serif;
+  --font-serif: 'Gowun Batang', 'Nanum Myeongjo', 'AppleMyungjo', 'Batang', serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  color-scheme: dark;
+  --app-h: 100dvh;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--color-ink);
+  color: var(--color-hanji);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+body {
+  overflow: hidden;
+}
+
+#root {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--app-h);
+}
+
+::selection {
+  background: var(--color-cinnabar-deep);
+  color: var(--color-ink);
+}
+
+input,
+textarea,
+select {
+  caret-color: var(--color-cinnabar);
+}
+
+/* Layered so component utilities (e.g. focus:outline-none on fields that draw their own focus border) win. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-cinnabar);
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-rule) transparent;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The double boxed rule (광곽) around the whole screen. */
+.frame-rule {
+  position: absolute;
+  inset: max(6px, env(safe-area-inset-top)) 6px max(6px, env(safe-area-inset-bottom)) 6px;
+  border: 1.5px solid var(--color-cinnabar-deep);
+  pointer-events: none;
+  z-index: 40;
+}
+.frame-rule::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid #4a2219;
+}
+
+/* Signature move: a syllable splits into its jamo slots. */
+@keyframes cell-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes slot-ink {
+  from {
+    background-color: var(--color-ink-3);
+    color: var(--color-hanji-2);
+  }
+}
+@keyframes seal-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.6) rotate(-14deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.94) rotate(-5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-6deg);
+  }
+}
+@keyframes nudge {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+@keyframes sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+.anim-cell {
+  animation: cell-in 420ms var(--ease-out-expo) both;
+}
+.anim-slot {
+  animation: slot-ink 360ms var(--ease-out-expo) both;
+}
+.anim-seal {
+  animation: seal-in 520ms var(--ease-out-expo) both;
+}
+.anim-nudge {
+  animation: nudge 260ms ease-in-out;
+}
+.anim-sheet {
+  animation: sheet-in 320ms var(--ease-out-expo) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-cell,
+  .anim-slot,
+  .anim-seal,
+  .anim-nudge,
+  .anim-sheet {
+    animation: none;
+  }
+}

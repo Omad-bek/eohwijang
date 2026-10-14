@@ -1,0 +1,398 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, Check, CornerDownLeft, Eye, RotateCcw } from 'lucide-react';
+import type { PromptLang, Settings, Stage, VocabEntry } from '../types';
+import type { Strings } from '../lib/i18n';
+import { checkAnswer, isCorrect, type DiffResult } from '../utils/hangulDiff';
+import { DiffView } from './DiffView';
+import { Seal } from './Seal';
+
+interface Props {
+  t: Strings;
+  stage: Stage;
+  settings: Settings;
+  onMastered: (w: VocabEntry) => void;
+  onComplete: (firstTryShare: number) => void;
+  onExit: () => void;
+  nextStage: Stage | null;
+  onNext: () => void;
+}
+
+interface Item {
+  word: VocabEntry;
+  /** Position in the stage's word list; stable identity across re-queues. */
+  n: number;
+}
+
+type Phase = { kind: 'ask' } | { kind: 'review'; result: DiffResult; typed: string } | { kind: 'done'; firstTry: number };
+
+function shuffle<T>(xs: T[]): T[] {
+  const a = [...xs];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function Prompt({ word, lang }: { word: VocabEntry; lang: PromptLang }) {
+  const langs = (['uz', 'ru', 'en'] as const).filter((l) => word[l]);
+  if (lang === 'all' || !word[lang as 'uz' | 'ru' | 'en']) {
+    return (
+      <dl className="space-y-2.5">
+        {langs.map((l) => (
+          <div key={l} className="flex items-baseline gap-3">
+            <dt className="w-7 shrink-0 text-[11px] font-bold uppercase tracking-[0.12em] text-cinnabar-text">{l}</dt>
+            <dd lang={l} className="text-[24px] font-bold leading-tight">
+              {word[l]}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+  const l = lang as 'uz' | 'ru' | 'en';
+  return (
+    <p lang={l} className="text-[34px] font-bold leading-[1.1] tracking-[-0.01em]">
+      {word[l]}
+    </p>
+  );
+}
+
+export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextStage, onNext }: Props) {
+  const [queue, setQueue] = useState<Item[]>(() => shuffle(stage.words.map((word, n) => ({ word, n }))));
+  const [phase, setPhase] = useState<Phase>({ kind: 'ask' });
+  const [value, setValue] = useState('');
+  const [missed, setMissed] = useState<Set<number>>(() => new Set());
+  const [nudge, setNudge] = useState(0);
+  const [lastRight, setLastRight] = useState<{ prompt: string; ko: string } | null>(null);
+  const [imeHint, setImeHint] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const composing = useRef(false);
+  const pendingSubmit = useRef(false);
+
+  const glossLang = settings.promptLang !== 'all' ? settings.promptLang : settings.uiLang === 'ko' ? 'en' : settings.uiLang;
+  const gloss = (w: VocabEntry) => w[glossLang] || w.uz || w.ru || w.en;
+  const total = stage.words.length;
+  const current = queue[0];
+  const pendingSet = new Set(queue.map((q) => q.n));
+  const cleared = total - pendingSet.size;
+
+  useEffect(() => {
+    if (phase.kind !== 'done') inputRef.current?.focus({ preventScroll: true });
+  }, [phase.kind, current]);
+
+  const finish = (missedSet: Set<number>) => {
+    const share = (total - missedSet.size) / total;
+    setPhase({ kind: 'done', firstTry: share });
+    onComplete(share);
+  };
+
+  const submit = () => {
+    if (!current || phase.kind === 'done') return;
+    const typed = value;
+    if (!typed.trim()) return;
+
+    // Latin/Cyrillic input means the keyboard isn't on Korean: say so instead of scoring a miss.
+    if (!/[ᄀ-ᇿ㄰-㆏가-힣]/.test(typed)) {
+      setImeHint(true);
+      setNudge((n) => n + 1);
+      return;
+    }
+    setImeHint(false);
+
+    if (phase.kind === 'ask') {
+      const result = checkAnswer(typed, current.word.ko);
+      if (result.correct) {
+        onMastered(current.word);
+        setLastRight({ prompt: gloss(current.word), ko: result.target });
+        setValue('');
+        const rest = queue.slice(1);
+        setQueue(rest);
+        if (!rest.length) finish(missed);
+      } else {
+        const next = new Set(missed);
+        next.add(current.n);
+        setMissed(next);
+        setLastRight(null);
+        setPhase({ kind: 'review', result, typed });
+        setValue('');
+      }
+      return;
+    }
+
+    // Review: the learner must type the correct word before moving on.
+    if (isCorrect(typed, current.word.ko)) {
+      setValue('');
+      setQueue([...queue.slice(1), current]);
+      setPhase({ kind: 'ask' });
+    } else {
+      setNudge((n) => n + 1);
+      setValue('');
+    }
+  };
+
+  const reveal = () => {
+    if (!current || phase.kind !== 'ask') return;
+    const next = new Set(missed);
+    next.add(current.n);
+    setMissed(next);
+    setLastRight(null);
+    setPhase({ kind: 'review', result: checkAnswer('', current.word.ko), typed: '' });
+    setValue('');
+    inputRef.current?.focus({ preventScroll: true });
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    // Korean IME: Enter while a syllable is still composing commits it first; check after commit.
+    if (composing.current || e.nativeEvent.isComposing || e.keyCode === 229) {
+      pendingSubmit.current = true;
+      return;
+    }
+    submit();
+  };
+
+  const onCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
+    composing.current = false;
+    if (pendingSubmit.current) {
+      pendingSubmit.current = false;
+      const v = (e.target as HTMLInputElement).value;
+      setValue(v);
+      // Let React apply the committed value, then submit.
+      requestAnimationFrame(() => document.getElementById('answer-submit')?.click());
+    }
+  };
+
+  const reviewTarget = phase.kind === 'review' ? phase.result.target : '';
+  const correctForm = phase.kind === 'review' ? current.word.ko : '';
+
+  const track = (
+    /* One seal per word: the stage visibly fills as words are mastered. */
+    <ol className="flex items-center gap-[3px]" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={cleared} aria-label={t.remaining(queue.length)}>
+      {stage.words.map((_, n) => {
+        const done = !pendingSet.has(n);
+        const now = current?.n === n && phase.kind !== 'done';
+        return (
+          <li key={n} className="flex flex-1 justify-center">
+            <span
+              className={`block aspect-square w-full max-w-[14px] transition-all duration-300 ${
+                done
+                  ? 'rotate-[-6deg] bg-cinnabar-deep'
+                  : now
+                    ? `bg-hanji ${missed.has(n) ? 'ring-2 ring-cinnabar-deep ring-offset-1 ring-offset-ink' : ''}`
+                    : missed.has(n)
+                      ? 'ring-1 ring-inset ring-cinnabar-deep'
+                      : 'bg-rule-soft'
+              }`}
+            />
+          </li>
+        );
+      })}
+    </ol>
+  );
+
+  const header = (
+    <header className="shrink-0 pb-3 pt-3 md:pb-4 md:pt-6">
+      <div className="mb-3 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onExit}
+          onMouseDown={(e) => e.preventDefault()}
+          className="-ml-1 flex h-9 shrink-0 items-center gap-1.5 border border-rule px-2.5 text-[13px] font-semibold text-hanji hover:border-hanji-2"
+        >
+          <ArrowLeft size={16} aria-hidden />
+          <span className="hidden sm:inline">{t.backToLevels}</span>
+          <span className="sr-only sm:hidden">{t.backToLevels}</span>
+        </button>
+        <p className="min-w-0 flex-1 truncate text-[12px] font-semibold uppercase tracking-[0.12em] text-hanji-2">
+          {stage.bookId} · <span className="font-serif text-[15px] normal-case tracking-normal text-hanji">{stage.unit}</span> · {t.stage(stage.index + 1)}
+        </p>
+        <p className="tabular shrink-0 text-[14px] font-bold text-hanji">
+          {cleared}
+          <span className="font-semibold text-hanji-2"> / {total}</span>
+        </p>
+      </div>
+      {track}
+    </header>
+  );
+
+  const missedWords = useMemo(() => stage.words.filter((_, n) => missed.has(n)), [missed, stage.words]);
+
+  /** The flashcard: full-bleed on phones, a bordered centered card on wider screens. */
+  const cardCls = 'flex min-h-0 flex-1 flex-col md:mb-6 md:border md:border-rule md:bg-ink-2';
+
+  if (phase.kind === 'done') {
+    const pct = Math.round(phase.firstTry * 100);
+    return (
+      <div className="mx-auto flex h-full w-full max-w-2xl flex-col px-4">
+        {header}
+        <section className={cardCls}>
+          <div className="min-h-0 flex-1 overflow-y-auto px-1 py-8 md:px-8">
+            <div className="flex items-center gap-5">
+              <Seal size={84} animate />
+              <div>
+                <h2 className="text-[26px] font-bold leading-tight">{t.stageDone}</h2>
+                <p className="tabular mt-1 text-[14px] text-hanji-2">{t.firstTry(pct)}</p>
+              </div>
+            </div>
+            {missedWords.length > 0 && (
+              <>
+                <h3 className="mt-9 text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">{t.missedWords}</h3>
+                <ul className="mt-2 border-t border-rule">
+                  {missedWords.map((w) => (
+                    <li key={w.ko} className="flex items-baseline gap-4 border-b border-rule-soft py-2.5">
+                      <span lang="ko" className="w-32 shrink-0 font-serif text-[19px] font-bold">
+                        {w.ko}
+                      </span>
+                      <span className="min-w-0 text-[14px] text-hanji-2">{gloss(w)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+          <footer className="grid shrink-0 gap-2 border-t border-rule pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:grid-cols-2 md:px-8 md:pb-6 md:pt-5">
+            <button
+              type="button"
+              onClick={onExit}
+              className={`h-12 border text-[14px] font-semibold md:order-1 ${nextStage ? 'border-rule text-hanji hover:border-hanji-2' : 'border-cinnabar bg-cinnabar text-ink md:col-span-2'}`}
+            >
+              {t.backToLevels}
+            </button>
+            {nextStage && (
+              <button type="button" onClick={onNext} className="h-12 bg-cinnabar text-[15px] font-bold text-ink hover:bg-cinnabar-text md:order-2">
+                {t.nextStage} · <span className="font-serif">{nextStage.unit}</span> {t.stage(nextStage.index + 1)}
+              </button>
+            )}
+          </footer>
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto flex h-full w-full max-w-2xl flex-col px-4">
+      {header}
+
+      <section className={cardCls}>
+        <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-4 pt-6 md:px-8 md:pt-8">
+          <div aria-hidden className="pointer-events-none absolute inset-0 flex px-1 md:px-8">
+            {[0, 1, 2, 3].map((i) => (
+              <span key={i} className="flex-1 border-l border-rule-soft/60 last:border-r" />
+            ))}
+          </div>
+
+          <div className="relative">
+            <div className="flex items-start justify-between gap-4">
+              <Prompt word={current.word} lang={settings.promptLang} />
+              <span className="mt-0.5 shrink-0 border border-rule bg-ink px-2 py-1 font-serif text-[14px] font-bold text-hanji-2" title={stage.unit}>
+                {stage.unit}
+              </span>
+            </div>
+
+            <div aria-live="polite" className="mt-7">
+              {phase.kind === 'review' ? (
+                <div>
+                  {phase.typed ? <DiffView key={`${current.n}-${reviewTarget}-${phase.typed}`} t={t} cells={phase.result.cells} /> : null}
+                  <div className="mt-5 flex items-baseline gap-3 border-t border-rule pt-4">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">{t.correctAnswer}</span>
+                    <span lang="ko" className="font-serif text-[30px] font-bold leading-none text-hanji">
+                      {correctForm}
+                    </span>
+                  </div>
+                  <p className="mt-2 flex items-center gap-1.5 text-[13px] text-hanji-2">
+                    <RotateCcw size={14} aria-hidden /> {t.retypeHint}
+                  </p>
+                </div>
+              ) : (
+                lastRight && (
+                  <p key={lastRight.ko + cleared} className="anim-cell flex items-center gap-2 border-t border-rule-soft pt-3 text-[14px] text-hanji-2">
+                    <Check size={16} strokeWidth={2.6} className="text-celadon" aria-label={t.correct} />
+                    <span className="truncate">{lastRight.prompt}</span>
+                    <span aria-hidden>→</span>
+                    <span lang="ko" className="font-serif text-[19px] font-bold text-celadon">
+                      {lastRight.ko}
+                    </span>
+                  </p>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+
+        <form
+          className="shrink-0 border-t border-rule bg-ink pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:bg-transparent md:px-8 md:pb-6 md:pt-5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            submit();
+          }}
+        >
+          <label htmlFor="answer" className="mb-1.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">
+            <span className={phase.kind === 'review' ? 'text-cinnabar-text' : ''}>{phase.kind === 'review' ? t.retypeLabel : t.typeInKorean}</span>
+            <span className="tabular shrink-0 whitespace-nowrap pl-3 normal-case tracking-normal">{t.remaining(queue.length)}</span>
+          </label>
+          <div key={nudge} className={`flex gap-2 ${nudge ? 'anim-nudge' : ''}`}>
+            <input
+              ref={inputRef}
+              id="answer"
+              lang="ko"
+              inputMode="text"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              enterKeyHint="done"
+              value={value}
+              onChange={(e) => {
+                setValue(e.target.value);
+                if (imeHint) setImeHint(false);
+                if (lastRight) setLastRight(null);
+              }}
+              onKeyDown={onKeyDown}
+              onCompositionStart={() => (composing.current = true)}
+              onCompositionEnd={onCompositionEnd}
+              placeholder={phase.kind === 'review' ? correctForm : '한국어'}
+              className={`h-14 min-w-0 flex-1 border-[1.5px] bg-ink-2 px-4 text-[24px] font-semibold text-hanji placeholder:font-normal placeholder:text-hanji-2/85 focus:outline-none md:bg-ink ${
+                phase.kind === 'review' ? 'border-cinnabar' : 'border-hanji/70 focus:border-hanji'
+              }`}
+            />
+            <button
+              id="answer-submit"
+              type="submit"
+              onMouseDown={(e) => e.preventDefault()}
+              aria-label={phase.kind === 'review' ? t.continue : t.check}
+              className="flex h-14 w-14 shrink-0 items-center justify-center bg-cinnabar text-ink hover:bg-cinnabar-text md:w-auto md:gap-2 md:px-5 md:text-[15px] md:font-bold"
+            >
+              <CornerDownLeft size={22} strokeWidth={2.4} aria-hidden />
+              <span className="hidden md:inline">{phase.kind === 'review' ? t.continue : t.check}</span>
+            </button>
+          </div>
+          {imeHint && (
+            <p role="alert" className="mt-2 border border-rule bg-ink-2 px-3 py-2 text-[13px] leading-snug text-hanji">
+              {t.notHangul}
+            </p>
+          )}
+          <div className="mt-2 flex items-center justify-between gap-3">
+            {phase.kind === 'ask' && !imeHint ? (
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={reveal}
+                className="flex items-center gap-1.5 py-1 text-[13px] font-semibold text-hanji-2 hover:text-hanji"
+              >
+                <Eye size={15} aria-hidden /> {t.showAnswer}
+              </button>
+            ) : (
+              <span />
+            )}
+            <p className="hidden items-center gap-1.5 text-[12px] text-hanji-2 md:flex" aria-hidden>
+              <kbd className="border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji">Enter ↵</kbd>
+              {phase.kind === 'review' ? t.continue.toLowerCase() : t.enterToCheck}
+            </p>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
