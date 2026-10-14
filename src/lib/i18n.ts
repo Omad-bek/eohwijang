@@ -92,6 +92,12 @@ export interface Strings {
   loadedFiles: (names: string) => string;
   /** Short cheers flashed on a right answer; one is picked at random. */
   praise: string[];
+  keyboard: string;
+  keyboardHint: string;
+  openKeyboard: string;
+  kbShift: string;
+  kbBackspace: string;
+  kbSpace: string;
   offline: string;
 }
 
@@ -187,6 +193,12 @@ const en: Strings = {
   dropActive: 'Drop to load the words',
   loadedFiles: (names) => `Loaded ${names}`,
   praise: ['정답!', 'Great!', 'Nice!', 'Awesome!', 'Spot on!', '잘했어요!'],
+  keyboard: 'Korean keyboard',
+  keyboardHint: 'While this is open, your own keyboard types Korean too (2-set layout, letters shown on the keys).',
+  openKeyboard: 'Use the onscreen Korean keyboard',
+  kbShift: 'Shift (ㅃ ㅉ ㄸ ㄲ ㅆ ㅒ ㅖ)',
+  kbBackspace: 'Delete',
+  kbSpace: 'Space',
 };
 
 const ru: Strings = {
@@ -281,6 +293,12 @@ const ru: Strings = {
   dropActive: 'Отпустите, чтобы загрузить слова',
   loadedFiles: (names) => `Загружено: ${names}`,
   praise: ['정답!', 'Отлично!', 'Верно!', 'Здорово!', 'Супер!', '잘했어요!'],
+  keyboard: 'Корейская клавиатура',
+  keyboardHint: 'Пока она открыта, ваша клавиатура тоже печатает по-корейски (раскладка 두벌식, буквы подписаны на клавишах).',
+  openKeyboard: 'Открыть экранную корейскую клавиатуру',
+  kbShift: 'Shift (ㅃ ㅉ ㄸ ㄲ ㅆ ㅒ ㅖ)',
+  kbBackspace: 'Стереть',
+  kbSpace: 'Пробел',
 };
 
 const uz: Strings = {
@@ -375,6 +393,12 @@ const uz: Strings = {
   dropActive: "So'zlarni yuklash uchun qo'yib yuboring",
   loadedFiles: (names) => `Yuklandi: ${names}`,
   praise: ['정답!', 'Zo‘r!', 'Barakalla!', 'Ajoyib!', 'To‘g‘ri!', '잘했어요!'],
+  keyboard: 'Koreys klaviaturasi',
+  keyboardHint: "Ochiq turganda o'z klaviaturangiz ham koreyscha yozadi (두벌식 tartibi, harflar tugmalarda ko'rsatilgan).",
+  openKeyboard: "Ekrandagi koreys klaviaturasidan foydalanish",
+  kbShift: 'Shift (ㅃ ㅉ ㄸ ㄲ ㅆ ㅒ ㅖ)',
+  kbBackspace: "O'chirish",
+  kbSpace: "Bo'sh joy",
 };
 
 const ko: Strings = {
@@ -469,6 +493,12 @@ const ko: Strings = {
   dropActive: '놓으면 단어를 불러옵니다',
   loadedFiles: (names) => `불러옴: ${names}`,
   praise: ['정답!', '잘했어요!', '좋아요!', '완벽해요!', '최고예요!', '맞아요!'],
+  keyboard: '한글 자판',
+  keyboardHint: '자판이 열려 있으면 실제 키보드로도 두벌식 한글을 입력할 수 있습니다 (키에 영문 자리가 표시됩니다).',
+  openKeyboard: '화면 한글 자판 사용하기',
+  kbShift: 'Shift (ㅃ ㅉ ㄸ ㄲ ㅆ ㅒ ㅖ)',
+  kbBackspace: '지우기',
+  kbSpace: '띄어쓰기',
 };
 
 export const STRINGS: Record<UiLang, Strings> = { en, ru, uz, ko };

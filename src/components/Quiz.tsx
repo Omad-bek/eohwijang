@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Check, CornerDownLeft, RotateCcw, Sparkles, SkipForward } from 'lucide-react';
+import { ArrowLeft, Check, CornerDownLeft, Keyboard, RotateCcw, Sparkles, SkipForward } from 'lucide-react';
 import type { PromptLang, Settings, Stage, VocabEntry } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { Outcome } from '../lib/srs';
 import { checkAnswer, isCorrect, type DiffResult } from '../utils/hangulDiff';
+import { backspaceJamo, DUBEOLSIK, typeJamo } from '../utils/hangulInput';
 import { DiffView } from './DiffView';
+import { KoreanKeyboard } from './KoreanKeyboard';
 import { Seal } from './Seal';
 
 interface Props {
@@ -66,6 +68,16 @@ function shake(row: HTMLElement | null, field: HTMLElement | null) {
   );
 }
 
+const KEYBOARD_KEY = 'project-vocab:keyboard';
+
+function readKeyboardOpen(): boolean {
+  try {
+    return localStorage.getItem(KEYBOARD_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 function Prompt({ word, lang }: { word: VocabEntry; lang: PromptLang }) {
   const langs = (['uz', 'ru', 'en'] as const).filter((l) => word[l]);
   if (lang === 'all' || !word[lang as 'uz' | 'ru' | 'en']) {
@@ -102,6 +114,9 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   const [praise, setPraise] = useState<{ id: number; text: string } | null>(null);
   const [lastRight, setLastRight] = useState<{ prompt: string; ko: string } | null>(null);
   const [imeHint, setImeHint] = useState(false);
+  /** Onscreen 두벌식 keyboard; remembered per device. */
+  const [kbOpen, setKbOpen] = useState(readKeyboardOpen);
+  const [keyFlash, setKeyFlash] = useState<{ code: string; n: number } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const answerRow = useRef<HTMLDivElement>(null);
   const composing = useRef(false);
@@ -215,7 +230,47 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
     inputRef.current?.focus({ preventScroll: true });
   };
 
+  const toggleKeyboard = (open = !kbOpen) => {
+    setKbOpen(open);
+    try {
+      localStorage.setItem(KEYBOARD_KEY, open ? '1' : '0');
+    } catch {
+      /* per-device convenience only */
+    }
+    inputRef.current?.focus({ preventScroll: true });
+  };
+
+  /** Apply an onscreen (or remapped physical) key at the caret: a jamo, " ", or "back". */
+  const pressKey = (key: string) => {
+    const el = inputRef.current;
+    const start = el?.selectionStart ?? value.length;
+    const end = el?.selectionEnd ?? value.length;
+    let before = value.slice(0, start);
+    if (start === end) before = key === 'back' ? backspaceJamo(before) : key === ' ' ? `${before} ` : typeJamo(before, key);
+    else if (key !== 'back') before = key === ' ' ? `${before} ` : typeJamo(before, key);
+    setValue(before + value.slice(end));
+    setImeHint(false);
+    if (lastRight) setLastRight(null);
+    requestAnimationFrame(() => {
+      el?.focus({ preventScroll: true });
+      el?.setSelectionRange(before.length, before.length);
+    });
+  };
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const imeBusy = composing.current || e.nativeEvent.isComposing || e.keyCode === 229;
+    // With the onscreen keyboard open, letter keys type 두벌식 by position (e.code), whatever the OS layout is.
+    if (kbOpen && !imeBusy && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const jamo = DUBEOLSIK[e.code];
+      const collapsed = e.currentTarget.selectionStart === e.currentTarget.selectionEnd;
+      if (jamo || (e.key === 'Backspace' && collapsed)) {
+        e.preventDefault();
+        pressKey(jamo ? jamo[e.shiftKey ? 1 : 0] : 'back');
+        const code = jamo ? e.code : 'Backspace';
+        setKeyFlash((f) => ({ code, n: (f?.n ?? 0) + 1 }));
+        return;
+      }
+    }
     if (e.key === 'Escape') {
       // Escape mid-composition belongs to the IME (it cancels the syllable).
       if (composing.current || e.nativeEvent.isComposing || e.keyCode === 229) return;
@@ -310,8 +365,8 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
 
   const missedWords = useMemo(() => stage.words.filter((_, n) => missed.has(n)), [missed, stage.words]);
 
-  /** The flashcard: full-bleed on phones, a bordered centered card on wider screens. */
-  const cardCls = 'relative flex min-h-0 flex-1 flex-col md:mb-6 md:border md:border-rule md:bg-ink-2';
+  /** The flashcard: full-bleed on phones, a bordered centered card on wider screens. Tighter while the keyboard is open, so the jamo diff keeps its room. */
+  const cardCls = `relative flex min-h-0 flex-1 flex-col md:border md:border-rule md:bg-ink-2 ${kbOpen ? 'md:mb-3' : 'md:mb-6'}`;
 
   if (phase.kind === 'done') {
     const pct = Math.round(phase.firstTry * 100);
@@ -380,7 +435,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
             </span>
           </div>
         )}
-        <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-4 pt-6 md:px-8 md:pt-8">
+        <div className={`relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-4 pt-6 md:px-8 ${kbOpen ? 'md:pt-6' : 'md:pt-8'}`}>
           <div aria-hidden className="pointer-events-none absolute inset-0 flex px-1 md:px-8">
             {[0, 1, 2, 3].map((i) => (
               <span key={i} className="flex-1 border-l border-rule-soft/60 last:border-r" />
@@ -395,7 +450,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               </span>
             </div>
 
-            <div aria-live="polite" className="mt-7">
+            <div aria-live="polite" className={kbOpen ? 'mt-5' : 'mt-7'}>
               {phase.kind === 'review' ? (
                 <div>
                   {phase.typed ? <DiffView key={`${current.n}-${reviewTarget}-${phase.typed}`} t={t} cells={phase.result.cells} /> : null}
@@ -426,22 +481,41 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
         </div>
 
         <form
-          className="shrink-0 border-t border-rule bg-ink pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:bg-transparent md:px-8 md:pb-6 md:pt-5"
+          className={`shrink-0 border-t border-rule bg-ink pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:bg-transparent md:px-8 ${kbOpen ? 'md:pb-4 md:pt-4' : 'md:pb-6 md:pt-5'}`}
           onSubmit={(e) => {
             e.preventDefault();
             submit();
           }}
         >
-          <label htmlFor="answer" className="mb-1.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">
-            <span className={phase.kind === 'review' ? 'text-amber' : ''}>{phase.kind === 'review' ? t.retypeLabel : t.typeInKorean}</span>
-            <span className="tabular shrink-0 whitespace-nowrap pl-3 normal-case tracking-normal">{t.remaining(left)}</span>
-          </label>
+          <div className="mb-1.5 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">
+            <label htmlFor="answer" className={`min-w-0 flex-1 truncate ${phase.kind === 'review' ? 'text-amber' : ''}`}>
+              {phase.kind === 'review' ? t.retypeLabel : t.typeInKorean}
+            </label>
+            <span className="tabular shrink-0 whitespace-nowrap normal-case tracking-normal">{t.remaining(left)}</span>
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => toggleKeyboard()}
+              aria-pressed={kbOpen}
+              aria-label={t.keyboard}
+              title={t.keyboard}
+              className={`-my-1 flex h-8 shrink-0 items-center gap-1.5 border px-2 text-[12px] font-semibold normal-case tracking-normal transition-colors ${
+                kbOpen ? 'border-accent/50 bg-accent-wash text-accent-text' : 'border-rule text-hanji-2 hover:border-hanji-2 hover:text-hanji'
+              }`}
+            >
+              <Keyboard size={16} aria-hidden />
+              <span lang="ko" aria-hidden>
+                한글
+              </span>
+            </button>
+          </div>
           <div ref={answerRow} className="flex gap-2">
             <input
               ref={inputRef}
               id="answer"
               lang="ko"
-              inputMode="text"
+              // An open onscreen keyboard replaces the phone's own, so it doesn't cover the screen.
+              inputMode={kbOpen ? 'none' : 'text'}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
@@ -473,30 +547,57 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
             </button>
           </div>
           {imeHint && (
-            <p role="alert" className="mt-2 border border-rule bg-ink-2 px-3 py-2 text-[13px] leading-snug text-hanji">
-              {t.notHangul}
-            </p>
+            <div role="alert" className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 border border-rule bg-ink-2 px-3 py-2 text-[13px] leading-snug text-hanji">
+              <p className="min-w-0 flex-1">{t.notHangul}</p>
+              {!kbOpen && (
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setImeHint(false);
+                    setValue('');
+                    toggleKeyboard(true);
+                  }}
+                  className="flex h-9 shrink-0 items-center gap-1.5 bg-accent px-3 text-[13px] font-bold text-ink hover:bg-accent-text"
+                >
+                  <Keyboard size={16} aria-hidden /> {t.openKeyboard}
+                </button>
+              )}
+            </div>
           )}
-          <div className="mt-2 flex items-center justify-between gap-3">
-            {phase.kind === 'ask' ? (
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={skip}
-                aria-keyshortcuts="Escape"
-                className="flex h-9 items-center gap-1.5 border border-rule px-3 text-[13px] font-semibold text-hanji-2 hover:border-hanji-2 hover:text-hanji"
-              >
-                <SkipForward size={15} aria-hidden /> {t.dontKnow}
-                <kbd aria-hidden className="ml-1 hidden border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji md:inline">Esc</kbd>
-              </button>
-            ) : (
-              <span />
-            )}
-            <p className="hidden items-center gap-1.5 text-[12px] text-hanji-2 md:flex" aria-hidden>
-              <kbd className="border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji">Enter ↵</kbd>
-              {phase.kind === 'review' ? t.continue.toLowerCase() : t.enterToCheck}
-            </p>
-          </div>
+          {(phase.kind === 'ask' || !kbOpen) && (
+            <div className="mt-2 flex items-center justify-between gap-3">
+              {phase.kind === 'ask' ? (
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={skip}
+                  aria-keyshortcuts="Escape"
+                  className="flex h-9 items-center gap-1.5 border border-rule px-3 text-[13px] font-semibold text-hanji-2 hover:border-hanji-2 hover:text-hanji"
+                >
+                  <SkipForward size={15} aria-hidden /> {t.dontKnow}
+                  <kbd aria-hidden className="ml-1 hidden border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji md:inline">Esc</kbd>
+                </button>
+              ) : (
+                <span />
+              )}
+              {!kbOpen && (
+                <p className="hidden items-center gap-1.5 text-[12px] text-hanji-2 md:flex" aria-hidden>
+                  <kbd className="border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji">Enter ↵</kbd>
+                  {phase.kind === 'review' ? t.continue.toLowerCase() : t.enterToCheck}
+                </p>
+              )}
+            </div>
+          )}
+          {kbOpen && (
+            <KoreanKeyboard
+              t={t}
+              onKey={pressKey}
+              onEnter={() => document.getElementById('answer-submit')?.click()}
+              enterLabel={phase.kind === 'review' ? t.continue : t.check}
+              flash={keyFlash}
+            />
+          )}
         </form>
       </section>
     </div>

@@ -179,6 +179,13 @@ select {
     opacity: 1;
   }
 }
+/* A physical key press lights its onscreen twin for a moment. */
+@keyframes key-flash {
+  from {
+    background-color: var(--color-ink-3);
+    border-color: var(--color-accent);
+  }
+}
 @keyframes sheet-in {
   from {
     transform: translateY(24px);
@@ -194,6 +201,9 @@ select {
 }
 .anim-seal {
   animation: seal-in 520ms var(--ease-out-expo) both;
+}
+.anim-keyflash {
+  animation: key-flash 260ms ease-out;
 }
 .anim-praise {
   animation: praise 1300ms var(--ease-out-expo) both;
