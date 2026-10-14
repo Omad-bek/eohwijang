@@ -20,7 +20,7 @@ export interface Strings {
   retypeLabel: string;
   retypeHint: string;
   correctAnswer: string;
-  showAnswer: string;
+  dontKnow: string;
   youTyped: string;
   correct: string;
   requeued: string;
@@ -103,7 +103,7 @@ const en: Strings = {
   retypeLabel: 'Type the correct word',
   retypeHint: 'This word returns at the end of the stage.',
   correctAnswer: 'Correct answer',
-  showAnswer: 'Show answer',
+  dontKnow: "Don't know (Skip)",
   youTyped: 'You typed',
   correct: 'Correct',
   requeued: 'Back in the queue',
@@ -186,7 +186,7 @@ const ru: Strings = {
   retypeLabel: 'Наберите правильное слово',
   retypeHint: 'Это слово вернётся в конце этапа.',
   correctAnswer: 'Правильный ответ',
-  showAnswer: 'Показать ответ',
+  dontKnow: 'Не знаю (Пропустить)',
   youTyped: 'Вы написали',
   correct: 'Верно',
   requeued: 'Снова в очереди',
@@ -269,7 +269,7 @@ const uz: Strings = {
   retypeLabel: "To'g'ri so'zni yozing",
   retypeHint: "Bu so'z bosqich oxirida yana chiqadi.",
   correctAnswer: "To'g'ri javob",
-  showAnswer: "Javobni ko'rsatish",
+  dontKnow: "Bilmayman (O'tkazish)",
   youTyped: 'Siz yozdingiz',
   correct: "To'g'ri",
   requeued: 'Navbatga qaytdi',
@@ -352,7 +352,7 @@ const ko: Strings = {
   retypeLabel: '정답을 다시 입력하세요',
   retypeHint: '이 단어는 단계 끝에 다시 나옵니다.',
   correctAnswer: '정답',
-  showAnswer: '정답 보기',
+  dontKnow: '모르겠어요 (건너뛰기)',
   youTyped: '입력한 답',
   correct: '정답',
   requeued: '다시 대기열로',

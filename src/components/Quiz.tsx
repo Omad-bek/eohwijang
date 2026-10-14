@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Check, CornerDownLeft, Eye, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Check, CornerDownLeft, RotateCcw, SkipForward } from 'lucide-react';
 import type { PromptLang, Settings, Stage, VocabEntry } from '../types';
 import type { Strings } from '../lib/i18n';
 import { checkAnswer, isCorrect, type DiffResult } from '../utils/hangulDiff';
@@ -131,8 +131,10 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
     }
   };
 
-  const reveal = () => {
+  /** "Don't know": reveal the answer as a miss; the retype step then requeues it to the end of the stage. */
+  const skip = () => {
     if (!current || phase.kind !== 'ask') return;
+    setImeHint(false);
     const next = new Set(missed);
     next.add(current.n);
     setMissed(next);
@@ -143,6 +145,13 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      // Escape mid-composition belongs to the IME (it cancels the syllable).
+      if (composing.current || e.nativeEvent.isComposing || e.keyCode === 229) return;
+      e.preventDefault();
+      skip();
+      return;
+    }
     if (e.key !== 'Enter') return;
     e.preventDefault();
     // Korean IME: Enter while a syllable is still composing commits it first; check after commit.
@@ -374,14 +383,16 @@ export function Quiz({ t, stage, settings, onMastered, onComplete, onExit, nextS
             </p>
           )}
           <div className="mt-2 flex items-center justify-between gap-3">
-            {phase.kind === 'ask' && !imeHint ? (
+            {phase.kind === 'ask' ? (
               <button
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={reveal}
-                className="flex items-center gap-1.5 py-1 text-[13px] font-semibold text-hanji-2 hover:text-hanji"
+                onClick={skip}
+                aria-keyshortcuts="Escape"
+                className="flex h-9 items-center gap-1.5 border border-rule px-3 text-[13px] font-semibold text-hanji-2 hover:border-hanji-2 hover:text-hanji"
               >
-                <Eye size={15} aria-hidden /> {t.showAnswer}
+                <SkipForward size={15} aria-hidden /> {t.dontKnow}
+                <kbd aria-hidden className="ml-1 hidden border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji md:inline">Esc</kbd>
               </button>
             ) : (
               <span />
