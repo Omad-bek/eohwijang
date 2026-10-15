@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Settings, Stage, VocabEntry } from './types';
 import { STRINGS } from './lib/i18n';
 import { allBooks, stagesForUnit, wordId } from './lib/books';
-import { useNow, useOnline, useUserData, useVisualViewportHeight } from './lib/hooks';
+import { useCloudSync, useNow, useOnline, useUserData, useVisualViewportHeight } from './lib/hooks';
 import { applyOutcome, type Outcome } from './lib/srs';
 import { Home } from './components/Home';
 import { Manager } from './components/Manager';
@@ -26,6 +26,7 @@ export default function App() {
   useVisualViewportHeight();
   const { data, update, replace, saveFailed } = useUserData();
   const online = useOnline();
+  const sync = useCloudSync(data, update, online);
   const t = STRINGS[data.settings.uiLang];
   const books = useMemo(() => allBooks(data), [data]);
   const now = useNow();
@@ -163,6 +164,7 @@ export default function App() {
               replace={replace}
               onBookCreated={chooseBook}
               onBack={() => setView({ kind: 'home' })}
+              sync={sync}
             />
           )}
         </div>

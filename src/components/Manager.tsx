@@ -2,6 +2,8 @@ import { useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Download, FileUp, Trash2, Upload } from 'lucide-react';
 import type { Book, UserData, VocabEntry } from '../types';
 import type { Strings } from '../lib/i18n';
+import type { CloudSync } from '../lib/hooks';
+import { CloudSyncSection } from './CloudSyncSection';
 import { MAX_STAGE, MIN_STAGE } from '../lib/books';
 import { downloadText, exportJson, parseWords, sanitizeData } from '../lib/storage';
 
@@ -15,6 +17,7 @@ interface Props {
   /** Called after words land in a book that did not exist yet, so the dashboard can open it. */
   onBookCreated: (id: string) => void;
   onBack: () => void;
+  sync: CloudSync;
 }
 
 const NEW = '__new__';
@@ -52,7 +55,7 @@ function ConfirmButton({ label, confirmLabel, onConfirm, icon }: { label: string
 const fieldCls = 'w-full border border-rule bg-ink-2 px-3 text-[16px] text-hanji placeholder:text-hanji-2/85 focus:border-hanji focus:outline-none';
 const labelCls = 'mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2';
 
-export function Manager({ t, data, books, startWithNewBook, update, replace, onBookCreated, onBack }: Props) {
+export function Manager({ t, data, books, startWithNewBook, update, replace, onBookCreated, onBack, sync }: Props) {
   const [target, setTarget] = useState(startWithNewBook ? NEW : books[0]?.id ?? NEW);
   const [newId, setNewId] = useState('');
   const [text, setText] = useState('');
@@ -108,7 +111,7 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
       }
       const units: string[] = [];
       for (const w of fresh) if (!units.includes(w.unit)) units.push(w.unit);
-      return { ...d, customBooks: [...d.customBooks, { id: bookId, title: bookId, units, words: fresh, builtIn: false }] };
+      return { ...d, customBooks: [...d.customBooks, { id: bookId, title: bookId, units, words: fresh, builtIn: false, addedAt: Date.now() }] };
     });
     if (!book) onBookCreated(bookId);
     setStatus({ tone: 'ok', msg: t.imported(fresh.length) });
@@ -298,6 +301,15 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
           </div>
         </Section>
 
+        <Section title={t.cloudSync} hint={t.cloudSyncHint}>
+          <CloudSyncSection
+            t={t}
+            sync={sync}
+            uiLang={data.settings.uiLang}
+            confirm={({ label, onConfirm }) => <ConfirmButton label={label} confirmLabel={`${label}?`} icon={<Trash2 size={16} aria-hidden />} onConfirm={onConfirm} />}
+          />
+        </Section>
+
         <Section title={t.backup} hint={t.backupHint}>
           <div className="flex flex-wrap gap-2">
             <button
@@ -373,7 +385,13 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
                     label={t.deleteBook}
                     confirmLabel={`${t.deleteBook}?`}
                     icon={<Trash2 size={16} aria-hidden />}
-                    onConfirm={() => update((d) => ({ ...d, customBooks: d.customBooks.filter((x) => x.id !== b.id) }))}
+                    onConfirm={() =>
+                      update((d) => ({
+                        ...d,
+                        customBooks: d.customBooks.filter((x) => x.id !== b.id),
+                        deletedBooks: { ...d.deletedBooks, [b.id]: Date.now() },
+                      }))
+                    }
                   />
                 </li>
               ))}

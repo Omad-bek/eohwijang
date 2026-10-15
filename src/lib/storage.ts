@@ -21,6 +21,7 @@ export function emptyData(): UserData {
     stages: {},
     customBooks: [],
     extraWords: {},
+    deletedBooks: {},
   };
 }
 
@@ -57,7 +58,15 @@ function sanitizeBook(raw: unknown): Book | null {
   const words = b.words.filter(isEntry).map(cleanEntry);
   const units = Array.isArray(b.units) ? b.units.filter((u) => typeof u === 'string') : [];
   for (const w of words) if (!units.includes(w.unit)) units.push(w.unit);
-  return { id: b.id.trim(), title: typeof b.title === 'string' && b.title.trim() ? b.title.trim() : b.id.trim(), units, words, builtIn: false };
+  const addedAt = Number(b.addedAt);
+  return {
+    id: b.id.trim(),
+    title: typeof b.title === 'string' && b.title.trim() ? b.title.trim() : b.id.trim(),
+    units,
+    words,
+    builtIn: false,
+    ...(Number.isFinite(addedAt) && addedAt > 0 ? { addedAt } : {}),
+  };
 }
 
 function sanitizeMemory(raw: unknown): Record<string, WordMemory> {
@@ -84,6 +93,10 @@ export function sanitizeData(raw: unknown): UserData {
       if (Array.isArray(v)) extraWords[k] = v.filter(isEntry).map(cleanEntry);
     }
   }
+  const deletedBooks: Record<string, number> = {};
+  if (d.deletedBooks && typeof d.deletedBooks === 'object') {
+    for (const [k, v] of Object.entries(d.deletedBooks)) if (Number.isFinite(Number(v))) deletedBooks[k] = Number(v);
+  }
   const memory = sanitizeMemory(d.memory);
   // v1 kept a flat list of mastered word ids: carry each over as level 1, due for review now.
   const legacy = (d as { mastered?: unknown }).mastered;
@@ -98,6 +111,7 @@ export function sanitizeData(raw: unknown): UserData {
     stages: d.stages && typeof d.stages === 'object' ? d.stages : {},
     customBooks: Array.isArray(d.customBooks) ? (d.customBooks.map(sanitizeBook).filter(Boolean) as Book[]) : [],
     extraWords,
+    deletedBooks,
   };
 }
 

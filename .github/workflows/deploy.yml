@@ -32,6 +32,10 @@ jobs:
         env:
           # Project sites live at https://<user>.github.io/<repo>/
           BASE_PATH: /${{ github.event.repository.name }}/
+          # Cloud Sync backend (Settings → Secrets and variables → Actions → Variables).
+          # Both values are public by design; leave them unset to ship without Cloud Sync.
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
 
       - uses: actions/configure-pages@v5
 

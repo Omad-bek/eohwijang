@@ -101,6 +101,27 @@ export interface Strings {
   notQuite: string;
   revealed: string;
   offline: string;
+  cloudSync: string;
+  cloudSyncHint: string;
+  privacyNote: string;
+  connectCloud: string;
+  linkDevice: string;
+  linkDeviceHint: string;
+  syncIdLabel: string;
+  syncIdKeep: string;
+  link: string;
+  copy: string;
+  copied: string;
+  syncNow: string;
+  syncing: string;
+  syncedAt: (time: string) => string;
+  syncFailed: string;
+  syncNotFound: string;
+  syncBadCode: string;
+  disconnect: string;
+  disconnectHint: string;
+  eraseCloud: string;
+  syncUnavailable: string;
 }
 
 const en: Strings = {
@@ -172,7 +193,7 @@ const en: Strings = {
   importWords: 'Add words',
   imported: (n) => `${n} words added`,
   backup: 'Backup',
-  backupHint: 'Progress lives in this browser only. Export a backup to move it to another device or keep it safe.',
+  backupHint: 'Without Cloud Sync, progress lives in this browser only. Export a backup file to keep a copy of your own.',
   exportBackup: 'Export backup',
   importBackup: 'Restore backup',
   backupRestored: 'Backup restored',
@@ -191,6 +212,27 @@ const en: Strings = {
   deleteBook: 'Delete collection',
   bookExists: 'A collection with that name already exists; words will be added to it.',
   offline: 'Offline',
+  cloudSync: 'Cloud Sync',
+  cloudSyncHint: 'Keep memory levels, stage records and your collections in step across your phone, tablet and computer.',
+  privacyNote: 'Fully anonymous: no email, password, name or any personal information is ever asked for. Your progress is stored under a random code, and that code is the only key to it.',
+  connectCloud: 'Connect Cloud',
+  linkDevice: 'Link this device',
+  linkDeviceHint: 'Already synced on another device? Enter its Sync ID to pull and merge that progress here.',
+  syncIdLabel: 'Your Sync ID',
+  syncIdKeep: 'Enter this code on your other devices. Anyone who has it can see and change your progress, so keep it like a key.',
+  link: 'Link',
+  copy: 'Copy',
+  copied: 'Copied',
+  syncNow: 'Sync now',
+  syncing: 'Syncing…',
+  syncedAt: (time) => `Synced at ${time}`,
+  syncFailed: 'Could not reach the cloud. Your progress is safe here and will sync when the connection is back.',
+  syncNotFound: 'No cloud data uses this Sync ID. Check the code on your other device.',
+  syncBadCode: 'A Sync ID has 20 letters and digits, like ABCD-EFGH-JKMN-PQRS-TVWX.',
+  disconnect: 'Disconnect this device',
+  disconnectHint: 'Progress stays on this device. Erasing the cloud copy also stops sync on every linked device.',
+  eraseCloud: 'Erase cloud copy',
+  syncUnavailable: 'Cloud Sync is not set up for this copy of the app.',
   dropHint: 'Drop .txt, .tsv or .json files here',
   dropActive: 'Drop to load the words',
   loadedFiles: (names) => `Loaded ${names}`,
@@ -274,7 +316,7 @@ const ru: Strings = {
   importWords: 'Добавить слова',
   imported: (n) => `Добавлено слов: ${n}`,
   backup: 'Резервная копия',
-  backupHint: 'Прогресс хранится только в этом браузере. Экспортируйте копию, чтобы перенести его на другое устройство.',
+  backupHint: 'Без облачной синхронизации прогресс хранится только в этом браузере. Экспортируйте файл, чтобы сохранить свою копию.',
   exportBackup: 'Экспорт копии',
   importBackup: 'Восстановить',
   backupRestored: 'Копия восстановлена',
@@ -293,6 +335,27 @@ const ru: Strings = {
   deleteBook: 'Удалить коллекцию',
   bookExists: 'Такая коллекция уже есть — слова будут добавлены в неё.',
   offline: 'Офлайн',
+  cloudSync: 'Облачная синхронизация',
+  cloudSyncHint: 'Уровни памяти, результаты этапов и ваши коллекции совпадают на телефоне, планшете и компьютере.',
+  privacyNote: 'Полностью анонимно: мы никогда не спрашиваем email, пароль, имя или другие личные данные. Прогресс хранится под случайным кодом, и только этот код открывает к нему доступ.',
+  connectCloud: 'Подключить облако',
+  linkDevice: 'Связать это устройство',
+  linkDeviceHint: 'Уже синхронизируете на другом устройстве? Введите его Sync ID, чтобы загрузить и объединить прогресс.',
+  syncIdLabel: 'Ваш Sync ID',
+  syncIdKeep: 'Введите этот код на других устройствах. Любой, у кого он есть, может видеть и менять ваш прогресс, поэтому храните его как ключ.',
+  link: 'Связать',
+  copy: 'Копировать',
+  copied: 'Скопировано',
+  syncNow: 'Синхронизировать',
+  syncing: 'Синхронизация…',
+  syncedAt: (time) => `Синхронизировано в ${time}`,
+  syncFailed: 'Не удалось связаться с облаком. Прогресс сохранён здесь и синхронизируется, когда появится связь.',
+  syncNotFound: 'С этим Sync ID нет данных в облаке. Проверьте код на другом устройстве.',
+  syncBadCode: 'Sync ID состоит из 20 латинских букв и цифр, например ABCD-EFGH-JKMN-PQRS-TVWX.',
+  disconnect: 'Отключить это устройство',
+  disconnectHint: 'Прогресс останется на этом устройстве. Удаление облачной копии остановит синхронизацию на всех связанных устройствах.',
+  eraseCloud: 'Удалить облачную копию',
+  syncUnavailable: 'Облачная синхронизация не настроена в этой версии приложения.',
   dropHint: 'Перетащите сюда файлы .txt, .tsv или .json',
   dropActive: 'Отпустите, чтобы загрузить слова',
   loadedFiles: (names) => `Загружено: ${names}`,
@@ -376,7 +439,7 @@ const uz: Strings = {
   importWords: "So'zlarni qo'shish",
   imported: (n) => `${n} ta so'z qo'shildi`,
   backup: 'Zaxira nusxa',
-  backupHint: "Natijalar faqat shu brauzerda saqlanadi. Boshqa qurilmaga o'tkazish uchun zaxira nusxani eksport qiling.",
+  backupHint: "Bulutli sinxronlashsiz natijalar faqat shu brauzerda saqlanadi. O'z nusxangizni saqlash uchun zaxira faylni eksport qiling.",
   exportBackup: 'Eksport qilish',
   importBackup: 'Tiklash',
   backupRestored: 'Zaxira nusxa tiklandi',
@@ -395,6 +458,27 @@ const uz: Strings = {
   deleteBook: "To'plamni o'chirish",
   bookExists: "Bu nomdagi to'plam bor — so'zlar unga qo'shiladi.",
   offline: 'Oflayn',
+  cloudSync: 'Bulutli sinxronlash',
+  cloudSyncHint: "Xotira darajalari, bosqich natijalari va to'plamlaringiz telefon, planshet va kompyuterda bir xil bo'ladi.",
+  privacyNote: "To'liq anonim: email, parol, ism yoki boshqa shaxsiy ma'lumot hech qachon so'ralmaydi. Natijalaringiz tasodifiy kod ostida saqlanadi va faqat shu kod ularga kalit bo'ladi.",
+  connectCloud: 'Bulutga ulash',
+  linkDevice: 'Bu qurilmani bog‘lash',
+  linkDeviceHint: "Boshqa qurilmada sinxronlaganmisiz? Natijalarni bu yerga yuklab birlashtirish uchun o'sha Sync ID ni kiriting.",
+  syncIdLabel: 'Sizning Sync ID',
+  syncIdKeep: "Bu kodni boshqa qurilmalaringizda kiriting. Kimda shu kod bo'lsa, natijalaringizni ko'ra va o'zgartira oladi — uni kalit kabi saqlang.",
+  link: 'Bog‘lash',
+  copy: 'Nusxalash',
+  copied: 'Nusxalandi',
+  syncNow: 'Hozir sinxronlash',
+  syncing: 'Sinxronlanmoqda…',
+  syncedAt: (time) => `${time} da sinxronlandi`,
+  syncFailed: "Bulutga ulanib bo'lmadi. Natijalar shu yerda saqlangan va aloqa tiklanganda sinxronlanadi.",
+  syncNotFound: "Bu Sync ID bilan bulutda ma'lumot yo'q. Boshqa qurilmadagi kodni tekshiring.",
+  syncBadCode: "Sync ID 20 ta lotin harfi va raqamdan iborat, masalan ABCD-EFGH-JKMN-PQRS-TVWX.",
+  disconnect: 'Bu qurilmani uzish',
+  disconnectHint: "Natijalar shu qurilmada qoladi. Bulutdagi nusxani o'chirsangiz, barcha bog'langan qurilmalarda sinxronlash to'xtaydi.",
+  eraseCloud: "Bulutdagi nusxani o'chirish",
+  syncUnavailable: "Ilovaning bu nusxasida bulutli sinxronlash sozlanmagan.",
   dropHint: ".txt, .tsv yoki .json fayllarni shu yerga tashlang",
   dropActive: "So'zlarni yuklash uchun qo'yib yuboring",
   loadedFiles: (names) => `Yuklandi: ${names}`,
@@ -478,7 +562,7 @@ const ko: Strings = {
   importWords: '단어 추가',
   imported: (n) => `${n}개 단어 추가됨`,
   backup: '백업',
-  backupHint: '진도는 이 브라우저에만 저장됩니다. 다른 기기로 옮기려면 백업을 내보내세요.',
+  backupHint: '클라우드 동기화를 쓰지 않으면 진도는 이 브라우저에만 저장됩니다. 백업 파일을 내보내 따로 보관하세요.',
   exportBackup: '백업 내보내기',
   importBackup: '백업 복원',
   backupRestored: '백업을 복원했습니다',
@@ -497,6 +581,27 @@ const ko: Strings = {
   deleteBook: '컬렉션 삭제',
   bookExists: '같은 이름의 컬렉션이 있어 그 컬렉션에 추가됩니다.',
   offline: '오프라인',
+  cloudSync: '클라우드 동기화',
+  cloudSyncHint: '기억 단계, 스테이지 기록, 내 단어장을 휴대폰·태블릿·컴퓨터에서 똑같이 유지합니다.',
+  privacyNote: '완전히 익명입니다. 이메일, 비밀번호, 이름 등 어떤 개인 정보도 묻지 않습니다. 진도는 무작위 코드로만 저장되며, 그 코드가 유일한 열쇠입니다.',
+  connectCloud: '클라우드 연결',
+  linkDevice: '이 기기 연결',
+  linkDeviceHint: '다른 기기에서 이미 동기화 중인가요? 그 기기의 Sync ID를 입력하면 진도를 가져와 합칩니다.',
+  syncIdLabel: '내 Sync ID',
+  syncIdKeep: '다른 기기에 이 코드를 입력하세요. 코드를 가진 사람은 누구나 진도를 보고 바꿀 수 있으니 열쇠처럼 보관하세요.',
+  link: '연결',
+  copy: '복사',
+  copied: '복사됨',
+  syncNow: '지금 동기화',
+  syncing: '동기화 중…',
+  syncedAt: (time) => `${time}에 동기화됨`,
+  syncFailed: '클라우드에 연결할 수 없습니다. 진도는 이 기기에 안전하게 있으며 연결되면 동기화됩니다.',
+  syncNotFound: '이 Sync ID로 저장된 데이터가 없습니다. 다른 기기의 코드를 확인하세요.',
+  syncBadCode: 'Sync ID는 ABCD-EFGH-JKMN-PQRS-TVWX처럼 영문자와 숫자 20자입니다.',
+  disconnect: '이 기기 연결 해제',
+  disconnectHint: '진도는 이 기기에 남습니다. 클라우드 사본을 지우면 연결된 모든 기기의 동기화가 멈춥니다.',
+  eraseCloud: '클라우드 사본 삭제',
+  syncUnavailable: '이 앱 사본에는 클라우드 동기화가 설정되어 있지 않습니다.',
   dropHint: '.txt, .tsv, .json 파일을 여기에 놓으세요',
   dropActive: '놓으면 단어를 불러옵니다',
   loadedFiles: (names) => `불러옴: ${names}`,

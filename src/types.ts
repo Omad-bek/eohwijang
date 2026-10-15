@@ -18,6 +18,8 @@ export interface Book {
   units: string[];
   words: VocabEntry[];
   builtIn: boolean;
+  /** When the learner created it; a cloud-sync deletion only wins over copies made before it. */
+  addedAt?: number;
 }
 
 export interface Stage {
@@ -66,4 +68,6 @@ export interface UserData {
   customBooks: Book[];
   /** Words appended to built-in books, keyed by book id. */
   extraWords: Record<string, VocabEntry[]>;
+  /** Deleted collection ids and when, so cloud sync does not bring them back from another device. */
+  deletedBooks: Record<string, number>;
 }

@@ -46,6 +46,18 @@ Choose an existing collection or "New collection…" and give it a name (`1B`, `
 
 Stored in `localStorage` per browser, per word, so changing the stage size (20–30) never loses progress. **Words & data → Backup** exports and restores everything (settings, mastery, added collections and words) as one JSON file.
 
+## Cloud Sync (anonymous)
+
+**Words & data → Cloud Sync** keeps memory levels, stage records and added collections in step across devices without any account: **Connect Cloud** creates a random 20-character Sync ID, and **Link this device** on another device pulls and merges that ID's progress. Merging never loses progress: each word keeps its higher memory level (the more recent review on a tie), stage records keep their best numbers, collections and words are unioned, and a deleted collection stays deleted. Settings stay per device. The app syncs on start, a few seconds after each change, and when it returns to the foreground.
+
+Backend setup (one time):
+
+1. Create a free [Supabase](https://supabase.com) project and run [`supabase/schema.sql`](supabase/schema.sql) in its SQL editor. The table is closed to the public API; browsers can only call `pull_vault`, `push_vault` and `delete_vault` with an exact Sync ID.
+2. In the GitHub repo, open **Settings → Secrets and variables → Actions → Variables** and add `SUPABASE_URL` (Project URL) and `SUPABASE_ANON_KEY` (the anon / publishable key, which is public by design).
+3. Re-run the deploy workflow. For local dev, put the same values in `.env.local` as `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+
+Without these values the app builds normally and the Cloud Sync section says it is not set up.
+
 ## Icons
 
 `node scripts/make-icons.mjs` regenerates `public/` icons (the 어 mark in the emerald frame).
