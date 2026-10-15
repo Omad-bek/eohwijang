@@ -212,6 +212,37 @@ export function parseWords(text: string): ParsedWords {
   return { words, skipped };
 }
 
+/**
+ * Turn CSV (comma or semicolon separated, "quoted" cells allowed) into the tab-separated lines
+ * parseWords understands. Text from other file types is returned unchanged.
+ */
+export function wordFileText(name: string, text: string): string {
+  const body = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  if (!/\.csv$/i.test(name)) return body;
+  return body
+    .split(/\r?\n/)
+    .map((line) => {
+      const delim = line.includes(';') && !line.includes(',') ? ';' : ',';
+      const cells: string[] = [];
+      let cell = '';
+      let quoted = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (quoted) {
+          if (c === '"' && line[i + 1] === '"') (cell += '"'), i++;
+          else if (c === '"') quoted = false;
+          else cell += c;
+        } else if (c === '"') quoted = true;
+        else if (c === delim) cells.push(cell.trim()), (cell = '');
+        else cell += c;
+      }
+      cells.push(cell.trim());
+      // A line with one cell is a unit heading such as "9과" and stays as it is.
+      return cells.length > 1 ? cells.map((x) => x.replace(/\t/g, ' ')).join('\t') : cells[0];
+    })
+    .join('\n');
+}
+
 export function exportJson(data: UserData): string {
   return JSON.stringify({ app: 'project-vocab', exportedAt: new Date().toISOString(), ...data }, null, 2);
 }

@@ -6,7 +6,7 @@ import type { CloudSync } from '../lib/hooks';
 import { CloudSyncSection } from './CloudSyncSection';
 import { ConfirmButton } from './ConfirmButton';
 import { MAX_STAGE, MIN_STAGE } from '../lib/books';
-import { downloadText, exportJson, parseWords, sanitizeData } from '../lib/storage';
+import { downloadText, exportJson, parseWords, sanitizeData, wordFileText } from '../lib/storage';
 
 interface Props {
   t: Strings;
@@ -119,7 +119,7 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
       return;
     }
     try {
-      const texts = (await Promise.all(files.map((f) => f.text()))).map((x) => x.replace(/^﻿/, ''));
+      const texts = await Promise.all(files.map(async (f) => wordFileText(f.name, await f.text())));
       // JSON files cannot simply be joined, so several of them are merged into one word list.
       const merge = texts.length > 1 && texts.some((x) => /^\s*[[{]/.test(x));
       setText(merge ? JSON.stringify(texts.flatMap((x) => parseWords(x).words), null, 1) : texts.join('\n'));

@@ -3,7 +3,7 @@ import { Download, EyeOff, FileUp, Lock, LogOut, Pencil, RotateCcw, Save, Upload
 import type { Book, VocabEntry } from '../types';
 import { BUILT_IN_BOOKS } from '../lib/books';
 import type { GlobalWord } from '../lib/global';
-import { DEFAULT_UNIT, downloadText, parseWords } from '../lib/storage';
+import { DEFAULT_UNIT, downloadText, parseWords, wordFileText } from '../lib/storage';
 import { SYNC_AVAILABLE, SyncError, rpc } from '../lib/sync';
 
 /**
@@ -68,8 +68,7 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
   const loadFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
-      const raw = String(reader.result ?? '');
-      const text = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw; // drop a byte-order mark
+      const text = wordFileText(file.name, String(reader.result ?? ''));
       setBulk(text);
       setBulkFile(file.name);
       setMsg(null);
