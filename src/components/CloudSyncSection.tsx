@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Check, Cloud, Copy, Link2, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Check, Cloud, Copy, Link2, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react';
 import type { Strings } from '../lib/i18n';
 import type { CloudSync } from '../lib/hooks';
 import { SyncError, formatSyncId, normalizeSyncId } from '../lib/sync';
+import { ConfirmButton } from './ConfirmButton';
 
 const fieldCls = 'w-full border border-rule bg-ink-2 px-3 text-[16px] text-hanji placeholder:text-hanji-2/85 focus:border-hanji focus:outline-none';
 const ghostBtn = 'flex h-11 items-center gap-2 border border-rule px-4 text-[14px] font-semibold hover:border-hanji-2 disabled:cursor-not-allowed disabled:text-hanji-2';
@@ -11,7 +12,7 @@ function errorText(t: Strings, e: unknown): string {
   return e instanceof SyncError && e.code === 'notFound' ? t.syncNotFound : t.syncFailed;
 }
 
-export function CloudSyncSection({ t, sync, uiLang, confirm }: { t: Strings; sync: CloudSync; uiLang: string; confirm: (p: { label: string; onConfirm: () => void }) => React.ReactNode }) {
+export function CloudSyncSection({ t, sync, uiLang }: { t: Strings; sync: CloudSync; uiLang: string }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -139,7 +140,12 @@ export function CloudSyncSection({ t, sync, uiLang, confirm }: { t: Strings; syn
           <button type="button" disabled={busy} onClick={() => attempt(() => sync.disconnect(false))} className={ghostBtn}>
             {t.disconnect}
           </button>
-          {confirm({ label: t.eraseCloud, onConfirm: () => attempt(() => sync.disconnect(true)) })}
+          <ConfirmButton
+            label={t.eraseCloud}
+            confirmLabel={`${t.eraseCloud}?`}
+            icon={<Trash2 size={16} aria-hidden />}
+            onConfirm={() => attempt(() => sync.disconnect(true))}
+          />
         </div>
       </div>
     </>

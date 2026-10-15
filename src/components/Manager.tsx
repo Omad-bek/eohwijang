@@ -4,6 +4,7 @@ import type { Book, UserData, VocabEntry } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { CloudSync } from '../lib/hooks';
 import { CloudSyncSection } from './CloudSyncSection';
+import { ConfirmButton } from './ConfirmButton';
 import { MAX_STAGE, MIN_STAGE } from '../lib/books';
 import { downloadText, exportJson, parseWords, sanitizeData } from '../lib/storage';
 
@@ -31,24 +32,6 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
       {hint && <p className="mt-1 max-w-[60ch] text-[13px] leading-relaxed text-hanji-2">{hint}</p>}
       <div className="mt-4">{children}</div>
     </section>
-  );
-}
-
-/** A destructive button that asks for a second tap instead of a browser dialog. */
-function ConfirmButton({ label, confirmLabel, onConfirm, icon }: { label: string; confirmLabel: string; onConfirm: () => void; icon: React.ReactNode }) {
-  const [armed, setArmed] = useState(false);
-  return (
-    <button
-      type="button"
-      onClick={() => (armed ? (setArmed(false), onConfirm()) : setArmed(true))}
-      onBlur={() => setArmed(false)}
-      className={`flex h-11 items-center gap-2 border px-4 text-[14px] font-semibold transition-colors ${
-        armed ? 'border-danger bg-danger text-ink' : 'border-rule text-hanji hover:border-hanji-2'
-      }`}
-    >
-      {icon}
-      {armed ? confirmLabel : label}
-    </button>
   );
 }
 
@@ -302,12 +285,7 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
         </Section>
 
         <Section title={t.cloudSync} hint={t.cloudSyncHint}>
-          <CloudSyncSection
-            t={t}
-            sync={sync}
-            uiLang={data.settings.uiLang}
-            confirm={({ label, onConfirm }) => <ConfirmButton label={label} confirmLabel={`${label}?`} icon={<Trash2 size={16} aria-hidden />} onConfirm={onConfirm} />}
-          />
+          <CloudSyncSection t={t} sync={sync} uiLang={data.settings.uiLang} />
         </Section>
 
         <Section title={t.backup} hint={t.backupHint}>

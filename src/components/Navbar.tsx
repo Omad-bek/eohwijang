@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, Database, Languages, WifiOff } from 'lucide-react';
+import { Check, ChevronDown, Cloud, CloudAlert, CloudOff, Database, Languages, RefreshCw, WifiOff } from 'lucide-react';
 import type { PromptLang, Settings, UiLang } from '../types';
 import type { Strings } from '../lib/i18n';
+import type { CloudSync } from '../lib/hooks';
 
 interface Props {
   t: Strings;
@@ -10,6 +11,8 @@ interface Props {
   onChange: (patch: Partial<Settings>) => void;
   onHome: () => void;
   onData: () => void;
+  sync: CloudSync;
+  onSync: () => void;
 }
 
 const UI_LANGS: { value: UiLang; code: string; name: string }[] = [
@@ -82,7 +85,35 @@ function UiLangMenu({ t, value, onChange }: { t: Strings; value: UiLang; onChang
   );
 }
 
-export function Navbar({ t, settings, online, onChange, onHome, onData }: Props) {
+/** Cloud Sync state at a glance; opens the Sync ID dialog. */
+function SyncButton({ t, sync, online, onClick }: { t: Strings; sync: CloudSync; online: boolean; onClick: () => void }) {
+  const state = !sync.syncId ? 'off' : !online ? 'offline' : sync.status;
+  const { icon, label, tone } = {
+    off: { icon: <CloudOff size={15} aria-hidden />, label: t.syncOff, tone: 'text-hanji-2' },
+    offline: { icon: <CloudOff size={15} aria-hidden />, label: t.offline, tone: 'text-hanji-2' },
+    idle: { icon: <Cloud size={15} aria-hidden />, label: t.cloudSync, tone: 'text-hanji' },
+    syncing: { icon: <RefreshCw size={15} aria-hidden className="animate-spin" />, label: t.syncing, tone: 'text-hanji' },
+    ok: { icon: <Cloud size={15} aria-hidden />, label: t.synced, tone: 'text-accent-text' },
+    error: { icon: <CloudAlert size={15} aria-hidden />, label: t.syncProblem, tone: 'text-danger-text' },
+  }[state];
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={`${t.cloudSync}: ${label}`}
+      aria-label={`${t.cloudSync}: ${label}`}
+      className={`relative flex h-9 shrink-0 items-center gap-1.5 border px-2.5 text-[13px] font-semibold hover:border-hanji-2 ${
+        state === 'ok' ? 'border-accent/60' : state === 'error' ? 'border-danger/60' : 'border-rule'
+      } ${tone}`}
+    >
+      {icon}
+      <span className="hidden whitespace-nowrap sm:inline">{label}</span>
+      {state === 'ok' && <span aria-hidden className="absolute -right-[3px] -top-[3px] h-[7px] w-[7px] rounded-full bg-accent sm:hidden" />}
+    </button>
+  );
+}
+
+export function Navbar({ t, settings, online, onChange, onHome, onData, sync, onSync }: Props) {
   const prompt: { value: PromptLang; label: string; title: string }[] = [
     { value: 'uz', label: 'UZ', title: `${t.langName.uz} → 한국어` },
     { value: 'ru', label: 'RU', title: `${t.langName.ru} → 한국어` },
@@ -98,7 +129,9 @@ export function Navbar({ t, settings, online, onChange, onHome, onData }: Props)
           {t.appName !== '어휘장' && <span className="hidden text-[13px] font-semibold text-hanji-2 lg:inline">{t.appName}</span>}
         </button>
 
-        {!online && (
+        {sync.available && <SyncButton t={t} sync={sync} online={online} onClick={onSync} />}
+
+        {!online && !sync.syncId && (
           <span className="hidden items-center gap-1 text-[12px] font-semibold text-hanji-2 sm:flex" title={t.offline}>
             <WifiOff size={14} aria-hidden /> <span className="hidden lg:inline">{t.offline}</span>
           </span>

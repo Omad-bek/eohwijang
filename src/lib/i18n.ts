@@ -122,6 +122,9 @@ export interface Strings {
   disconnectHint: string;
   eraseCloud: string;
   syncUnavailable: string;
+  syncOff: string;
+  synced: string;
+  syncProblem: string;
 }
 
 const en: Strings = {
@@ -233,6 +236,9 @@ const en: Strings = {
   disconnectHint: 'Progress stays on this device. Erasing the cloud copy also stops sync on every linked device.',
   eraseCloud: 'Erase cloud copy',
   syncUnavailable: 'Cloud Sync is not set up for this copy of the app.',
+  syncOff: 'Sync off',
+  synced: 'Synced',
+  syncProblem: 'Sync failed',
   dropHint: 'Drop .txt, .tsv or .json files here',
   dropActive: 'Drop to load the words',
   loadedFiles: (names) => `Loaded ${names}`,
@@ -356,6 +362,9 @@ const ru: Strings = {
   disconnectHint: 'Прогресс останется на этом устройстве. Удаление облачной копии остановит синхронизацию на всех связанных устройствах.',
   eraseCloud: 'Удалить облачную копию',
   syncUnavailable: 'Облачная синхронизация не настроена в этой версии приложения.',
+  syncOff: 'Синхр. выкл.',
+  synced: 'Синхронизировано',
+  syncProblem: 'Ошибка синхр.',
   dropHint: 'Перетащите сюда файлы .txt, .tsv или .json',
   dropActive: 'Отпустите, чтобы загрузить слова',
   loadedFiles: (names) => `Загружено: ${names}`,
@@ -479,6 +488,9 @@ const uz: Strings = {
   disconnectHint: "Natijalar shu qurilmada qoladi. Bulutdagi nusxani o'chirsangiz, barcha bog'langan qurilmalarda sinxronlash to'xtaydi.",
   eraseCloud: "Bulutdagi nusxani o'chirish",
   syncUnavailable: "Ilovaning bu nusxasida bulutli sinxronlash sozlanmagan.",
+  syncOff: "Sinxron o'chiq",
+  synced: 'Sinxronlangan',
+  syncProblem: 'Sinxron xatosi',
   dropHint: ".txt, .tsv yoki .json fayllarni shu yerga tashlang",
   dropActive: "So'zlarni yuklash uchun qo'yib yuboring",
   loadedFiles: (names) => `Yuklandi: ${names}`,
@@ -602,6 +614,9 @@ const ko: Strings = {
   disconnectHint: '진도는 이 기기에 남습니다. 클라우드 사본을 지우면 연결된 모든 기기의 동기화가 멈춥니다.',
   eraseCloud: '클라우드 사본 삭제',
   syncUnavailable: '이 앱 사본에는 클라우드 동기화가 설정되어 있지 않습니다.',
+  syncOff: '동기화 꺼짐',
+  synced: '동기화됨',
+  syncProblem: '동기화 실패',
   dropHint: '.txt, .tsv, .json 파일을 여기에 놓으세요',
   dropActive: '놓으면 단어를 불러옵니다',
   loadedFiles: (names) => `불러옴: ${names}`,

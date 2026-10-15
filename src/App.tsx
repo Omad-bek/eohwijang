@@ -7,6 +7,7 @@ import { applyOutcome, type Outcome } from './lib/srs';
 import { Home } from './components/Home';
 import { Manager } from './components/Manager';
 import { Navbar } from './components/Navbar';
+import { CloudSyncDialog } from './components/CloudSyncDialog';
 import { Quiz } from './components/Quiz';
 import { StagePreview } from './components/StagePreview';
 
@@ -34,6 +35,8 @@ export default function App() {
   const [bookId, setBookId] = useState(() => readBook() ?? '1A');
   const [view, setView] = useState<View>({ kind: 'home' });
   const [preview, setPreview] = useState<Stage | null>(null);
+  const [syncOpen, setSyncOpen] = useState(false);
+  const closeSync = useCallback(() => setSyncOpen(false), []);
 
   const activeBook = books.find((b) => b.id === bookId) ?? books[0];
 
@@ -118,6 +121,8 @@ export default function App() {
           onChange={setSettings}
           onHome={() => setView({ kind: 'home' })}
           onData={() => setView({ kind: 'data', newBook: false })}
+          sync={sync}
+          onSync={() => setSyncOpen(true)}
         />
 
         <div className="mx-auto min-h-0 w-full max-w-7xl flex-1">
@@ -171,6 +176,7 @@ export default function App() {
       </div>
 
       {preview && <StagePreview t={t} stage={preview} memory={data.memory} now={now} onClose={() => setPreview(null)} onStart={() => startStage(preview)} />}
+      {syncOpen && <CloudSyncDialog t={t} sync={sync} uiLang={data.settings.uiLang} onClose={closeSync} />}
     </div>
   );
 }
