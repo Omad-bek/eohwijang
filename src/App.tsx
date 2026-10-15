@@ -8,12 +8,16 @@ import { Home } from './components/Home';
 import { Manager } from './components/Manager';
 import { Navbar } from './components/Navbar';
 import { CloudSyncDialog } from './components/CloudSyncDialog';
+import { AdminPanel } from './components/AdminPanel';
+import { useSharedBooks } from './lib/global';
 import { Quiz } from './components/Quiz';
 import { StagePreview } from './components/StagePreview';
 
 type View = { kind: 'home' } | { kind: 'quiz'; stage: Stage; run: number } | { kind: 'data'; newBook: boolean };
 
 const BOOK_KEY = 'project-vocab:book';
+
+const isAdminHash = () => window.location.hash === '#admin';
 
 function readBook(): string | null {
   try {
@@ -29,7 +33,9 @@ export default function App() {
   const online = useOnline();
   const sync = useCloudSync(data, update, online);
   const t = STRINGS[data.settings.uiLang];
-  const books = useMemo(() => allBooks(data), [data]);
+  const shared = useSharedBooks(online);
+  const books = useMemo(() => allBooks(data, shared.books), [data, shared.books]);
+  const [admin, setAdmin] = useState(isAdminHash);
   const now = useNow();
 
   const [bookId, setBookId] = useState(() => readBook() ?? '1A');
@@ -39,6 +45,17 @@ export default function App() {
   const closeSync = useCallback(() => setSyncOpen(false), []);
 
   const activeBook = books.find((b) => b.id === bookId) ?? books[0];
+
+  useEffect(() => {
+    const onHash = () => setAdmin(isAdminHash());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  const exitAdmin = () => {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    setAdmin(false);
+  };
 
   useEffect(() => {
     document.documentElement.lang = data.settings.uiLang;
@@ -126,7 +143,9 @@ export default function App() {
         />
 
         <div className="mx-auto min-h-0 w-full max-w-7xl flex-1">
-          {view.kind === 'home' && (
+          {admin && <AdminPanel shared={shared.books} rows={shared.rows} refresh={shared.refresh} onExit={exitAdmin} />}
+
+          {!admin && view.kind === 'home' && (
             <Home
               t={t}
               books={books}
@@ -141,7 +160,7 @@ export default function App() {
             />
           )}
 
-          {view.kind === 'quiz' && (
+          {!admin && view.kind === 'quiz' && (
             <Quiz
               key={view.run}
               t={t}
@@ -159,7 +178,7 @@ export default function App() {
             />
           )}
 
-          {view.kind === 'data' && (
+          {!admin && view.kind === 'data' && (
             <Manager
               t={t}
               data={data}

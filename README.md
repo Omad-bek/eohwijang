@@ -58,6 +58,20 @@ Backend setup (one time):
 
 Without these values the app builds normally and the Cloud Sync section says it is not set up.
 
+## Shared vs personal data
+
+- **Shared, read-only:** the bundled collections (`src/data`) plus global updates published in admin mode. Identical for every learner, never written by the app, never stored in anyone's progress or Sync ID vault.
+- **Personal:** words a learner adds (`extraWords`) and their own collections (`customBooks`), plus memory levels and stage records. Kept in this browser's `localStorage` (`project-vocab:v1`) and, if they connect Cloud Sync, in their own Sync ID vault only. They are shown layered on top of the shared lists for that learner alone.
+
+## Admin mode (global vocabulary)
+
+Open the app with `#admin` at the end of the URL. The panel is only hidden, not secret; the protection is server-side: every write sends your admin token to Supabase, which compares its SHA-256 with `admin_secrets`. The token is never in the app bundle and is kept only in that tab's `sessionStorage`.
+
+1. After running `supabase/schema.sql`, set a long random token in the SQL editor:
+   `insert into public.admin_secrets (token_hash) values (encode(extensions.digest('YOUR-LONG-RANDOM-TOKEN', 'sha256'), 'hex'));`
+2. Visit `…/#admin`, enter the token, then add or edit words, hide bundled ones, revert edits, or bulk-paste a whole unit (heading lines like `9과` start units; a new book name such as `1B` creates a new shared collection).
+3. Changes reach every learner the next time their app opens online (cached for offline). **Export** downloads a book as JSON to commit into `src/data` when you want it bundled with the app.
+
 ## Icons
 
 `node scripts/make-icons.mjs` regenerates `public/` icons (the 어 mark in the emerald frame).

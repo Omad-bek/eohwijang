@@ -87,7 +87,7 @@ export function sanitizeData(raw: unknown): UserData {
   const base = emptyData();
   const d = raw as Partial<UserData> | null;
   if (!d || typeof d !== 'object') return base;
-  // Added words only ever extend a built-in collection; anything keyed to another name is dropped.
+  // Words the learner added to a shared collection (bundled, or published later as a global update).
   const extraWords: Record<string, VocabEntry[]> = {};
   const addExtra = (bookId: string, words: VocabEntry[]) => {
     const list = (extraWords[bookId] ??= []);
@@ -96,8 +96,7 @@ export function sanitizeData(raw: unknown): UserData {
   };
   if (d.extraWords && typeof d.extraWords === 'object') {
     for (const [k, v] of Object.entries(d.extraWords)) {
-      const target = builtInBook(k);
-      if (target && Array.isArray(v)) addExtra(target.id, v.filter(isEntry).map(cleanEntry));
+      if (Array.isArray(v) && k.trim()) addExtra(builtInBook(k)?.id ?? k.trim(), v.filter(isEntry).map(cleanEntry));
     }
   }
   // A personal collection may never share a built-in's name: fold its words into the learner's additions instead.

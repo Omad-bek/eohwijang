@@ -32,16 +32,31 @@ export function wordId(bookId: string, w: VocabEntry): string {
   return `${bookId}|${w.unit}|${w.ko.normalize('NFC').trim()}`;
 }
 
-/** Every book (built-in with appended words, plus learner-added) in textbook order: 1A, 1B, 2A … */
-export function allBooks(data: UserData): Book[] {
-  const builtIn = BUILT_IN_BOOKS.map((b) => {
-    const extra = data.extraWords[b.id] ?? [];
+/**
+ * Every book in textbook order (1A, 1B, 2A …): the shared read-only collections (bundled, with
+ * global updates applied) followed by this learner's own words and collections. The learner's
+ * part is only layered on for display; the shared lists themselves are never changed. A personal
+ * collection that shares a name with a shared one shows as additions to it.
+ */
+export function allBooks(data: UserData, shared: readonly Book[] = BUILT_IN_BOOKS): Book[] {
+  const key = (id: string) => id.trim().toLowerCase();
+  const sharedIds = new Set(shared.map((b) => key(b.id)));
+  const readOnly = shared.map((b) => {
+    const extra = [...(data.extraWords[b.id] ?? []), ...data.customBooks.filter((c) => key(c.id) === key(b.id)).flatMap((c) => c.words)];
     if (!extra.length) return b;
+    const seen = new Set(b.words.map((w) => `${w.unit}|${w.ko}`));
     const units = [...b.units];
-    for (const w of extra) if (!units.includes(w.unit)) units.push(w.unit);
-    return { ...b, units, words: [...b.words, ...extra] };
+    const words = [...b.words];
+    for (const w of extra) {
+      if (seen.has(`${w.unit}|${w.ko}`)) continue;
+      seen.add(`${w.unit}|${w.ko}`);
+      words.push(w);
+      if (!units.includes(w.unit)) units.push(w.unit);
+    }
+    return { ...b, units, words };
   });
-  return [...builtIn, ...data.customBooks].sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
+  const own = data.customBooks.filter((c) => !sharedIds.has(key(c.id)));
+  return [...readOnly, ...own].sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
 }
 
 /**
