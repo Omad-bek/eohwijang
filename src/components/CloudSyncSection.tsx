@@ -58,6 +58,9 @@ export function CloudSyncSection({ t, sync, uiLang }: { t: Strings; sync: CloudS
             {t.linkDevice}
           </label>
           <p className="mb-2 text-[13px] leading-relaxed text-hanji-2">{t.linkDeviceHint}</p>
+          {sync.previousSyncId && (
+            <p className="mb-2 border-l-2 border-danger/70 pl-3 text-[13px] leading-relaxed text-hanji">{t.linkReplaces(formatSyncId(sync.previousSyncId))}</p>
+          )}
           <form
             className="flex gap-2"
             onSubmit={(e) => {
@@ -137,14 +140,20 @@ export function CloudSyncSection({ t, sync, uiLang }: { t: Strings; sync: CloudS
       <div className="mt-6 border-t border-rule-soft pt-4">
         <p className="mb-3 max-w-[60ch] text-[13px] leading-relaxed text-hanji-2">{t.disconnectHint}</p>
         <div className="flex flex-wrap gap-2">
-          <button type="button" disabled={busy} onClick={() => attempt(() => sync.disconnect(false))} className={ghostBtn}>
+          <button type="button" disabled={busy} onClick={() => attempt(() => sync.disconnect())} className={ghostBtn}>
             {t.disconnect}
           </button>
+          <ConfirmButton
+            label={t.disconnectClear}
+            confirmLabel={`${t.disconnectClear}?`}
+            icon={<Trash2 size={16} aria-hidden />}
+            onConfirm={() => attempt(() => sync.disconnect({ clearDevice: true }))}
+          />
           <ConfirmButton
             label={t.eraseCloud}
             confirmLabel={`${t.eraseCloud}?`}
             icon={<Trash2 size={16} aria-hidden />}
-            onConfirm={() => attempt(() => sync.disconnect(true))}
+            onConfirm={() => attempt(() => sync.disconnect({ erase: true }))}
           />
         </div>
       </div>

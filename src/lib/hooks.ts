@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { UserData } from '../types';
-import { loadData, saveData } from './storage';
-import { SYNC_AVAILABLE, deleteVault, fingerprint, loadSyncId, mergeData, newSyncId, saveSyncId, syncNow as runSync } from './sync';
+import { emptyData, loadData, saveData } from './storage';
+import { SYNC_AVAILABLE, clearLastSyncId, deleteVault, fingerprint, loadLastSyncId, loadSyncId, mergeData, newSyncId, saveSyncId, syncNow as runSync } from './sync';
 
 /**
  * Pin the app to the *visual* viewport so the on-screen keyboard shrinks the
@@ -96,13 +96,18 @@ export interface CloudSync {
   syncId: string | null;
   status: SyncStatus;
   lastSyncedAt: number | null;
+  /**
+   * While disconnected: the Sync ID this device's data came from. Linking a different code
+   * replaces that data instead of merging it, so two people's words never mix on a shared device.
+   */
+  previousSyncId: string | null;
   /** Make a new vault from this device's data. */
   connect: () => Promise<void>;
   /** Join an existing vault; rejects with SyncError('notFound') for an unknown code. */
   link: (id: string) => Promise<void>;
   syncNow: () => Promise<void>;
-  /** Forget the code on this device; with `erase`, delete the cloud copy as well. */
-  disconnect: (erase: boolean) => Promise<void>;
+  /** Forget the code on this device; `erase` deletes the cloud copy, `clearDevice` wipes local progress and collections. */
+  disconnect: (opts?: { erase?: boolean; clearDevice?: boolean }) => Promise<void>;
 }
 
 const AUTO_SYNC_DELAY = 4000;
@@ -115,6 +120,7 @@ export function useCloudSync(data: UserData, update: (fn: (d: UserData) => UserD
   const [syncId, setSyncId] = useState<string | null>(() => (SYNC_AVAILABLE ? loadSyncId() : null));
   const [status, setStatus] = useState<SyncStatus>('idle');
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
+  const [previousSyncId, setPreviousSyncId] = useState<string | null>(() => (SYNC_AVAILABLE ? loadLastSyncId() : null));
   /** Fingerprint of what the cloud holds after the last successful sync. */
   const [synced, setSynced] = useState<string | null>(null);
   const dataRef = useRef(data);
@@ -122,14 +128,17 @@ export function useCloudSync(data: UserData, update: (fn: (d: UserData) => UserD
   const busy = useRef(false);
 
   const run = useCallback(
-    async (id: string, mustExist = false) => {
+    async (id: string, mustExist = false, replaceLocal = false) => {
       if (busy.current) return;
       busy.current = true;
       setStatus('syncing');
       try {
-        const merged = await runSync(id, () => dataRef.current, mustExist);
-        // Anything typed while the request was in flight is merged in, not overwritten.
+        // Replacing: this device contributes nothing but its settings.
+        const local = replaceLocal ? () => ({ ...emptyData(), settings: dataRef.current.settings }) : () => dataRef.current;
+        const merged = await runSync(id, local, mustExist);
         update((d) => {
+          if (replaceLocal) return { ...merged, settings: d.settings };
+          // Anything typed while the request was in flight is merged in, not overwritten.
           const next = mergeData(d, merged);
           return fingerprint(next) === fingerprint(d) ? d : next;
         });
@@ -162,9 +171,10 @@ export function useCloudSync(data: UserData, update: (fn: (d: UserData) => UserD
   }, [syncId, quiet]);
 
   const adopt = async (id: string, mustExist: boolean) => {
-    await run(id, mustExist);
+    await run(id, mustExist, mustExist && !!previousSyncId && previousSyncId !== id);
     saveSyncId(id);
     setSyncId(id);
+    setPreviousSyncId(id);
   };
 
   return {
@@ -172,11 +182,17 @@ export function useCloudSync(data: UserData, update: (fn: (d: UserData) => UserD
     syncId,
     status,
     lastSyncedAt,
+    previousSyncId: syncId ? null : previousSyncId,
     connect: () => adopt(newSyncId(), false),
     link: (id) => adopt(id, true),
     syncNow: () => (syncId ? run(syncId) : Promise.resolve()),
-    disconnect: async (erase) => {
+    disconnect: async ({ erase = false, clearDevice = false } = {}) => {
       if (erase && syncId) await deleteVault(syncId);
+      if (clearDevice) {
+        update((d) => ({ ...emptyData(), settings: d.settings }));
+        clearLastSyncId();
+        setPreviousSyncId(null);
+      } else setPreviousSyncId(syncId);
       saveSyncId(null);
       setSyncId(null);
       setSynced(null);

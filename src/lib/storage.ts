@@ -1,5 +1,5 @@
 import type { Book, PromptLang, Settings, UiLang, UserData, VocabEntry, WordMemory } from '../types';
-import { DEFAULT_STAGE, MAX_STAGE, MIN_STAGE } from './books';
+import { DEFAULT_STAGE, MAX_STAGE, MIN_STAGE, builtInBook } from './books';
 
 const KEY = 'project-vocab:v1';
 
@@ -87,11 +87,27 @@ export function sanitizeData(raw: unknown): UserData {
   const base = emptyData();
   const d = raw as Partial<UserData> | null;
   if (!d || typeof d !== 'object') return base;
+  // Added words only ever extend a built-in collection; anything keyed to another name is dropped.
   const extraWords: Record<string, VocabEntry[]> = {};
+  const addExtra = (bookId: string, words: VocabEntry[]) => {
+    const list = (extraWords[bookId] ??= []);
+    const seen = new Set(list.map((w) => `${w.unit}|${w.ko}`));
+    for (const w of words) if (!seen.has(`${w.unit}|${w.ko}`)) (seen.add(`${w.unit}|${w.ko}`), list.push(w));
+  };
   if (d.extraWords && typeof d.extraWords === 'object') {
     for (const [k, v] of Object.entries(d.extraWords)) {
-      if (Array.isArray(v)) extraWords[k] = v.filter(isEntry).map(cleanEntry);
+      const target = builtInBook(k);
+      if (target && Array.isArray(v)) addExtra(target.id, v.filter(isEntry).map(cleanEntry));
     }
+  }
+  // A personal collection may never share a built-in's name: fold its words into the learner's additions instead.
+  const customBooks: Book[] = [];
+  for (const b of Array.isArray(d.customBooks) ? d.customBooks : []) {
+    const book = sanitizeBook(b);
+    if (!book) continue;
+    const target = builtInBook(book.id);
+    if (target) addExtra(target.id, book.words);
+    else if (!customBooks.some((x) => x.id === book.id)) customBooks.push(book);
   }
   const deletedBooks: Record<string, number> = {};
   if (d.deletedBooks && typeof d.deletedBooks === 'object') {
@@ -109,7 +125,7 @@ export function sanitizeData(raw: unknown): UserData {
     settings: sanitizeSettings(d.settings, base.settings),
     memory,
     stages: d.stages && typeof d.stages === 'object' ? d.stages : {},
-    customBooks: Array.isArray(d.customBooks) ? (d.customBooks.map(sanitizeBook).filter(Boolean) as Book[]) : [],
+    customBooks,
     extraWords,
     deletedBooks,
   };

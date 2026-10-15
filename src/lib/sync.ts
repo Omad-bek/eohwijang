@@ -20,6 +20,8 @@ const API_KEY = clean(import.meta.env.VITE_SUPABASE_ANON_KEY, import.meta.env.SU
 export const SYNC_AVAILABLE = !!API_URL && !!API_KEY;
 
 const ID_KEY = 'project-vocab:sync-id';
+/** The Sync ID this device's data last belonged to; kept after disconnecting. */
+const LAST_KEY = 'project-vocab:sync-last';
 /** Crockford base32: no I, L, O or U, so a code read aloud or retyped survives. */
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 const ID_LENGTH = 20; // 100 random bits
@@ -52,10 +54,28 @@ export function loadSyncId(): string | null {
   }
 }
 
+export function loadLastSyncId(): string | null {
+  try {
+    return normalizeSyncId(localStorage.getItem(LAST_KEY) ?? '');
+  } catch {
+    return null;
+  }
+}
+
+export function clearLastSyncId() {
+  try {
+    localStorage.removeItem(LAST_KEY);
+  } catch {
+    /* nothing to forget */
+  }
+}
+
 export function saveSyncId(id: string | null) {
   try {
-    if (id) localStorage.setItem(ID_KEY, id);
-    else localStorage.removeItem(ID_KEY);
+    if (id) {
+      localStorage.setItem(ID_KEY, id);
+      localStorage.setItem(LAST_KEY, id);
+    } else localStorage.removeItem(ID_KEY);
   } catch {
     /* the code is shown on screen; losing it here only means relinking */
   }

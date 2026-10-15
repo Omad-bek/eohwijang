@@ -5,9 +5,28 @@ export const MIN_STAGE = 20;
 export const MAX_STAGE = 30;
 export const DEFAULT_STAGE = 25;
 
-export const BUILT_IN_BOOKS: Book[] = [
-  { id: '1A', title: '1A', units: [...UNITS_1A], words: VOCAB_1A, builtIn: true },
-];
+function deepFreeze<T>(value: T): T {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    for (const v of Object.values(value)) deepFreeze(v);
+  }
+  return value;
+}
+
+/**
+ * Textbook collections shipped with the app. Read-only (frozen): words a learner adds to
+ * them live in `UserData.extraWords`, and their own collections in `UserData.customBooks`,
+ * both on this device and in their own Sync ID's cloud copy, never in these lists.
+ */
+export const BUILT_IN_BOOKS: readonly Book[] = deepFreeze([
+  { id: '1A', title: '1A', units: [...UNITS_1A], words: VOCAB_1A.map((w) => ({ ...w })), builtIn: true },
+]);
+
+/** The built-in collection a name refers to, ignoring case ("1a" → 1A). */
+export function builtInBook(id: string): Book | undefined {
+  const key = id.trim().toLowerCase();
+  return BUILT_IN_BOOKS.find((b) => b.id.toLowerCase() === key);
+}
 
 export function wordId(bookId: string, w: VocabEntry): string {
   return `${bookId}|${w.unit}|${w.ko.normalize('NFC').trim()}`;
