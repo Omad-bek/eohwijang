@@ -54,7 +54,7 @@ Backend setup (one time):
 
 1. Create a free [Supabase](https://supabase.com) project and run [`supabase/schema.sql`](supabase/schema.sql) in its SQL editor. The table is closed to the public API; browsers can only call `pull_vault`, `push_vault` and `delete_vault` with an exact Sync ID.
 2. In the GitHub repo, open **Settings → Secrets and variables → Actions → Variables** and add `SUPABASE_URL` (Project URL) and `SUPABASE_ANON_KEY` (the anon / publishable key, which is public by design).
-3. Re-run the deploy workflow. For local dev, put the same values in `.env.local` as `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+3. Deploy the latest commit: **Actions → Deploy to GitHub Pages → Run workflow** on `main` (or push any commit). Do **not** use “Re-run” on an older run: that rebuilds that run's old commit and rolls the site back. For local dev, put the same values in `.env.local` as `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 
 Without these values the app builds normally and the Cloud Sync section says it is not set up.
 

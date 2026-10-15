@@ -85,7 +85,7 @@ function UiLangMenu({ t, value, onChange }: { t: Strings; value: UiLang; onChang
   );
 }
 
-/** Cloud Sync state at a glance; opens the Sync ID dialog. */
+/** Cloud Sync state at a glance; opens the Sync ID dialog. Always shown, even on a build without a backend (the dialog explains). */
 function SyncButton({ t, sync, online, onClick }: { t: Strings; sync: CloudSync; online: boolean; onClick: () => void }) {
   const state = !sync.syncId ? 'off' : !online ? 'offline' : sync.status;
   const { icon, label, tone } = {
@@ -129,7 +129,7 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, sync, on
           {t.appName !== '어휘장' && <span className="hidden text-[13px] font-semibold text-hanji-2 lg:inline">{t.appName}</span>}
         </button>
 
-        {sync.available && <SyncButton t={t} sync={sync} online={online} onClick={onSync} />}
+        <SyncButton t={t} sync={sync} online={online} onClick={onSync} />
 
         {!online && !sync.syncId && (
           <span className="hidden items-center gap-1 text-[12px] font-semibold text-hanji-2 sm:flex" title={t.offline}>
