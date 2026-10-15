@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -14,8 +14,18 @@ function normalizeBase(p: string): string {
   return withLead.endsWith('/') ? withLead : `${withLead}/`;
 }
 
-export default defineConfig({
+/**
+ * Cloud Sync settings. Vite only exposes VITE_* variables to the browser, so the
+ * unprefixed SUPABASE_URL / SUPABASE_ANON_KEY are passed through by name. Not via
+ * envPrefix, which would also leak secrets such as SUPABASE_SERVICE_ROLE_KEY.
+ */
+const PUBLIC_ENV = ['SUPABASE_URL', 'SUPABASE_ANON_KEY'] as const;
+
+export default defineConfig(({ mode }) => {
+  const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env };
+  return {
   base,
+  define: Object.fromEntries(PUBLIC_ENV.map((k) => [`import.meta.env.${k}`, JSON.stringify(env[k] ?? '')])),
   plugins: [
     react(),
     tailwindcss(),
@@ -49,4 +59,5 @@ export default defineConfig({
       },
     }),
   ],
+};
 });

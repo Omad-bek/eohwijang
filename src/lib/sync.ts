@@ -8,8 +8,14 @@ import { sanitizeData } from './storage';
  * who knows its ID. The URL and public key come from the build environment; without
  * them the feature stays hidden.
  */
-const API_URL = (import.meta.env.VITE_SUPABASE_URL ?? '').replace(/\/+$/, '');
-const API_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
+function clean(...values: unknown[]): string {
+  const v = values.find((x) => typeof x === 'string' && x.trim());
+  return typeof v === 'string' ? v.trim() : '';
+}
+
+// Static property accesses on purpose: Vite substitutes them at build time.
+const API_URL = clean(import.meta.env.VITE_SUPABASE_URL, import.meta.env.SUPABASE_URL).replace(/\/+$/, '');
+const API_KEY = clean(import.meta.env.VITE_SUPABASE_ANON_KEY, import.meta.env.SUPABASE_ANON_KEY);
 
 export const SYNC_AVAILABLE = !!API_URL && !!API_KEY;
 
