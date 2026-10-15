@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Download, EyeOff, Lock, LogOut, Pencil, RotateCcw, Save, Upload } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Download, EyeOff, FileUp, Lock, LogOut, Pencil, RotateCcw, Save, Upload } from 'lucide-react';
 import type { Book, VocabEntry } from '../types';
 import { BUILT_IN_BOOKS } from '../lib/books';
 import type { GlobalWord } from '../lib/global';
@@ -61,6 +61,31 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
   const [newUnit, setNewUnit] = useState('');
   const [form, setForm] = useState<VocabEntry>(EMPTY);
   const [bulk, setBulk] = useState('');
+  const [bulkFile, setBulkFile] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  /** Load a word file into the bulk box; a file naming its book (JSON) or a new book picks up that name. */
+  const loadFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const raw = String(reader.result ?? '');
+      const text = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw; // drop a byte-order mark
+      setBulk(text);
+      setBulkFile(file.name);
+      setMsg(null);
+      if (bookSel === NEW && !newBook.trim()) {
+        let name: string | undefined;
+        try {
+          name = parseWords(text).book;
+        } catch {
+          /* shown as 0 words below */
+        }
+        setNewBook((name ?? file.name.replace(/\.[^.]+$/, '')).slice(0, 24));
+      }
+    };
+    reader.onerror = () => setMsg({ tone: 'err', text: `Could not read ${file.name}.` });
+    reader.readAsText(file);
+  };
 
   const fail = (e: unknown) =>
     setMsg({ tone: 'err', text: e instanceof SyncError && e.code === 'forbidden' ? 'The server rejected the admin token.' : 'Could not reach the server.' });
@@ -326,14 +351,51 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
             Same formats as the learner import (`ko - uz - ru - en`, tab columns or JSON). Heading lines such as “9과” start a unit; lines before any heading go to the
             selected unit.
           </p>
-          <textarea value={bulk} onChange={(e) => setBulk(e.target.value)} rows={6} spellCheck={false} className={`${fieldCls} resize-y py-2 font-mono text-[13px]`} />
+          <div className="mb-2 flex flex-wrap items-center gap-3">
+            <button type="button" onClick={() => fileInput.current?.click()} className={btn}>
+              <FileUp size={15} aria-hidden /> Choose file (.txt, .json, .csv)
+            </button>
+            {bulkFile && <span className="text-[13px] text-hanji-2">Loaded {bulkFile}. Check the preview count, then publish.</span>}
+            <input
+              ref={fileInput}
+              type="file"
+              accept=".txt,.json,.csv,.tsv,text/plain,application/json,text/csv"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = '';
+                if (f) loadFile(f);
+              }}
+            />
+          </div>
+          <textarea
+            value={bulk}
+            onChange={(e) => {
+              setBulk(e.target.value);
+              if (!e.target.value) setBulkFile(null);
+            }}
+            onDragOver={(e) => e.dataTransfer.types.includes('Files') && e.preventDefault()}
+            onDrop={(e) => {
+              const f = e.dataTransfer.files[0];
+              if (!f) return;
+              e.preventDefault();
+              loadFile(f);
+            }}
+            rows={6}
+            spellCheck={false}
+            placeholder="Paste words, choose a file, or drop one here"
+            className={`${fieldCls} resize-y py-2 font-mono text-[13px]`}
+          />
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <button
               type="button"
               disabled={busy || !book || !parsed?.words.length}
               onClick={async () => {
                 const words = parsed!.words.map((w) => ({ ...w, book, unit: w.unit === DEFAULT_UNIT && unit ? unit : w.unit }));
-                if (await put(words, 'Published')) setBulk('');
+                if (await put(words, 'Published')) {
+                  setBulk('');
+                  setBulkFile(null);
+                }
               }}
               className={primary}
             >

@@ -136,7 +136,11 @@ export default function App() {
           settings={data.settings}
           online={online}
           onChange={setSettings}
-          onHome={() => setView({ kind: 'home' })}
+          onHome={() => {
+            if (admin) exitAdmin();
+            setView({ kind: 'home' });
+          }}
+          admin={admin}
           onData={() => setView({ kind: 'data', newBook: false })}
           sync={sync}
           onSync={() => setSyncOpen(true)}

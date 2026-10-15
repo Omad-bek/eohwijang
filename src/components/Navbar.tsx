@@ -13,6 +13,8 @@ interface Props {
   onData: () => void;
   sync: CloudSync;
   onSync: () => void;
+  /** Admin view (#admin): only the logo and Cloud Sync status, no learner controls. */
+  admin?: boolean;
 }
 
 const UI_LANGS: { value: UiLang; code: string; name: string }[] = [
@@ -113,7 +115,7 @@ function SyncButton({ t, sync, online, onClick }: { t: Strings; sync: CloudSync;
   );
 }
 
-export function Navbar({ t, settings, online, onChange, onHome, onData, sync, onSync }: Props) {
+export function Navbar({ t, settings, online, onChange, onHome, onData, sync, onSync, admin = false }: Props) {
   const prompt: { value: PromptLang; label: string; title: string }[] = [
     { value: 'uz', label: 'UZ', title: `${t.langName.uz} → 한국어` },
     { value: 'ru', label: 'RU', title: `${t.langName.ru} → 한국어` },
@@ -131,52 +133,56 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, sync, on
 
         <SyncButton t={t} sync={sync} online={online} onClick={onSync} />
 
-        {!online && !sync.syncId && (
-          <span className="hidden items-center gap-1 text-[12px] font-semibold text-hanji-2 sm:flex" title={t.offline}>
-            <WifiOff size={14} aria-hidden /> <span className="hidden lg:inline">{t.offline}</span>
-          </span>
-        )}
+        {!admin && (
+          <>
+          {!online && !sync.syncId && (
+            <span className="hidden items-center gap-1 text-[12px] font-semibold text-hanji-2 sm:flex" title={t.offline}>
+              <WifiOff size={14} aria-hidden /> <span className="hidden lg:inline">{t.offline}</span>
+            </span>
+          )}
 
-        <UiLangMenu t={t} value={settings.uiLang} onChange={(uiLang) => onChange({ uiLang })} />
+          <UiLangMenu t={t} value={settings.uiLang} onChange={(uiLang) => onChange({ uiLang })} />
 
-        <div className="flex items-center gap-2">
-          <span className="hidden text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2 lg:inline">{t.promptLang}</span>
-          <div role="radiogroup" aria-label={`${t.promptLang} → 한국어`} className="flex border border-rule">
-            {prompt.map((o) => {
-              const on = o.value === settings.promptLang;
-              return (
-                <button
-                  key={o.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={on}
-                  title={o.title}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => onChange({ promptLang: o.value })}
-                  className={`h-[34px] min-w-8 px-1.5 text-[11px] font-bold tracking-[0.05em] transition-colors sm:min-w-10 sm:px-2 ${
-                    on ? 'bg-accent text-ink' : 'text-hanji-2 hover:bg-ink-3 hover:text-hanji'
-                  }`}
-                >
-                  {o.label}
-                </button>
-              );
-            })}
+          <div className="flex items-center gap-2">
+            <span className="hidden text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2 lg:inline">{t.promptLang}</span>
+            <div role="radiogroup" aria-label={`${t.promptLang} → 한국어`} className="flex border border-rule">
+              {prompt.map((o) => {
+                const on = o.value === settings.promptLang;
+                return (
+                  <button
+                    key={o.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    title={o.title}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => onChange({ promptLang: o.value })}
+                    className={`h-[34px] min-w-8 px-1.5 text-[11px] font-bold tracking-[0.05em] transition-colors sm:min-w-10 sm:px-2 ${
+                      on ? 'bg-accent text-ink' : 'text-hanji-2 hover:bg-ink-3 hover:text-hanji'
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
+            <span lang="ko" className="hidden text-[12px] font-semibold text-hanji md:inline">
+              → 한국어
+            </span>
           </div>
-          <span lang="ko" className="hidden text-[12px] font-semibold text-hanji md:inline">
-            → 한국어
-          </span>
-        </div>
 
-        <button
-          type="button"
-          onClick={onData}
-          title={t.data}
-          aria-label={t.data}
-          className="flex h-9 shrink-0 items-center gap-1.5 border border-rule px-2.5 text-[13px] font-semibold text-hanji hover:border-hanji-2"
-        >
-          <Database size={15} aria-hidden />
-          <span className="hidden xl:inline">{t.data}</span>
-        </button>
+          <button
+            type="button"
+            onClick={onData}
+            title={t.data}
+            aria-label={t.data}
+            className="flex h-9 shrink-0 items-center gap-1.5 border border-rule px-2.5 text-[13px] font-semibold text-hanji hover:border-hanji-2"
+          >
+            <Database size={15} aria-hidden />
+            <span className="hidden xl:inline">{t.data}</span>
+          </button>
+          </>
+        )}
       </div>
     </header>
   );
