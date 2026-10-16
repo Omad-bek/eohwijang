@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import type { Book, Stage, UserData, WordMemory } from '../types';
 import type { Strings } from '../lib/i18n';
 import { stagesForUnit } from '../lib/books';
+import type { SavedSession } from '../lib/session';
 import { addStats, EMPTY_STATS, memoryStats, type MemoryStats } from '../lib/srs';
 import { DueBadge } from './Levels';
 import { Seal } from './Seal';
@@ -18,6 +19,9 @@ interface Props {
   onBook: (id: string) => void;
   onPreview: (s: Stage) => void;
   onStart: (s: Stage) => void;
+  /** The unfinished run of a stage, if one can still be resumed. */
+  resumable: (s: Stage) => SavedSession | null;
+  onResume: (s: Stage) => void;
   onAddBook: () => void;
 }
 
@@ -73,7 +77,7 @@ function BookTabs({ t, books, bookId, onBook, onAddBook }: Pick<Props, 't' | 'bo
   );
 }
 
-export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, onStart, onAddBook }: Props) {
+export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, onStart, resumable, onResume, onAddBook }: Props) {
   const book = books.find((b) => b.id === bookId) ?? books[0];
   const size = data.settings.stageSize;
 
@@ -247,6 +251,8 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
                   stats={selected.stats[i]}
                   onPreview={() => onPreview(s)}
                   onStart={() => onStart(s)}
+                  resume={resumable(s)}
+                  onResume={() => onResume(s)}
                 />
               ))}
             </div>

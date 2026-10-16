@@ -4,6 +4,7 @@ import { STRINGS } from './lib/i18n';
 import { allBooks, stagesForUnit, wordId } from './lib/books';
 import { useCloudSync, useNow, useOnline, useUserData, useVisualViewportHeight } from './lib/hooks';
 import { applyOutcome, type Outcome } from './lib/srs';
+import { clearSession, loadSession, sessionFor, type SavedSession } from './lib/session';
 import { Home } from './components/Home';
 import { Manager } from './components/Manager';
 import { Navbar } from './components/Navbar';
@@ -13,7 +14,10 @@ import { useSharedBooks } from './lib/global';
 import { Quiz } from './components/Quiz';
 import { StagePreview } from './components/StagePreview';
 
-type View = { kind: 'home' } | { kind: 'quiz'; stage: Stage; run: number } | { kind: 'data'; newBook: boolean };
+type View =
+  | { kind: 'home' }
+  | { kind: 'quiz'; stage: Stage; run: number; resume: SavedSession | null }
+  | { kind: 'data'; newBook: boolean };
 
 const BOOK_KEY = 'project-vocab:book';
 
@@ -45,6 +49,10 @@ export default function App() {
   const closeSync = useCallback(() => setSyncOpen(false), []);
 
   const activeBook = books.find((b) => b.id === bookId) ?? books[0];
+
+  // Re-read whenever the view changes (a quiz may have just saved) and as the clock moves (it may have expired).
+  const saved = useMemo(() => (view.kind === 'quiz' ? null : loadSession(now)), [view, now]);
+  const resumable = useCallback((stage: Stage) => sessionFor(saved, stage), [saved]);
 
   useEffect(() => {
     const onHash = () => setAdmin(isAdminHash());
@@ -115,9 +123,18 @@ export default function App() {
     return i >= 0 && i < ordered.length - 1 ? ordered[i + 1] : null;
   };
 
+  /** Starts the stage afresh, discarding any unfinished run (of this or any other stage). */
   const startStage = (stage: Stage) => {
+    clearSession();
     setPreview(null);
-    setView({ kind: 'quiz', stage, run: Date.now() });
+    setView({ kind: 'quiz', stage, run: Date.now(), resume: null });
+  };
+
+  const resumeStage = (stage: Stage) => {
+    const resume = sessionFor(loadSession(), stage);
+    if (!resume) return startStage(stage);
+    setPreview(null);
+    setView({ kind: 'quiz', stage, run: Date.now(), resume });
   };
 
   return (
@@ -160,6 +177,8 @@ export default function App() {
               onBook={chooseBook}
               onPreview={setPreview}
               onStart={startStage}
+              resumable={resumable}
+              onResume={resumeStage}
               onAddBook={() => setView({ kind: 'data', newBook: true })}
             />
           )}
@@ -170,6 +189,7 @@ export default function App() {
               t={t}
               stage={view.stage}
               settings={data.settings}
+              resume={view.resume}
               onResult={(w, outcome) => recordResult(view.stage, w, outcome)}
               onComplete={(share) => completeStage(view.stage, share)}
               onExit={() => setView({ kind: 'home' })}
@@ -198,7 +218,18 @@ export default function App() {
         </div>
       </div>
 
-      {preview && <StagePreview t={t} stage={preview} memory={data.memory} now={now} onClose={() => setPreview(null)} onStart={() => startStage(preview)} />}
+      {preview && (
+        <StagePreview
+          t={t}
+          stage={preview}
+          memory={data.memory}
+          now={now}
+          resume={resumable(preview)}
+          onClose={() => setPreview(null)}
+          onStart={() => startStage(preview)}
+          onResume={() => resumeStage(preview)}
+        />
+      )}
       {syncOpen && <CloudSyncDialog t={t} sync={sync} uiLang={data.settings.uiLang} onClose={closeSync} />}
     </div>
   );

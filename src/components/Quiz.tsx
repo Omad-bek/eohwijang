@@ -6,6 +6,7 @@ import type { Outcome } from '../lib/srs';
 import { checkAnswer, isCorrect, type DiffResult } from '../utils/hangulDiff';
 import { backspaceJamo, DUBEOLSIK, typeJamo } from '../utils/hangulInput';
 import { useTouchOnly } from '../lib/hooks';
+import { clearSession, saveSession, stageSignature, type SavedSession } from '../lib/session';
 import { DiffView } from './DiffView';
 import { KoreanKeyboard } from './KoreanKeyboard';
 import { Seal } from './Seal';
@@ -20,6 +21,8 @@ interface Props {
   onExit: () => void;
   nextStage: Stage | null;
   onNext: () => void;
+  /** An unfinished run of this stage to continue instead of starting over. */
+  resume?: SavedSession | null;
 }
 
 interface Item {
@@ -111,14 +114,23 @@ function Prompt({ word, lang }: { word: VocabEntry; lang: PromptLang }) {
   );
 }
 
-export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextStage, onNext }: Props) {
+export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextStage, onNext, resume }: Props) {
+  const items = (ns: number[]) => ns.map((n) => ({ word: stage.words[n], n }));
   /** The current round, in order. Misses wait in `nextRound` (FIFO) until every word in this round has been seen. */
-  const [queue, setQueue] = useState<Item[]>(() => shuffle(stage.words.map((word, n) => ({ word, n }))));
-  const [nextRound, setNextRound] = useState<Item[]>([]);
-  const [round, setRound] = useState(1);
-  const [phase, setPhase] = useState<Phase>({ kind: 'ask' });
+  const [queue, setQueue] = useState<Item[]>(() => (resume ? items(resume.queue) : shuffle(stage.words.map((word, n) => ({ word, n })))));
+  const [nextRound, setNextRound] = useState<Item[]>(() => (resume ? items(resume.nextRound) : []));
+  const [round, setRound] = useState(resume?.round ?? 1);
+  const [phase, setPhase] = useState<Phase>(() =>
+    resume && resume.reviewTyped !== null
+      ? { kind: 'review', result: checkAnswer(resume.reviewTyped, stage.words[resume.queue[0]].ko), typed: resume.reviewTyped }
+      : { kind: 'ask' },
+  );
   const [value, setValue] = useState('');
-  const [missed, setMissed] = useState<Set<number>>(() => new Set());
+  const [missed, setMissed] = useState<Set<number>>(() => new Set(resume?.missed));
+  /** Set once the learner answers, so merely opening (or resuming) a stage saves nothing. */
+  const answered = useRef(false);
+  /** Bumped by answers that change nothing else (a wrong retype), so they still refresh `lastActive`. */
+  const [attempts, setAttempts] = useState(0);
   /** The encouragement badge; `id` restarts its animation on every right answer. */
   const [praise, setPraise] = useState<{ id: number; text: string } | null>(null);
   const [lastRight, setLastRight] = useState<{ prompt: string; ko: string } | null>(null);
@@ -147,6 +159,22 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   useEffect(() => {
     if (phase.kind !== 'done') inputRef.current?.focus({ preventScroll: true });
   }, [phase.kind, current]);
+
+  // Keep the run resumable: saved after every answer, dropped once the stage is done.
+  useEffect(() => {
+    if (!answered.current) return;
+    if (phase.kind === 'done') return clearSession();
+    saveSession({
+      stageKey: stage.key,
+      signature: stageSignature(stage),
+      queue: queue.map((q) => q.n),
+      nextRound: nextRound.map((q) => q.n),
+      round,
+      missed: [...missed],
+      reviewTyped: phase.kind === 'review' ? phase.typed : null,
+      lastActive: Date.now(),
+    });
+  }, [stage, queue, nextRound, round, missed, phase, attempts]);
 
   const flashEdge = (kind: EdgeKind) => setEdge((e) => ({ id: (e?.id ?? 0) + 1, kind }));
 
@@ -202,6 +230,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
       return;
     }
     setImeHint(false);
+    answered.current = true;
 
     if (phase.kind === 'ask') {
       const result = checkAnswer(typed, current.word.ko);
@@ -234,6 +263,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
       shake(answerRow.current, inputRef.current);
       flashEdge('wrong');
       setValue('');
+      setAttempts((a) => a + 1);
     }
   };
 
@@ -241,6 +271,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   const skip = () => {
     if (!current || phase.kind !== 'ask') return;
     setImeHint(false);
+    answered.current = true;
     miss();
     setLastRight(null);
     setPraise(null);

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { UserData } from '../types';
 import { emptyData, loadData, saveData } from './storage';
+import { clearSession } from './session';
 import { SYNC_AVAILABLE, clearLastSyncId, deleteVault, fingerprint, loadLastSyncId, loadSyncId, mergeData, newSyncId, saveSyncId, syncNow as runSync } from './sync';
 
 /**
@@ -136,6 +137,8 @@ export function useCloudSync(data: UserData, update: (fn: (d: UserData) => UserD
         // Replacing: this device contributes nothing but its settings.
         const local = replaceLocal ? () => ({ ...emptyData(), settings: dataRef.current.settings }) : () => dataRef.current;
         const merged = await runSync(id, local, mustExist);
+        // The device now holds someone else's progress; an unfinished run from before doesn't belong to it.
+        if (replaceLocal) clearSession();
         update((d) => {
           if (replaceLocal) return { ...merged, settings: d.settings };
           // Anything typed while the request was in flight is merged in, not overwritten.
@@ -190,6 +193,7 @@ export function useCloudSync(data: UserData, update: (fn: (d: UserData) => UserD
       if (erase && syncId) await deleteVault(syncId);
       if (clearDevice) {
         update((d) => ({ ...emptyData(), settings: d.settings }));
+        clearSession();
         clearLastSyncId();
         setPreviousSyncId(null);
       } else setPreviousSyncId(syncId);

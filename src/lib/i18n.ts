@@ -45,6 +45,7 @@ export interface Strings {
   wordsRange: (from: number, to: number) => string;
   previewWords: string;
   startQuiz: string;
+  resume: string;
   backToLevels: string;
   enterToCheck: string;
   units: string;
@@ -174,6 +175,7 @@ const en: Strings = {
   wordsRange: (a, b) => `Words ${a}–${b}`,
   previewWords: 'Preview',
   startQuiz: 'Start quiz',
+  resume: 'Resume',
   backToLevels: 'Back to levels',
   enterToCheck: 'to check',
   units: 'Units',
@@ -302,6 +304,7 @@ const ru: Strings = {
   wordsRange: (a, b) => `Слова ${a}–${b}`,
   previewWords: 'Просмотр',
   startQuiz: 'Начать тест',
+  resume: 'Продолжить',
   backToLevels: 'К этапам',
   enterToCheck: 'проверить',
   units: 'Уроки',
@@ -430,6 +433,7 @@ const uz: Strings = {
   wordsRange: (a, b) => `${a}–${b}-so'zlar`,
   previewWords: "Ko'rish",
   startQuiz: 'Testni boshlash',
+  resume: 'Davom etish',
   backToLevels: 'Bosqichlarga qaytish',
   enterToCheck: 'tekshirish',
   units: 'Darslar',
@@ -558,6 +562,7 @@ const ko: Strings = {
   wordsRange: (a, b) => `${a}–${b}번 단어`,
   previewWords: '미리 보기',
   startQuiz: '퀴즈 시작',
+  resume: '이어 하기',
   backToLevels: '단계 목록으로',
   enterToCheck: '확인',
   units: '단원',

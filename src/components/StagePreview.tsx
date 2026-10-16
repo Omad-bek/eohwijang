@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { Play, X } from 'lucide-react';
+import { Play, StepForward, X } from 'lucide-react';
 import type { Stage, WordMemory } from '../types';
 import type { Strings } from '../lib/i18n';
 import { wordId } from '../lib/books';
 import { isDue, levelOf, memoryStats } from '../lib/srs';
+import { sessionCleared, type SavedSession } from '../lib/session';
 import { DueBadge, LevelBadge, LevelChips } from './Levels';
 
 interface Props {
@@ -13,9 +14,11 @@ interface Props {
   now: number;
   onClose: () => void;
   onStart: () => void;
+  resume: SavedSession | null;
+  onResume: () => void;
 }
 
-export function StagePreview({ t, stage, memory, now, onClose, onStart }: Props) {
+export function StagePreview({ t, stage, memory, now, resume, onClose, onStart, onResume }: Props) {
   const startRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -108,16 +111,32 @@ export function StagePreview({ t, stage, memory, now, onClose, onStart }: Props)
           </table>
         </div>
 
-        <footer className="border-t border-rule px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4">
+        <footer className={`grid gap-2 border-t border-rule px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 ${resume ? 'grid-cols-2' : ''}`}>
           <button
-            ref={startRef}
+            ref={resume ? undefined : startRef}
             type="button"
             onClick={onStart}
-            className="flex h-13 w-full items-center justify-center gap-2 bg-accent text-[15px] font-bold tracking-[0.04em] text-ink transition-colors hover:bg-accent-text"
+            className={`flex h-13 w-full min-w-0 items-center justify-center gap-2 px-2 text-[15px] tracking-[0.04em] transition-colors ${
+              resume ? 'border border-rule font-semibold text-hanji hover:border-hanji-2 hover:bg-ink-3' : 'bg-accent font-bold text-ink hover:bg-accent-text'
+            }`}
           >
-            <Play size={18} fill="currentColor" aria-hidden />
-            {done === stage.words.length ? t.replay : t.start}
+            <Play size={18} fill="currentColor" aria-hidden className="shrink-0" />
+            <span className="truncate">{done === stage.words.length ? t.replay : t.start}</span>
           </button>
+          {resume && (
+            <button
+              ref={startRef}
+              type="button"
+              onClick={onResume}
+              className="flex h-13 w-full min-w-0 items-center justify-center gap-2 bg-accent px-2 text-[15px] font-bold tracking-[0.04em] text-ink transition-colors hover:bg-accent-text"
+            >
+              <StepForward size={18} aria-hidden className="shrink-0" />
+              <span className="truncate">{t.resume}</span>
+              <span className="tabular shrink-0 font-semibold opacity-75">
+                {sessionCleared(resume, stage.words.length)}/{stage.words.length}
+              </span>
+            </button>
+          )}
         </footer>
       </section>
     </div>
