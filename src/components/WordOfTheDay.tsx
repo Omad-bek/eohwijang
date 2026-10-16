@@ -8,7 +8,8 @@ import { decompose } from '../utils/hangulDiff';
 
 interface Props {
   t: Strings;
-  book: Book;
+  /** Every collection: the word is drawn from all of them, whichever tab is open. */
+  books: readonly Book[];
   promptLang: PromptLang;
   /** Fallback meaning language when prompts show all three. */
   uiGloss: GlossLang;
@@ -22,7 +23,7 @@ const SLOT = {
   jong: 'bg-gold text-on-bright',
 } as const;
 
-const revealKey = (bookId: string, now: number) => `project-vocab:wotd:${bookId}:${dayKey(now)}`;
+const revealKey = (now: number) => `project-vocab:wotd:${dayKey(now)}`;
 
 function readRevealed(key: string): boolean {
   try {
@@ -36,12 +37,14 @@ function readRevealed(key: string): boolean {
  * The home screen's centerpiece: today's word in heavy display Hangul, broken into its jamo,
  * with the meaning held back until the learner has had a moment to guess it.
  */
-export function WordOfTheDay({ t, book, promptLang, uiGloss, now }: Props) {
+export function WordOfTheDay({ t, books, promptLang, uiGloss, now }: Props) {
   const day = dayKey(now);
-  const w = useMemo(() => wordOfDay(book, now), [book, day]);
-  const key = revealKey(book.id, now);
+  // Re-picked when the day changes (or the collections do), not every minute.
+  const daily = useMemo(() => wordOfDay(books, now), [books, day]);
+  const key = revealKey(now);
   const [revealedKey, setRevealedKey] = useState<string | null>(() => (readRevealed(key) ? key : null));
-  if (!w) return null;
+  if (!daily) return null;
+  const w = daily.word;
 
   const revealed = revealedKey === key;
   const reveal = () => {
@@ -119,7 +122,7 @@ export function WordOfTheDay({ t, book, promptLang, uiGloss, now }: Props) {
               </p>
             )}
             <p className="mt-2 text-[12px] font-bold text-hanji-2">
-              {book.title} · <span className="font-serif text-[13px]">{w.unit}</span>
+              {daily.book} · <span className="font-serif text-[13px]">{w.unit}</span>
             </p>
           </div>
         ) : (

@@ -343,7 +343,7 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
                 <StatusStrip t={t} data={data} now={now} />
               </div>
               <div className="lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-stretch">
-                <WordOfTheDay t={t} book={book} promptLang={data.settings.promptLang} uiGloss={uiGloss} now={now} />
+                <WordOfTheDay t={t} books={books} promptLang={data.settings.promptLang} uiGloss={uiGloss} now={now} />
               </div>
               <div className="lg:col-start-2">
                 <ContinueCard t={t} units={units} resumable={resumable} onStart={onStart} onResume={onResume} />
