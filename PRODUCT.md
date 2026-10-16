@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-React 18 + Vite + TypeScript + Tailwind CSS + vite-plugin-pwa. Offline-first installable PWA; all user data persisted in localStorage (no backend, no accounts).
+React 18 + Vite + TypeScript + Tailwind CSS + vite-plugin-pwa. Offline-first installable PWA hosted on GitHub Pages at the root domain https://eohwijang.fyi/. Learner data lives in localStorage; an optional Supabase backend (RPC-only, no accounts) provides anonymous Cloud Sync and the shared global vocabulary.
 
 ## Users
 
@@ -30,21 +30,25 @@ A vocabulary trainer that takes a learner from a prompt in their own language (U
 ## Operating Context
 
 - Study is organized as textbook → book level (1A, …) → unit → block of 20–30 words.
-- Learners type Korean (Hangul input) to answer, so the app depends on the device's Korean keyboard/IME, on both mobile and desktop.
+- Learners type Korean (Hangul) to answer. Touch devices use the app's own onscreen 두벌식 keyboard with real jamo composition instead of the OS IME; desktop uses the system Korean IME.
 - Sessions happen on the go: commutes, between classes, in places with no network.
 
 ## Capabilities and Constraints
 
-- Built-in content: SNU Korean 1A vocabulary (Hangul section + Units 1–8) as the first dataset; later books to follow.
-- Custom import: learners can add their own vocabulary via JSON or plain-text import.
+- Shared content: SNU 1A, 1B and A2 vocabulary is published by the author to a `global_words` table through a hidden admin view (`/#admin`, server-verified token). It is the same for every learner, read-only, and cached for offline use. The bundled `src/data/vocab1A.ts` is empty or a sample.
+- Strict data isolation: a learner's own collections and progress never mix with global content, and global content is never part of a learner's data or Sync vault.
+- Custom import: learners add their own collections from `.txt`, `.tsv`, `.csv` or `.json` files or pasted text.
 - Each word carries Uzbek, Russian, and English prompts mapped to one Korean answer.
-- Progress, mastery state, and imported decks live in localStorage; an export/backup path is advisable since clearing browser data erases progress (not yet decided).
-- Offline-first: the app shell and all built-in content must work with no network after first load.
-- **Open decisions:** the exercise formats beyond typed recall (spaced repetition, quizzes, audio/TTS pronunciation) were not confirmed; the exact mastery and retry rules per block; how UI language is chosen (likely matching the selected prompt language); whether romanization is shown.
+- Exercise: typed recall in rounds. Missed words are re-queued and retyped, and spaced-repetition memory levels track each word. Learners can skip a word ("don't know").
+- An unfinished quiz is saved after every answer and can be resumed ("Davom etish") for 30 minutes. Start, another stage, finishing, or 30 idle minutes discard it.
+- Progress persistence: localStorage, plus JSON backup export, plus optional anonymous Cloud Sync keyed by a random Sync ID (no accounts, no email).
+- UI language and prompt language are chosen independently (two switches). Romanization is never shown.
+- Offline-first: the app shell and all content must work with no network after first load.
+- **Open decisions:** audio/TTS pronunciation; the exact mastery threshold per block.
 
 ## Evidence on Hand
 
-- No vocabulary data exists in the repository yet. The SNU 1A word list must be supplied by the user; do not fabricate entries, translations, or unit assignments.
+- Real 1A, 1B and A2 word lists exist in the `global_words` table, supplied by the author; none are committed to the repository. Do not fabricate entries, translations, or unit assignments.
 - No testimonials, user counts, or affiliation with Seoul National University. Never imply endorsement by SNU or its publisher.
 
 ## Product Principles
@@ -58,4 +62,4 @@ A vocabulary trainer that takes a learner from a prompt in their own language (U
 ## Accessibility & Inclusion
 
 - Hangul must render with proper Korean font coverage, alongside Latin (Uzbek, English) and Cyrillic (Russian) text.
-- Typed-answer flows must handle Korean IME composition correctly (no premature checking mid-syllable).
+- Typed-answer flows must handle Korean IME composition correctly (no premature checking mid-syllable), with both the system IME and the onscreen keyboard.
