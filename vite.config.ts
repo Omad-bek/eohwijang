@@ -4,8 +4,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 /**
- * Public base path. GitHub Pages serves a project site from /<repo>/, so the
- * deploy workflow sets BASE_PATH=/<repo>/; local dev and preview stay at '/'.
+ * Public base path. The site is served from the custom root domain
+ * (eohwijang.fyi), so it defaults to '/'; set BASE_PATH to serve from a subpath.
  */
 const base = normalizeBase(process.env.BASE_PATH ?? '/');
 

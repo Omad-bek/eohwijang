@@ -30,8 +30,8 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # Project sites live at https://<user>.github.io/<repo>/
-          BASE_PATH: /${{ github.event.repository.name }}/
+          # Served from the custom root domain https://eohwijang.fyi/ (public/CNAME)
+          BASE_PATH: /
           # Cloud Sync backend: repo Variables or Secrets named SUPABASE_URL / SUPABASE_ANON_KEY
           # (Settings → Secrets and variables → Actions). Both values end up in the public bundle
           # by design; leave them unset to ship without Cloud Sync.
