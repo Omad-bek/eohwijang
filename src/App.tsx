@@ -4,6 +4,8 @@ import { STRINGS } from './lib/i18n';
 import { allBooks, stagesForUnit, wordId } from './lib/books';
 import { useCloudSync, useNow, useOnline, useUserData, useVisualViewportHeight } from './lib/hooks';
 import { applyOutcome, type Outcome } from './lib/srs';
+import { addActivity } from './lib/activity';
+import { useTheme } from './lib/theme';
 import { clearSession, loadSession, sessionFor, type SavedSession } from './lib/session';
 import { Home } from './components/Home';
 import { Manager } from './components/Manager';
@@ -41,6 +43,7 @@ export default function App() {
   const books = useMemo(() => allBooks(data, shared.books), [data, shared.books]);
   const [admin, setAdmin] = useState(isAdminHash);
   const now = useNow();
+  const { theme, toggle: toggleTheme } = useTheme();
 
   const [bookId, setBookId] = useState(() => readBook() ?? '1A');
   const [view, setView] = useState<View>({ kind: 'home' });
@@ -88,8 +91,12 @@ export default function App() {
     (stage: Stage, w: VocabEntry, outcome: Outcome) => {
       const id = wordId(stage.bookId, w);
       update((d) => {
-        const next = applyOutcome(d.memory[id], outcome, Date.now());
-        return next ? { ...d, memory: { ...d.memory, [id]: next } } : d;
+        const now = Date.now();
+        const next = applyOutcome(d.memory[id], outcome, now);
+        const memory = next ? { ...d.memory, [id]: next } : d.memory;
+        // A word counts toward today's goal once it is recalled, first try or after a miss.
+        const activity = outcome === 'missed' ? d.activity : addActivity(d.activity, now);
+        return memory === d.memory && activity === d.activity ? d : { ...d, memory, activity };
       });
     },
     [update],
@@ -97,6 +104,7 @@ export default function App() {
 
   const completeStage = useCallback(
     (stage: Stage, share: number) => {
+      if (stage.review) return;
       update((d) => {
         const prev = d.stages[stage.key] ?? { completions: 0 };
         return {
@@ -116,6 +124,7 @@ export default function App() {
   );
 
   const nextStageAfter = (stage: Stage): Stage | null => {
+    if (stage.review) return null;
     const book = books.find((b) => b.id === stage.bookId);
     if (!book) return null;
     const ordered = book.units.flatMap((u) => stagesForUnit(book, u, data.settings.stageSize));
@@ -139,11 +148,9 @@ export default function App() {
 
   return (
     <div className="relative flex h-full flex-col">
-      <div className="frame-rule" aria-hidden />
-
-      <div className="relative flex min-h-0 flex-1 flex-col px-[10px] pb-[8px] pt-[max(8px,env(safe-area-inset-top))]">
+      <div className="relative flex min-h-0 flex-1 flex-col pb-[max(8px,env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)]">
         {saveFailed && (
-          <p role="alert" className="shrink-0 bg-danger-wash px-5 py-2 text-[13px] text-danger-text">
+          <p role="alert" className="shrink-0 rounded-xl bg-danger-wash px-5 py-2 text-[13px] font-semibold text-danger-text">
             {t.storageFull}
           </p>
         )}
@@ -161,6 +168,8 @@ export default function App() {
           onData={() => setView({ kind: 'data', newBook: false })}
           sync={sync}
           onSync={() => setSyncOpen(true)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
 
         <div className="mx-auto min-h-0 w-full max-w-7xl flex-1">

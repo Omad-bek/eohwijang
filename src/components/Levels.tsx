@@ -4,9 +4,9 @@ import type { MemoryStats } from '../lib/srs';
 
 /** Level 1 is amber, level 2 indigo, level 3 the emerald seal. */
 const TONE: Record<1 | 2 | 3, { chip: string; bar: string }> = {
-  1: { chip: 'border-amber/60 bg-amber-wash text-amber', bar: 'bg-amber' },
-  2: { chip: 'border-indigo/60 bg-indigo-wash text-indigo', bar: 'bg-indigo' },
-  3: { chip: 'rotate-[-3deg] border-accent bg-accent text-ink', bar: 'bg-accent' },
+  1: { chip: 'border-flame/50 bg-flame-wash text-flame-ink', bar: 'bg-flame' },
+  2: { chip: 'border-indigo/40 bg-indigo-wash text-indigo', bar: 'bg-indigo' },
+  3: { chip: 'rotate-[-3deg] border-gold-lip bg-gold text-on-bright', bar: 'bg-gold' },
 };
 
 /** `compact` shows just the digit, for narrow table cells; the full name stays in the tooltip. */
@@ -14,7 +14,7 @@ export function LevelBadge({ t, level, count, compact = false }: { t: Strings; l
   return (
     <span
       title={compact ? t.level(level) : undefined}
-      className={`tabular inline-flex h-6 shrink-0 items-center gap-1.5 whitespace-nowrap border px-1.5 text-[11px] font-bold leading-none ${TONE[level].chip} ${
+      className={`tabular inline-flex h-6 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-2 text-[11px] font-extrabold leading-none ${TONE[level].chip} ${
         count === 0 ? 'opacity-35' : ''
       } ${compact ? 'min-w-6 justify-center' : ''}`}
     >
@@ -34,7 +34,7 @@ export function LevelBadge({ t, level, count, compact = false }: { t: Strings; l
 /** One segment per level, so the stage visibly moves from bronze to the seal. */
 export function LevelBar({ stats, total }: { stats: MemoryStats; total: number }) {
   return (
-    <div className="flex h-[3px] bg-rule-soft" aria-hidden>
+    <div className="flex h-2.5 overflow-hidden rounded-full bg-rule" aria-hidden>
       {([3, 2, 1] as const).map((l) =>
         stats.levels[l] ? <div key={l} className={`h-full transition-[width] duration-500 ${TONE[l].bar}`} style={{ width: `${(stats.levels[l] / total) * 100}%` }} /> : null,
       )}
@@ -59,7 +59,7 @@ export function DueBadge({ t, due, short = false }: { t: Strings; due: number; s
   return (
     <span
       title={t.dueReview(due)}
-      className="tabular inline-flex shrink-0 items-center gap-1 border border-sky/60 bg-sky-wash px-1.5 py-1 text-[12px] font-bold leading-tight text-sky"
+      className="tabular inline-flex shrink-0 items-center gap-1 rounded-full border border-sky/40 bg-sky-wash px-2.5 py-1 text-[12px] font-extrabold leading-tight text-sky"
     >
       <ArrowUp size={13} strokeWidth={2.6} aria-hidden className="shrink-0" />
       {short ? t.dueShort(due) : t.dueReview(due)}

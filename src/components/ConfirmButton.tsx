@@ -8,8 +8,8 @@ export function ConfirmButton({ label, confirmLabel, onConfirm, icon }: { label:
       type="button"
       onClick={() => (armed ? (setArmed(false), onConfirm()) : setArmed(true))}
       onBlur={() => setArmed(false)}
-      className={`flex h-11 items-center gap-2 border px-4 text-[14px] font-semibold transition-colors ${
-        armed ? 'border-danger bg-danger text-ink' : 'border-rule text-hanji hover:border-hanji-2'
+      className={`flex h-11 items-center gap-2 rounded-2xl border-2 px-4 text-[14px] font-extrabold transition-colors ${
+        armed ? 'border-danger bg-danger text-white' : 'border-rule bg-ink-2 text-hanji hover:border-hanji-2/50'
       }`}
     >
       {icon}

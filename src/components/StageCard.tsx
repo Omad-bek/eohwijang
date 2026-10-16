@@ -5,6 +5,7 @@ import type { MemoryStats } from '../lib/srs';
 import { sessionCleared, type SavedSession } from '../lib/session';
 import { DueBadge, LevelBar, LevelChips } from './Levels';
 import { Seal } from './Seal';
+import { firstForm } from '../lib/wordOfDay';
 
 interface Props {
   t: Strings;
@@ -18,8 +19,6 @@ interface Props {
 
 const SAMPLE = 4;
 
-/** First form of a slash alternative, so chips stay short ("아래/ 밑" → "아래"). */
-const firstForm = (ko: string) => ko.split('/')[0].trim();
 
 export function StageCard({ t, stage, stats, onPreview, onStart, resume, onResume }: Props) {
   const total = stage.words.length;
@@ -31,13 +30,13 @@ export function StageCard({ t, stage, stats, onPreview, onStart, resume, onResum
   return (
     <article
       aria-labelledby={titleId}
-      className={`group flex flex-col border bg-ink-2 p-4 transition-colors duration-200 sm:p-5 ${
-        complete ? 'border-accent/45 hover:border-accent' : 'border-rule hover:border-hanji-2/70'
+      className={`group flex flex-col rounded-[24px] border-2 bg-ink-2 p-4 transition-[border-color,transform] duration-200 hover:-translate-y-0.5 sm:p-5 ${
+        complete ? 'border-gold shadow-[0_5px_0_var(--color-gold-lip)]' : 'border-rule shadow-[0_5px_0_var(--color-rule)] hover:border-hanji-2/40'
       }`}
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 id={titleId} className="text-[16px] font-bold leading-tight">
+          <h3 id={titleId} className="text-[17px] font-black leading-tight">
             {t.stage(stage.index + 1)}
           </h3>
           <p className="tabular mt-0.5 text-[13px] text-hanji-2">{t.wordsRange(stage.from, stage.to)}</p>
@@ -57,7 +56,7 @@ export function StageCard({ t, stage, stats, onPreview, onStart, resume, onResum
 
       <ul className="mt-4 flex flex-wrap gap-1.5" aria-label={t.study}>
         {stage.words.slice(0, SAMPLE).map((w, i) => (
-          <li key={`${w.ko}-${i}`} lang="ko" className="border border-rule-soft bg-ink px-2 py-1 font-serif text-[15px] font-bold leading-none text-hanji/90">
+          <li key={`${w.ko}-${i}`} lang="ko" className="rounded-lg bg-ink px-2.5 py-1.5 font-serif text-[16px] leading-none text-hanji">
             {firstForm(w.ko)}
           </li>
         ))}
@@ -84,7 +83,7 @@ export function StageCard({ t, stage, stats, onPreview, onStart, resume, onResum
           onClick={onPreview}
           aria-label={resume ? t.previewWords : undefined}
           title={resume ? t.previewWords : undefined}
-          className="flex h-11 items-center justify-center gap-2 border border-rule text-[14px] font-semibold text-hanji transition-colors hover:border-hanji-2 hover:bg-ink-3"
+          className="juicy lip-rule flex h-11 items-center justify-center gap-2 rounded-2xl border-2 border-rule bg-ink-2 text-[14px] font-extrabold text-hanji-2 hover:text-hanji"
         >
           <Eye size={16} aria-hidden />
           {!resume && t.previewWords}
@@ -92,8 +91,8 @@ export function StageCard({ t, stage, stats, onPreview, onStart, resume, onResum
         <button
           type="button"
           onClick={onStart}
-          className={`flex h-11 min-w-0 items-center justify-center gap-2 px-1 text-[14px] transition-colors ${
-            resume ? 'border border-rule font-semibold text-hanji hover:border-hanji-2 hover:bg-ink-3' : 'bg-accent font-bold text-ink hover:bg-accent-text'
+          className={`juicy flex h-11 min-w-0 items-center justify-center gap-2 rounded-2xl px-1 text-[14px] ${
+            resume ? 'lip-rule border-2 border-rule bg-ink-2 font-extrabold text-hanji-2 hover:text-hanji' : 'lip-accent bg-accent font-black text-white'
           }`}
         >
           {complete ? <RotateCcw size={16} aria-hidden className="shrink-0" /> : <Play size={15} fill="currentColor" aria-hidden className="shrink-0" />}
@@ -104,7 +103,7 @@ export function StageCard({ t, stage, stats, onPreview, onStart, resume, onResum
             type="button"
             onClick={onResume}
             title={`${sessionCleared(resume, total)} / ${total}`}
-            className="flex h-11 min-w-0 items-center justify-center gap-2 bg-accent px-1 text-[14px] font-bold text-ink transition-colors hover:bg-accent-text"
+            className="juicy lip-accent flex h-11 min-w-0 items-center justify-center gap-2 rounded-2xl bg-accent px-1 text-[14px] font-black text-white"
           >
             <StepForward size={16} aria-hidden className="shrink-0" />
             <span className="truncate">{t.resume}</span>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Check, CircleHelp, CornerDownLeft, Keyboard, RotateCcw, Sparkles, SkipForward, X } from 'lucide-react';
+import { ArrowLeft, Check, CircleHelp, CornerDownLeft, Flame, Keyboard, RotateCcw, Sparkles, SkipForward, Star, X } from 'lucide-react';
 import type { PromptLang, Settings, Stage, VocabEntry } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { Outcome } from '../lib/srs';
@@ -10,6 +10,8 @@ import { clearSession, saveSession, stageSignature, type SavedSession } from '..
 import { DiffView } from './DiffView';
 import { KoreanKeyboard } from './KoreanKeyboard';
 import { Seal } from './Seal';
+import { Burst } from './Ring';
+import { XP_PER_WORD } from '../lib/activity';
 
 interface Props {
   t: Strings;
@@ -30,6 +32,9 @@ interface Item {
   /** Position in the stage's word list; stable identity across re-queues. */
   n: number;
 }
+
+/** Combo counts that earn a celebration. */
+const MILESTONES = new Set([3, 5, 10, 15, 20, 25, 30]);
 
 type Phase = { kind: 'ask' } | { kind: 'review'; result: DiffResult; typed: string } | { kind: 'done'; firstTry: number };
 
@@ -98,7 +103,7 @@ function Prompt({ word, lang }: { word: VocabEntry; lang: PromptLang }) {
         {langs.map((l) => (
           <div key={l} className="flex items-baseline gap-3">
             <dt className="w-7 shrink-0 text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">{l}</dt>
-            <dd lang={l} className="text-[24px] font-bold leading-tight">
+            <dd lang={l} className="text-[24px] font-black leading-tight">
               {word[l]}
             </dd>
           </div>
@@ -108,7 +113,7 @@ function Prompt({ word, lang }: { word: VocabEntry; lang: PromptLang }) {
   }
   const l = lang as 'uz' | 'ru' | 'en';
   return (
-    <p lang={l} className="text-[34px] font-bold leading-[1.1] tracking-[-0.01em]">
+    <p lang={l} className="text-[36px] font-black leading-[1.1] tracking-[-0.01em]">
       {word[l]}
     </p>
   );
@@ -132,7 +137,13 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   /** Bumped by answers that change nothing else (a wrong retype), so they still refresh `lastActive`. */
   const [attempts, setAttempts] = useState(0);
   /** The encouragement badge; `id` restarts its animation on every right answer. */
-  const [praise, setPraise] = useState<{ id: number; text: string } | null>(null);
+  const [praise, setPraise] = useState<{ id: number; text: string; hot?: boolean } | null>(null);
+  /** First-try answers in a row, the best run this session, and XP earned (not saved; the activity log is). */
+  const [combo, setCombo] = useState(0);
+  const [best, setBest] = useState(0);
+  const [xp, setXp] = useState(0);
+  /** Restarts the +XP float on every recalled word. */
+  const [gain, setGain] = useState(0);
   const [lastRight, setLastRight] = useState<{ prompt: string; ko: string } | null>(null);
   const [imeHint, setImeHint] = useState(false);
   /** Onscreen 두벌식 keyboard; remembered per device. */
@@ -178,12 +189,15 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
 
   const flashEdge = (kind: EdgeKind) => setEdge((e) => ({ id: (e?.id ?? 0) + 1, kind }));
 
-  const cheer = () => {
+  const cheer = (streak: number) => {
     glow(inputRef.current);
     flashEdge('right');
+    setXp((x) => x + XP_PER_WORD);
+    setGain((g) => g + 1);
+    const hot = MILESTONES.has(streak);
     setPraise((prev) => {
       const pool = t.praise.filter((p) => p !== prev?.text);
-      return { id: (prev?.id ?? 0) + 1, text: pool[Math.floor(Math.random() * pool.length)] };
+      return { id: (prev?.id ?? 0) + 1, text: hot ? t.inARow(streak) : pool[Math.floor(Math.random() * pool.length)], hot };
     });
   };
 
@@ -235,13 +249,21 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
     if (phase.kind === 'ask') {
       const result = checkAnswer(typed, current.word.ko);
       if (result.correct) {
-        onResult(current.word, missed.has(current.n) ? 'relearned' : 'firstTry');
+        const first = !missed.has(current.n);
+        onResult(current.word, first ? 'firstTry' : 'relearned');
         setLastRight({ prompt: gloss(current.word), ko: result.target });
-        cheer();
+        // Only first-try recalls grow the combo; a word recovered after a miss neither grows nor breaks it.
+        const streak = first ? combo + 1 : combo;
+        if (first) {
+          setCombo(streak);
+          setBest((b) => Math.max(b, streak));
+        }
+        cheer(first ? streak : 0);
         setValue('');
         advance(queue.slice(1), nextRound);
       } else {
         miss();
+        setCombo(0);
         setLastRight(null);
         setPraise(null);
         setPhase({ kind: 'review', result, typed });
@@ -273,6 +295,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
     setImeHint(false);
     answered.current = true;
     miss();
+    setCombo(0);
     setLastRight(null);
     setPraise(null);
     setPhase({ kind: 'review', result: checkAnswer('', current.word.ko), typed: '' });
@@ -363,14 +386,14 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
         return (
           <li key={n} className="flex flex-1 justify-center">
             <span
-              className={`block aspect-square w-full max-w-[14px] transition-all duration-300 ${
+              className={`block h-3 w-full rounded-full transition-all duration-300 ${
                 done
-                  ? 'rotate-[-6deg] bg-accent'
+                  ? 'bg-accent'
                   : now
-                    ? `bg-hanji ${missed.has(n) ? 'ring-2 ring-amber ring-offset-1 ring-offset-ink' : ''}`
+                    ? `bg-hanji ${missed.has(n) ? 'ring-2 ring-flame ring-offset-1 ring-offset-ink' : ''}`
                     : missed.has(n)
-                      ? 'ring-1 ring-inset ring-amber'
-                      : 'bg-rule-soft'
+                      ? 'bg-flame-wash ring-2 ring-inset ring-flame'
+                      : 'bg-rule'
               }`}
             />
           </li>
@@ -386,16 +409,37 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
           type="button"
           onClick={onExit}
           onMouseDown={(e) => e.preventDefault()}
-          className="-ml-1 flex h-9 shrink-0 items-center gap-1.5 border border-rule px-2.5 text-[13px] font-semibold text-hanji hover:border-hanji-2"
+          className="press -ml-1 flex h-9 shrink-0 items-center gap-1.5 rounded-full border-2 border-rule bg-ink-2 px-3 text-[13px] font-extrabold text-hanji hover:border-hanji-2/40"
         >
           <ArrowLeft size={16} aria-hidden />
           <span className="hidden sm:inline">{t.backToLevels}</span>
           <span className="sr-only sm:hidden">{t.backToLevels}</span>
         </button>
-        <p className="min-w-0 flex-1 truncate text-[12px] font-semibold uppercase tracking-[0.12em] text-hanji-2">
-          {stage.bookId} · <span className="font-serif text-[15px] normal-case tracking-normal text-hanji">{stage.unit}</span> · {t.stage(stage.index + 1)}
+        <p className="min-w-0 flex-1 truncate text-[12px] font-extrabold uppercase tracking-[0.12em] text-hanji-2">
+          {stage.review ? (
+            <>
+              {stage.bookId} · {t.review}
+            </>
+          ) : (
+            <>
+              {stage.bookId} · <span className="font-serif text-[16px] normal-case tracking-normal text-hanji">{stage.unit}</span> · {t.stage(stage.index + 1)}
+            </>
+          )}
         </p>
-        <p className="tabular shrink-0 text-[14px] font-bold text-hanji">
+        {phase.kind !== 'done' && (
+          <span
+            key={combo >= 2 ? `c${combo}` : 'off'}
+            role="status"
+            aria-label={t.combo(combo)}
+            className={`flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-[15px] font-black transition-colors ${
+              combo >= 2 ? 'anim-bump bg-flame text-on-bright shadow-[0_3px_0_var(--color-flame-lip)]' : 'bg-ink-3 text-hanji-2/70'
+            }`}
+          >
+            <Flame size={16} strokeWidth={2.5} className={combo >= 2 ? 'fill-gold' : ''} aria-hidden />
+            <span className="tabular">×{combo}</span>
+          </span>
+        )}
+        <p className="tabular shrink-0 text-[14px] font-black text-hanji">
           {cleared}
           <span className="font-semibold text-hanji-2"> / {total}</span>
         </p>
@@ -418,7 +462,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   const missedWords = useMemo(() => stage.words.filter((_, n) => missed.has(n)), [missed, stage.words]);
 
   /** The flashcard: full-bleed on phones, a bordered centered card on wider screens. Tighter while the keyboard is open, so the jamo diff keeps its room. */
-  const cardCls = `relative flex min-h-0 flex-1 flex-col md:border md:border-rule md:bg-ink-2 ${kbOpen ? 'md:mb-3' : 'md:mb-6'}`;
+  const cardCls = `relative flex min-h-0 flex-1 flex-col md:rounded-[28px] md:border-2 md:border-rule md:bg-ink-2 md:shadow-[0_5px_0_var(--color-rule)] ${kbOpen ? 'md:mb-3' : 'md:mb-6'}`;
 
   if (phase.kind === 'done') {
     const pct = Math.round(phase.firstTry * 100);
@@ -430,17 +474,33 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
             <div className="flex items-center gap-5">
               <Seal size={84} animate />
               <div>
-                <h2 className="text-[26px] font-bold leading-tight">{t.stageDone}</h2>
-                <p className="tabular mt-1 text-[14px] text-hanji-2">{t.firstTry(pct)}</p>
+                <h2 className="text-[28px] font-black leading-tight">{t.stageDone}</h2>
+                <p className="tabular mt-1 text-[14px] font-bold text-hanji-2">{t.firstTry(pct)}</p>
               </div>
             </div>
+            <dl className="mt-7 grid grid-cols-2 gap-3">
+              <div className="anim-rise rounded-2xl border-2 border-gold bg-gold/15 px-4 py-3" style={{ ['--i' as string]: 2 }}>
+                <dt className="flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wide text-hanji-2">
+                  <Star size={14} className="fill-gold text-gold-lip" aria-hidden />
+                  {t.xpEarned}
+                </dt>
+                <dd className="tabular mt-1 text-[26px] font-black">+{xp}</dd>
+              </div>
+              <div className="anim-rise rounded-2xl border-2 border-flame bg-flame-wash px-4 py-3" style={{ ['--i' as string]: 3 }}>
+                <dt className="flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wide text-hanji-2">
+                  <Flame size={14} className="fill-flame text-flame-ink" aria-hidden />
+                  {t.bestCombo}
+                </dt>
+                <dd className="tabular mt-1 text-[26px] font-black">×{best}</dd>
+              </div>
+            </dl>
             {missedWords.length > 0 && (
               <>
-                <h3 className="mt-9 text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">{t.missedWords}</h3>
+                <h3 className="mt-9 text-[11px] font-extrabold uppercase tracking-[0.12em] text-hanji-2">{t.missedWords}</h3>
                 <ul className="mt-2 border-t border-rule">
                   {missedWords.map((w) => (
                     <li key={w.ko} className="flex items-baseline gap-4 border-b border-rule-soft py-2.5">
-                      <span lang="ko" className="w-32 shrink-0 font-serif text-[19px] font-bold">
+                      <span lang="ko" className="w-32 shrink-0 font-serif text-[20px]">
                         {w.ko}
                       </span>
                       <span className="min-w-0 text-[14px] text-hanji-2">{gloss(w)}</span>
@@ -450,16 +510,16 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               </>
             )}
           </div>
-          <footer className="grid shrink-0 gap-2 border-t border-rule pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:grid-cols-2 md:px-8 md:pb-6 md:pt-5">
+          <footer className="grid shrink-0 gap-3 border-t-2 border-rule pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 md:grid-cols-2 md:px-8 md:pb-7 md:pt-5">
             <button
               type="button"
               onClick={onExit}
-              className={`h-12 border text-[14px] font-semibold md:order-1 ${nextStage ? 'border-rule text-hanji hover:border-hanji-2' : 'border-accent bg-accent text-ink md:col-span-2'}`}
+              className={`juicy h-12 rounded-2xl text-[15px] font-black md:order-1 ${nextStage ? 'lip-rule border-2 border-rule bg-ink-2 text-hanji-2 hover:text-hanji' : 'lip-accent bg-accent text-white md:col-span-2'}`}
             >
               {t.backToLevels}
             </button>
             {nextStage && (
-              <button type="button" onClick={onNext} className="h-12 bg-accent text-[15px] font-bold text-ink hover:bg-accent-text md:order-2">
+              <button type="button" onClick={onNext} className="juicy lip-accent h-12 rounded-2xl bg-accent text-[15px] font-black text-white md:order-2">
                 {t.nextStage} · <span className="font-serif">{nextStage.unit}</span> {t.stage(nextStage.index + 1)}
               </button>
             )}
@@ -491,25 +551,22 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               key={praise.id}
               lang={/[가-힣]/.test(praise.text) ? 'ko' : undefined}
               onAnimationEnd={() => setPraise((p) => (p?.id === praise.id ? null : p))}
-              className="anim-praise flex items-center gap-2 whitespace-nowrap rounded-full border border-accent/60 bg-accent-wash px-5 py-2.5 text-[19px] font-bold text-accent-text shadow-[0_0_28px_rgba(16,185,129,0.35)]"
+              className={`anim-praise relative flex items-center gap-2 whitespace-nowrap rounded-full px-5 py-2.5 text-[19px] font-black ${
+                praise.hot ? 'bg-flame text-on-bright shadow-[0_4px_0_var(--color-flame-lip)]' : 'bg-accent text-white shadow-[0_4px_0_var(--color-accent-lip)]'
+              }`}
             >
-              <Sparkles size={20} strokeWidth={2.4} aria-hidden />
+              {praise.hot ? <Flame size={20} strokeWidth={2.4} className="fill-gold" aria-hidden /> : <Sparkles size={20} strokeWidth={2.4} aria-hidden />}
               {praise.text}
+              {praise.hot && <Burst colors={['#ffc233', '#14834a', '#1a6cc0', '#ff8a1f']} count={14} radius={90} />}
             </span>
           </div>
         )}
         <div className={`relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-4 pt-6 md:px-8 ${kbOpen ? 'md:pt-6' : 'md:pt-8'}`}>
-          <div aria-hidden className="pointer-events-none absolute inset-0 flex px-1 md:px-8">
-            {[0, 1, 2, 3].map((i) => (
-              <span key={i} className="flex-1 border-l border-rule-soft/60 last:border-r" />
-            ))}
-          </div>
-
           <div className="relative">
             <div className="flex items-start justify-between gap-4">
               <Prompt word={current.word} lang={settings.promptLang} />
-              <span className="mt-0.5 shrink-0 border border-rule bg-ink px-2 py-1 font-serif text-[14px] font-bold text-hanji-2" title={stage.unit}>
-                {stage.unit}
+              <span className="mt-0.5 shrink-0 rounded-lg bg-ink px-2.5 py-1 font-serif text-[15px] text-hanji-2" title={current.word.unit}>
+                {current.word.unit}
               </span>
             </div>
 
@@ -518,7 +575,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
                 <div>
                   {phase.typed ? (
                     <p className="anim-cell mb-4 flex items-center gap-2 text-[15px] font-bold text-danger-text">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-danger text-ink">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-danger text-white">
                         <X size={15} strokeWidth={3} aria-hidden />
                       </span>
                       {t.notQuite}
@@ -530,9 +587,9 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
                     </p>
                   )}
                   {phase.typed ? <DiffView key={`${current.n}-${reviewTarget}-${phase.typed}`} t={t} cells={phase.result.cells} /> : null}
-                  <div className="mt-5 flex items-baseline gap-3 border-t border-rule pt-4">
+                  <div className="mt-5 flex items-baseline gap-3 border-t-2 border-rule pt-4">
                     <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">{t.correctAnswer}</span>
-                    <span lang="ko" className="font-serif text-[30px] font-bold leading-none text-hanji">
+                    <span lang="ko" className="font-serif text-[34px] leading-none text-accent-text">
                       {correctForm}
                     </span>
                   </div>
@@ -546,7 +603,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
                     <Check size={16} strokeWidth={2.6} className="text-accent-text" aria-label={t.correct} />
                     <span className="truncate">{lastRight.prompt}</span>
                     <span aria-hidden>→</span>
-                    <span lang="ko" className="font-serif text-[19px] font-bold text-accent-text">
+                    <span lang="ko" className="font-serif text-[21px] text-accent-text">
                       {lastRight.ko}
                     </span>
                   </p>
@@ -557,14 +614,19 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
         </div>
 
         <form
-          className={`shrink-0 border-t border-rule bg-ink pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:bg-transparent md:px-8 ${kbOpen ? 'md:pb-4 md:pt-4' : 'md:pb-6 md:pt-5'}`}
+          className={`relative shrink-0 border-t-2 border-rule bg-ink pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:rounded-b-[28px] md:bg-transparent md:px-8 ${kbOpen ? 'md:pb-4 md:pt-4' : 'md:pb-6 md:pt-5'}`}
           onSubmit={(e) => {
             e.preventDefault();
             submit();
           }}
         >
-          <div className="mb-1.5 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">
-            <label htmlFor="answer" className={`min-w-0 flex-1 truncate ${phase.kind === 'review' ? 'text-amber' : ''}`}>
+          {gain > 0 && (
+            <span key={gain} aria-hidden className="anim-float pointer-events-none absolute -top-9 right-2 flex items-center gap-1 text-[17px] font-black text-gold-lip md:right-8 dark:text-gold">
+              <Star size={17} className="fill-gold" /> {t.xpGained(XP_PER_WORD)}
+            </span>
+          )}
+          <div className="mb-1.5 flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.12em] text-hanji-2">
+            <label htmlFor="answer" className={`min-w-0 flex-1 truncate ${phase.kind === 'review' ? 'text-flame-ink' : ''}`}>
               {phase.kind === 'review' ? t.retypeLabel : t.typeInKorean}
             </label>
             <span className="tabular shrink-0 whitespace-nowrap normal-case tracking-normal">{t.remaining(left)}</span>
@@ -576,8 +638,8 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               aria-pressed={kbOpen}
               aria-label={t.keyboard}
               title={t.keyboard}
-              className={`-my-1 flex h-8 shrink-0 items-center gap-1.5 border px-2 text-[12px] font-semibold normal-case tracking-normal transition-colors ${
-                kbOpen ? 'border-accent/50 bg-accent-wash text-accent-text' : 'border-rule text-hanji-2 hover:border-hanji-2 hover:text-hanji'
+              className={`-my-1 flex h-8 shrink-0 items-center gap-1.5 rounded-full border-2 px-2.5 text-[12px] font-extrabold normal-case tracking-normal transition-colors ${
+                kbOpen ? 'border-accent/50 bg-accent-wash text-accent-text' : 'border-rule bg-ink-2 text-hanji-2 hover:text-hanji'
               }`}
             >
               <Keyboard size={16} aria-hidden />
@@ -610,8 +672,8 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               onCompositionStart={() => (composing.current = true)}
               onCompositionEnd={onCompositionEnd}
               placeholder={phase.kind === 'review' ? correctForm : '한국어'}
-              className={`h-14 min-w-0 flex-1 border-[1.5px] bg-ink-2 px-4 transition-colors duration-300 text-[24px] font-semibold text-hanji placeholder:font-normal placeholder:text-hanji-2/85 focus:outline-none md:bg-ink ${
-                phase.kind === 'review' ? 'border-amber' : 'border-hanji/70 focus:border-hanji'
+              className={`h-14 min-w-0 flex-1 rounded-2xl border-2 bg-ink-2 px-4 font-serif text-[26px] text-hanji transition-colors duration-300 placeholder:text-hanji-2/70 focus:outline-none ${
+                phase.kind === 'review' ? 'border-flame' : 'border-rule focus:border-sky'
               }`}
             />
             <button
@@ -619,14 +681,14 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               type="submit"
               onMouseDown={(e) => e.preventDefault()}
               aria-label={phase.kind === 'review' ? t.continue : t.check}
-              className="flex h-14 w-14 shrink-0 items-center justify-center bg-accent text-ink hover:bg-accent-text md:w-auto md:gap-2 md:px-5 md:text-[15px] md:font-bold"
+              className="juicy lip-accent flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent text-white md:w-auto md:gap-2 md:px-6 md:text-[17px] md:font-black md:uppercase md:tracking-wide"
             >
               <CornerDownLeft size={22} strokeWidth={2.4} aria-hidden />
               <span className="hidden md:inline">{phase.kind === 'review' ? t.continue : t.check}</span>
             </button>
           </div>
           {imeHint && (
-            <div role="alert" className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 border border-rule bg-ink-2 px-3 py-2 text-[13px] leading-snug text-hanji">
+            <div role="alert" className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border-2 border-flame/50 bg-flame-wash px-3 py-2 text-[13px] font-semibold leading-snug text-hanji">
               <p className="min-w-0 flex-1">{t.notHangul}</p>
               {!kbOpen && (
                 <button
@@ -637,7 +699,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
                     setValue('');
                     toggleKeyboard(true);
                   }}
-                  className="flex h-9 shrink-0 items-center gap-1.5 bg-accent px-3 text-[13px] font-bold text-ink hover:bg-accent-text"
+                  className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-accent px-3 text-[13px] font-black text-white hover:bg-accent-text"
                 >
                   <Keyboard size={16} aria-hidden /> {t.openKeyboard}
                 </button>
@@ -652,17 +714,17 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={skip}
                   aria-keyshortcuts="Escape"
-                  className="flex h-9 items-center gap-1.5 border border-rule px-3 text-[13px] font-semibold text-hanji-2 hover:border-hanji-2 hover:text-hanji"
+                  className="juicy lip-rule mt-1 flex h-10 items-center gap-1.5 rounded-xl border-2 border-rule bg-ink-2 px-3.5 text-[13px] font-extrabold text-hanji-2 hover:text-hanji"
                 >
                   <SkipForward size={15} aria-hidden /> {t.dontKnow}
-                  {!touch && <kbd aria-hidden className="ml-1 hidden border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji md:inline">Esc</kbd>}
+                  {!touch && <kbd aria-hidden className="ml-1 hidden rounded-md border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji md:inline">Esc</kbd>}
                 </button>
               ) : (
                 <span />
               )}
               {!kbOpen && (
                 <p className="hidden items-center gap-1.5 text-[12px] text-hanji-2 md:flex" aria-hidden>
-                  <kbd className="border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji">Enter ↵</kbd>
+                  <kbd className="rounded-md border border-rule bg-ink-3 px-1.5 py-0.5 font-sans text-[11px] font-bold text-hanji">Enter ↵</kbd>
                   {phase.kind === 'review' ? t.continue.toLowerCase() : t.enterToCheck}
                 </p>
               )}

@@ -17,7 +17,7 @@ interface Props {
 
 /** Each row is 20 columns: letter keys span 2, so rows offset by half a key like a real board. Phone-sized keys are 52px tall. */
 const keyBase =
-  'relative flex h-[52px] touch-manipulation select-none items-center justify-center border border-rule bg-ink text-hanji transition-[background-color,transform] duration-100 hover:bg-ink-3 active:translate-y-px active:bg-rule';
+  'relative flex h-[52px] touch-manipulation select-none items-center justify-center rounded-xl border-2 border-rule bg-ink-2 text-hanji shadow-[0_3px_0_var(--color-rule)] transition-[background-color,transform,box-shadow] duration-100 hover:bg-ink-3 active:translate-y-[3px] active:shadow-none';
 
 /** Keys keep the answer field focused: they act on press without taking focus. */
 const keepFocus = (e: React.MouseEvent) => e.preventDefault();

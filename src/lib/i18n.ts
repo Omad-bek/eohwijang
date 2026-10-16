@@ -101,6 +101,27 @@ export interface Strings {
   kbSpace: string;
   notQuite: string;
   revealed: string;
+  streak: (n: number) => string;
+  goalLeft: (n: number) => string;
+  goalDone: string;
+  dailyGoal: (done: number, goal: number) => string;
+  totalXp: string;
+  lastWeek: string;
+  wordOfDay: string;
+  whatMeans: string;
+  continueLearning: string;
+  yourPath: (book: string) => string;
+  wordMastery: string;
+  levelUpReady: (n: number) => string;
+  levelUpHint: string;
+  review: string;
+  combo: (n: number) => string;
+  inARow: (n: number) => string;
+  xpGained: (n: number) => string;
+  xpEarned: string;
+  bestCombo: string;
+  darkMode: string;
+  lightMode: string;
   offline: string;
   cloudSync: string;
   cloudSyncHint: string;
@@ -257,6 +278,27 @@ const en: Strings = {
   kbSpace: 'Space',
   notQuite: 'Not quite: compare it letter by letter',
   revealed: "Here's the word: type it once to remember it",
+  streak: (n) => `${n}-day streak`,
+  goalLeft: (n) => `${n} more ${n === 1 ? 'word' : 'words'} today to hit your goal`,
+  goalDone: 'Goal done for today. Anything more is a bonus.',
+  dailyGoal: (a, b) => `Daily goal: ${a} of ${b} words`,
+  totalXp: 'total XP',
+  lastWeek: 'Last 7 days',
+  wordOfDay: 'Word of the day',
+  whatMeans: 'What does it mean?',
+  continueLearning: 'Continue learning',
+  yourPath: (b) => `Your path through ${b}`,
+  wordMastery: 'Word mastery',
+  levelUpReady: (n) => `${n} ${n === 1 ? 'word is' : 'words are'} ready to level up`,
+  levelUpHint: 'Get them right on the first try and they climb a level.',
+  review: 'Review',
+  combo: (n) => `Combo ${n}`,
+  inARow: (n) => `${n} in a row!`,
+  xpGained: (n) => `+${n} XP`,
+  xpEarned: 'XP earned',
+  bestCombo: 'Best combo',
+  darkMode: 'Dark mode',
+  lightMode: 'Light mode',
 };
 
 const ru: Strings = {
@@ -386,6 +428,27 @@ const ru: Strings = {
   kbSpace: 'Пробел',
   notQuite: 'Не совсем: сравните по буквам',
   revealed: 'Вот это слово: наберите его, чтобы запомнить',
+  streak: (n) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'день' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 'дня' : 'дней'} подряд`,
+  goalLeft: (n) => `Ещё ${n} до цели на сегодня`,
+  goalDone: 'Цель на сегодня выполнена. Дальше — бонус.',
+  dailyGoal: (a, b) => `Цель дня: ${a} из ${b} слов`,
+  totalXp: 'всего XP',
+  lastWeek: 'Последние 7 дней',
+  wordOfDay: 'Слово дня',
+  whatMeans: 'Что это значит?',
+  continueLearning: 'Продолжить',
+  yourPath: (b) => `Ваш путь по ${b}`,
+  wordMastery: 'Освоение слов',
+  levelUpReady: (n) => `Готово к повышению уровня: ${n}`,
+  levelUpHint: 'Ответьте верно с первой попытки — и слово поднимется на уровень.',
+  review: 'Повторить',
+  combo: (n) => `Комбо ${n}`,
+  inARow: (n) => `${n} подряд!`,
+  xpGained: (n) => `+${n} XP`,
+  xpEarned: 'Получено XP',
+  bestCombo: 'Лучшее комбо',
+  darkMode: 'Тёмная тема',
+  lightMode: 'Светлая тема',
 };
 
 const uz: Strings = {
@@ -515,6 +578,27 @@ const uz: Strings = {
   kbSpace: "Bo'sh joy",
   notQuite: "Biroz xato: harfma-harf solishtiring",
   revealed: "Mana bu so'z: eslab qolish uchun bir marta yozing",
+  streak: (n) => `${n} kun ketma-ket`,
+  goalLeft: (n) => `Bugungi maqsadgacha yana ${n} ta so'z`,
+  goalDone: "Bugungi maqsad bajarildi. Bundan keyingisi — bonus.",
+  dailyGoal: (a, b) => `Kunlik maqsad: ${b} tadan ${a} ta so'z`,
+  totalXp: 'jami XP',
+  lastWeek: "So'nggi 7 kun",
+  wordOfDay: "Kun so'zi",
+  whatMeans: "Ma'nosi nima?",
+  continueLearning: "O'qishni davom ettirish",
+  yourPath: (b) => `${b} bo'yicha yo'lingiz`,
+  wordMastery: "So'zlarni o'zlashtirish",
+  levelUpReady: (n) => `${n} ta so'z darajasini oshirishga tayyor`,
+  levelUpHint: "Birinchi urinishda to'g'ri yozsangiz, so'z bir daraja ko'tariladi.",
+  review: 'Takrorlash',
+  combo: (n) => `Kombo ${n}`,
+  inARow: (n) => `Ketma-ket ${n} ta!`,
+  xpGained: (n) => `+${n} XP`,
+  xpEarned: 'Olingan XP',
+  bestCombo: 'Eng yaxshi kombo',
+  darkMode: 'Tungi rejim',
+  lightMode: 'Kunduzgi rejim',
 };
 
 const ko: Strings = {
@@ -644,6 +728,27 @@ const ko: Strings = {
   kbSpace: '띄어쓰기',
   notQuite: '아쉬워요: 자모를 하나씩 비교해 보세요',
   revealed: '정답이에요: 한 번 따라 써 보세요',
+  streak: (n) => `${n}일 연속`,
+  goalLeft: (n) => `오늘 목표까지 ${n}개 남았어요`,
+  goalDone: '오늘 목표 달성! 이제부터는 보너스예요.',
+  dailyGoal: (a, b) => `오늘의 목표: ${b}개 중 ${a}개`,
+  totalXp: '총 XP',
+  lastWeek: '최근 7일',
+  wordOfDay: '오늘의 단어',
+  whatMeans: '무슨 뜻일까요?',
+  continueLearning: '이어서 공부하기',
+  yourPath: (b) => `${b} 학습 경로`,
+  wordMastery: '단어 숙달도',
+  levelUpReady: (n) => `레벨 업 준비된 단어 ${n}개`,
+  levelUpHint: '첫 시도에 맞히면 한 단계 올라가요.',
+  review: '복습',
+  combo: (n) => `콤보 ${n}`,
+  inARow: (n) => `${n}연속 정답!`,
+  xpGained: (n) => `+${n} XP`,
+  xpEarned: '얻은 XP',
+  bestCombo: '최고 콤보',
+  darkMode: '다크 모드',
+  lightMode: '라이트 모드',
 };
 
 export const STRINGS: Record<UiLang, Strings> = { en, ru, uz, ko };

@@ -22,7 +22,19 @@ export function emptyData(): UserData {
     customBooks: [],
     extraWords: {},
     deletedBooks: {},
+    activity: {},
   };
+}
+
+/** Day keys (`YYYY-MM-DD`) with a positive whole count; anything else is dropped. */
+export function sanitizeActivity(raw: unknown): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (!raw || typeof raw !== 'object') return out;
+  for (const [day, v] of Object.entries(raw as Record<string, unknown>)) {
+    const n = Math.floor(Number(v));
+    if (/^\d{4}-\d{2}-\d{2}$/.test(day) && Number.isFinite(n) && n > 0) out[day] = n;
+  }
+  return out;
 }
 
 const UI_LANGS: UiLang[] = ['en', 'ru', 'uz', 'ko'];
@@ -127,6 +139,7 @@ export function sanitizeData(raw: unknown): UserData {
     customBooks,
     extraWords,
     deletedBooks,
+    activity: sanitizeActivity(d.activity),
   };
 }
 

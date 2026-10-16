@@ -39,12 +39,12 @@ export function StagePreview({ t, stage, memory, now, resume, onClose, onStart, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ height: 'var(--app-h)' }}>
-      <button type="button" aria-label={t.close} onClick={onClose} className="absolute inset-0 bg-black/70" />
+      <button type="button" aria-label={t.close} onClick={onClose} className="absolute inset-0 bg-hanji/45 backdrop-blur-[2px]" />
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby="stage-title"
-        className="anim-sheet relative flex max-h-[92%] w-full max-w-2xl flex-col border-t border-rule bg-ink sm:max-h-[86%] sm:border"
+        className="anim-sheet relative flex max-h-[92%] w-full max-w-2xl flex-col overflow-hidden rounded-t-[28px] border-2 border-b-0 border-rule bg-ink-2 sm:max-h-[86%] sm:rounded-[28px] sm:border-b-2"
       >
         <header className="flex items-start gap-3 border-b border-rule px-5 pb-4 pt-5">
           <div className="min-w-0 flex-1">
@@ -68,7 +68,7 @@ export function StagePreview({ t, stage, memory, now, resume, onClose, onStart, 
         <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
           <table className="w-full table-fixed border-collapse text-left text-[13px] sm:text-[14px]">
             <caption className="sr-only">{t.study}</caption>
-            <thead className="sticky top-0 z-10 bg-ink-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-hanji-2 sm:text-[11px] sm:tracking-[0.12em]">
+            <thead className="sticky top-0 z-10 bg-ink text-[11px] font-semibold uppercase tracking-[0.06em] text-hanji-2 sm:text-[11px] sm:tracking-[0.12em]">
               <tr>
                 <th scope="col" className="w-11 py-2.5 pl-4 pr-1 font-semibold">#</th>
                 <th scope="col" className="w-[28%] py-2.5 pr-2 font-semibold">{t.colKo}</th>
@@ -98,7 +98,7 @@ export function StagePreview({ t, stage, memory, now, resume, onClose, onStart, 
                         </span>
                       )}
                     </td>
-                    <td lang="ko" className="break-keep py-2.5 pr-2 font-serif text-[17px] font-bold leading-snug sm:text-[18px]">
+                    <td lang="ko" className="break-keep py-2.5 pr-2 font-serif text-[18px] leading-snug sm:text-[19px]">
                       {w.ko}
                     </td>
                     <td lang="uz" className="break-words py-2.5 pr-2 leading-snug">{w.uz}</td>
@@ -116,8 +116,8 @@ export function StagePreview({ t, stage, memory, now, resume, onClose, onStart, 
             ref={resume ? undefined : startRef}
             type="button"
             onClick={onStart}
-            className={`flex h-13 w-full min-w-0 items-center justify-center gap-2 px-2 text-[15px] tracking-[0.04em] transition-colors ${
-              resume ? 'border border-rule font-semibold text-hanji hover:border-hanji-2 hover:bg-ink-3' : 'bg-accent font-bold text-ink hover:bg-accent-text'
+            className={`juicy flex h-13 w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-2 text-[16px] tracking-[0.02em] ${
+              resume ? 'lip-rule border-2 border-rule bg-ink-2 font-extrabold text-hanji-2 hover:text-hanji' : 'lip-accent bg-accent font-black text-white'
             }`}
           >
             <Play size={18} fill="currentColor" aria-hidden className="shrink-0" />
@@ -128,7 +128,7 @@ export function StagePreview({ t, stage, memory, now, resume, onClose, onStart, 
               ref={startRef}
               type="button"
               onClick={onResume}
-              className="flex h-13 w-full min-w-0 items-center justify-center gap-2 bg-accent px-2 text-[15px] font-bold tracking-[0.04em] text-ink transition-colors hover:bg-accent-text"
+              className="juicy lip-accent flex h-13 w-full min-w-0 items-center justify-center gap-2 rounded-2xl bg-accent px-2 text-[16px] font-black tracking-[0.02em] text-white"
             >
               <StepForward size={18} aria-hidden className="shrink-0" />
               <span className="truncate">{t.resume}</span>

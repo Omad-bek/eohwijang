@@ -154,12 +154,16 @@ export function mergeData(local: UserData, remote: UserData): UserData {
   const extraWords = { ...local.extraWords };
   for (const [id, words] of Object.entries(remote.extraWords)) extraWords[id] = mergeWords(extraWords[id] ?? [], words);
 
-  return { ...local, memory, stages, customBooks, extraWords, deletedBooks };
+  // Each day keeps the higher count: merging the same history twice never inflates it.
+  const activity = { ...local.activity };
+  for (const [day, n] of Object.entries(remote.activity)) activity[day] = Math.max(activity[day] ?? 0, n);
+
+  return { ...local, memory, stages, customBooks, extraWords, deletedBooks, activity };
 }
 
 /** The part of the data that travels; settings stay on each device. */
 function payload(d: UserData) {
-  return { memory: d.memory, stages: d.stages, customBooks: d.customBooks, extraWords: d.extraWords, deletedBooks: d.deletedBooks };
+  return { memory: d.memory, stages: d.stages, customBooks: d.customBooks, extraWords: d.extraWords, deletedBooks: d.deletedBooks, activity: d.activity };
 }
 
 function stable(value: unknown): string {

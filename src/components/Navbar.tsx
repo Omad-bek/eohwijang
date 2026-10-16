@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, Cloud, CloudAlert, CloudOff, Database, Languages, RefreshCw, WifiOff } from 'lucide-react';
+import { Check, ChevronDown, Cloud, CloudAlert, CloudOff, Database, Languages, Moon, RefreshCw, Sun, WifiOff } from 'lucide-react';
 import type { PromptLang, Settings, UiLang } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { CloudSync } from '../lib/hooks';
+import type { Theme } from '../lib/theme';
 
 interface Props {
   t: Strings;
@@ -15,6 +16,8 @@ interface Props {
   onSync: () => void;
   /** Admin view (#admin): only the logo and Cloud Sync status, no learner controls. */
   admin?: boolean;
+  theme: Theme;
+  onToggleTheme: () => void;
 }
 
 const UI_LANGS: { value: UiLang; code: string; name: string }[] = [
@@ -53,14 +56,14 @@ function UiLangMenu({ t, value, onChange }: { t: Strings; value: UiLang; onChang
         title={t.uiLang}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => setOpen((o) => !o)}
-        className="flex h-9 items-center gap-1 border border-rule px-2 text-[12px] font-bold tracking-[0.06em] text-hanji hover:border-hanji-2 sm:gap-1.5 sm:px-2.5"
+        className="press flex h-9 items-center gap-1 rounded-full border-2 border-rule bg-ink-2 px-2.5 text-[12px] font-extrabold tracking-[0.06em] text-hanji hover:border-hanji-2/40 sm:gap-1.5 sm:px-3"
       >
         <Languages size={15} aria-hidden className="text-hanji-2" />
         {current.code}
         <ChevronDown size={13} aria-hidden className={`hidden text-hanji-2 transition-transform sm:block ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div role="menu" aria-label={t.uiLang} className="anim-sheet absolute right-0 top-[calc(100%+6px)] z-50 w-44 border border-rule bg-ink-2 py-1">
+        <div role="menu" aria-label={t.uiLang} className="anim-sheet absolute right-0 top-[calc(100%+8px)] z-50 w-48 overflow-hidden rounded-2xl border-2 border-rule bg-ink-2 py-1.5 shadow-[0_5px_0_var(--color-rule)]">
           <p className="px-3 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">{t.uiLang}</p>
           {UI_LANGS.map((l) => (
             <button
@@ -72,7 +75,7 @@ function UiLangMenu({ t, value, onChange }: { t: Strings; value: UiLang; onChang
                 onChange(l.value);
                 setOpen(false);
               }}
-              className="flex w-full items-center gap-3 px-3 py-2 text-left text-[14px] hover:bg-ink-3"
+              className="flex w-full items-center gap-3 rounded-none px-3 py-2 text-left text-[14px] font-semibold hover:bg-ink-3"
             >
               <span className="w-6 text-[11px] font-bold tracking-[0.06em] text-hanji-2">{l.code}</span>
               <span lang={l.value} className="flex-1">
@@ -104,8 +107,8 @@ function SyncButton({ t, sync, online, onClick }: { t: Strings; sync: CloudSync;
       onClick={onClick}
       title={`${t.cloudSync}: ${label}`}
       aria-label={`${t.cloudSync}: ${label}`}
-      className={`relative flex h-9 shrink-0 items-center gap-1.5 border px-2.5 text-[13px] font-semibold hover:border-hanji-2 ${
-        state === 'ok' ? 'border-accent/60' : state === 'error' ? 'border-danger/60' : 'border-rule'
+      className={`press relative flex h-9 shrink-0 items-center gap-1.5 rounded-full border-2 bg-ink-2 px-3 text-[13px] font-extrabold hover:border-hanji-2/40 ${
+        state === 'ok' ? 'border-accent/50' : state === 'error' ? 'border-danger/60' : 'border-rule'
       } ${tone}`}
     >
       {icon}
@@ -115,7 +118,27 @@ function SyncButton({ t, sync, online, onClick }: { t: Strings; sync: CloudSync;
   );
 }
 
-export function Navbar({ t, settings, online, onChange, onHome, onData, sync, onSync, admin = false }: Props) {
+/** Light / dark switch: shows where a tap takes you (a moon by day, a sun at night). */
+function ThemeButton({ t, theme, onToggle }: { t: Strings; theme: Theme; onToggle: () => void }) {
+  const dark = theme === 'dark';
+  const label = dark ? t.lightMode : t.darkMode;
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      onMouseDown={(e) => e.preventDefault()}
+      aria-label={label}
+      title={label}
+      className="press grid size-9 shrink-0 place-items-center rounded-full border-2 border-rule bg-ink-2 text-hanji-2 hover:border-hanji-2/40 hover:text-hanji"
+    >
+      <span key={theme} className="anim-pop grid place-items-center">
+        {dark ? <Sun size={17} strokeWidth={2.4} className="text-gold" aria-hidden /> : <Moon size={16} strokeWidth={2.4} aria-hidden />}
+      </span>
+    </button>
+  );
+}
+
+export function Navbar({ t, settings, online, onChange, onHome, onData, sync, onSync, admin = false, theme, onToggleTheme }: Props) {
   const prompt: { value: PromptLang; label: string; title: string }[] = [
     { value: 'uz', label: 'UZ', title: `${t.langName.uz} → 한국어` },
     { value: 'ru', label: 'RU', title: `${t.langName.ru} → 한국어` },
@@ -124,12 +147,14 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, sync, on
   ];
 
   return (
-    <header className="shrink-0 border-b border-rule">
+    <header className="shrink-0 border-b-2 border-rule bg-ink">
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center gap-2 px-3 sm:gap-3 md:h-16 md:px-5">
         <button type="button" onClick={onHome} className="mr-auto flex min-w-0 shrink-0 items-baseline gap-2 text-left" aria-label={`${t.appName} — ${t.books}`}>
-          <span className="whitespace-nowrap font-serif text-[20px] font-bold leading-none tracking-tight sm:text-[22px] md:text-[26px]">어휘장</span>
-          {t.appName !== '어휘장' && <span className="hidden text-[13px] font-semibold text-hanji-2 lg:inline">{t.appName}</span>}
+          <span className="whitespace-nowrap font-serif text-[24px] leading-none text-accent sm:text-[26px] md:text-[30px]">어휘장</span>
+          {t.appName !== '어휘장' && <span className="hidden text-[13px] font-bold text-hanji-2 lg:inline">{t.appName}</span>}
         </button>
+
+        <ThemeButton t={t} theme={theme} onToggle={onToggleTheme} />
 
         <SyncButton t={t} sync={sync} online={online} onClick={onSync} />
 
@@ -144,8 +169,8 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, sync, on
           <UiLangMenu t={t} value={settings.uiLang} onChange={(uiLang) => onChange({ uiLang })} />
 
           <div className="flex items-center gap-2">
-            <span className="hidden text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2 lg:inline">{t.promptLang}</span>
-            <div role="radiogroup" aria-label={`${t.promptLang} → 한국어`} className="flex border border-rule">
+            <span className="hidden text-[11px] font-extrabold uppercase tracking-[0.12em] text-hanji-2 lg:inline">{t.promptLang}</span>
+            <div role="radiogroup" aria-label={`${t.promptLang} → 한국어`} className="flex rounded-full border-2 border-rule bg-ink-2 p-0.5">
               {prompt.map((o) => {
                 const on = o.value === settings.promptLang;
                 return (
@@ -157,8 +182,8 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, sync, on
                     title={o.title}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => onChange({ promptLang: o.value })}
-                    className={`h-[34px] min-w-8 px-1.5 text-[11px] font-bold tracking-[0.05em] transition-colors sm:min-w-10 sm:px-2 ${
-                      on ? 'bg-accent text-ink' : 'text-hanji-2 hover:bg-ink-3 hover:text-hanji'
+                    className={`h-[30px] min-w-8 rounded-full px-1.5 text-[11px] font-black tracking-[0.05em] transition-colors sm:min-w-10 sm:px-2 ${
+                      on ? 'bg-accent text-white' : 'text-hanji-2 hover:bg-ink-3 hover:text-hanji'
                     }`}
                   >
                     {o.label}
@@ -166,7 +191,7 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, sync, on
                 );
               })}
             </div>
-            <span lang="ko" className="hidden text-[12px] font-semibold text-hanji md:inline">
+            <span lang="ko" className="hidden text-[12px] font-bold text-hanji md:inline">
               → 한국어
             </span>
           </div>
@@ -176,7 +201,7 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, sync, on
             onClick={onData}
             title={t.data}
             aria-label={t.data}
-            className="flex h-9 shrink-0 items-center gap-1.5 border border-rule px-2.5 text-[13px] font-semibold text-hanji hover:border-hanji-2"
+            className="press flex h-9 shrink-0 items-center gap-1.5 rounded-full border-2 border-rule bg-ink-2 px-3 text-[13px] font-extrabold text-hanji hover:border-hanji-2/40"
           >
             <Database size={15} aria-hidden />
             <span className="hidden xl:inline">{t.data}</span>

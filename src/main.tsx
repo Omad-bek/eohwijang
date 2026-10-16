@@ -1,7 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import '@fontsource/gowun-batang/korean-700.css';
-import '@fontsource/gowun-batang/latin-700.css';
+import '@fontsource-variable/nunito/wght.css';
+import '@fontsource/jua/korean-400.css';
+import '@fontsource/jua/latin-400.css';
+import '@fontsource/black-han-sans/korean-400.css';
+import '@fontsource/black-han-sans/latin-400.css';
 import './index.css';
 import App from './App';
 

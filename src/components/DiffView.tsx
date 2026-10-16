@@ -9,15 +9,15 @@ interface Props {
 
 const syllableTone: Record<DiffCell['kind'], string> = {
   exact: 'text-accent-text',
-  partial: 'text-amber',
+  partial: 'text-flame-ink',
   wrong: 'text-danger-text line-through decoration-2',
   missing: 'text-danger-text/45',
   extra: 'text-danger-text line-through decoration-2',
 };
 
 const cellFrame: Record<DiffCell['kind'], string> = {
-  exact: 'border-accent-text/40 bg-accent-wash',
-  partial: 'border-amber/50 bg-amber-wash',
+  exact: 'border-accent/40 bg-accent-wash',
+  partial: 'border-flame/50 bg-flame-wash',
   wrong: 'border-danger/60 bg-danger-wash',
   missing: 'border-dashed border-danger/60',
   extra: 'border-danger/60 bg-danger-wash',
@@ -72,14 +72,14 @@ export function DiffView({ t, cells }: Props) {
           return (
             <li
               key={i}
-              className={`anim-cell flex w-[5.25rem] flex-col border ${cellFrame[c.kind]} ${isSpace ? 'w-8' : ''}`}
+              className={`anim-cell flex w-[5.25rem] flex-col overflow-hidden rounded-2xl border-2 ${cellFrame[c.kind]} ${isSpace ? 'w-8' : ''}`}
               style={{ animationDelay: `${i * 70}ms` }}
             >
-              <span lang="ko" className={`flex h-16 items-center justify-center font-serif text-[40px] font-bold leading-none ${syllableTone[c.kind]}`}>
+              <span lang="ko" className={`flex h-16 items-center justify-center font-serif text-[40px] leading-none ${syllableTone[c.kind]}`}>
                 {isSpace ? '' : shown}
               </span>
               {c.kind === 'partial' && c.jamo && (
-                <span className="flex border-t border-amber/40" lang="ko">
+                <span className="flex border-t border-flame/40" lang="ko">
                   {c.jamo.map((j, k) => (
                     <Slot key={j.slot} check={j} empty="·" delay={i * 70 + 200 + k * 60} />
                   ))}

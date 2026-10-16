@@ -1,42 +1,101 @@
 @import 'tailwindcss';
 
-@theme {
-  /* Calm slate ground; emerald carries progress and main actions. */
-  --color-ink: #0f172a;
-  --color-ink-2: #141e33;
-  --color-ink-3: #1e293b;
-  --color-rule: #1e293b;
-  --color-rule-soft: #18223a;
-  --color-hanji: #e2e8f0;
-  --color-hanji-2: #94a3b8;
-  --color-accent: #10b981;
-  --color-accent-text: #34d399;
-  --color-accent-wash: #0c2a2a;
-  /* Red is reserved for wrong syllables in the typing diff and real errors. */
-  --color-danger: #ef4444;
-  --color-danger-text: #f87171;
-  --color-danger-wash: #2b1622;
-  --color-amber: #fbbf24;
-  --color-amber-wash: #2a2416;
-  --color-indigo: #a5b4fc;
-  --color-indigo-wash: #1c2145;
-  --color-sky: #7dd3fc;
-  --color-sky-wash: #0f2639;
+/* `dark:` follows the app's own theme switch (html[data-theme]), not only the OS setting. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
-  --font-sans: system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Noto Sans CJK KR', Roboto, sans-serif;
-  --font-serif: 'Gowun Batang', 'Nanum Myeongjo', 'AppleMyungjo', 'Batang', serif;
+@theme {
+  /*
+   * Warm daylight: a cream page, white cards that sit on a soft lip, one deep green for every
+   * step forward. Token names are kept from the first design (ink = ground, hanji = text).
+   */
+  --color-ink: #fff8ee;
+  --color-ink-2: #ffffff;
+  --color-ink-3: #fbeedd;
+  --color-rule: #f0dfc6;
+  --color-rule-soft: #f6ead8;
+  --color-hanji: #3b2a1e;
+  --color-hanji-2: #7a6350;
+  --color-accent: #14834a;
+  --color-accent-lip: #0d5f34;
+  --color-accent-text: #11743f;
+  --color-accent-wash: #e1f5e8;
+  /* Red is reserved for wrong syllables in the typing diff and real errors. */
+  --color-danger: #e8484e;
+  --color-danger-text: #c22f35;
+  --color-danger-wash: #ffe5e3;
+  --color-amber: #a35f00;
+  --color-amber-wash: #fff1d6;
+  --color-indigo: #5b54d6;
+  --color-indigo-wash: #ecebff;
+  --color-sky: #1a6cc0;
+  --color-sky-lip: #12528f;
+  --color-sky-wash: #e0efff;
+  /* Engagement inks: the streak flame and the XP / mastered gold. */
+  --color-flame: #ff8a1f;
+  --color-flame-ink: #a94800;
+  --color-flame-wash: #ffe9d2;
+  --color-flame-lip: #c25a00;
+  --color-gold: #ffc233;
+  --color-gold-lip: #d99a00;
+  /* Text on bright fills (flame, gold): stays dark in both themes. */
+  --color-on-bright: #33261b;
+
+  --font-sans: 'Nunito Variable', Nunito, system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', Roboto, sans-serif;
+  /* Korean words and book/unit names: a rounded, friendly Hangul face. */
+  --font-serif: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  /* The word of the day only: heavy display Hangul. */
+  --font-display: 'Black Han Sans', 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --app-h: 100dvh;
+}
+
+/*
+ * Night study: a soft charcoal-slate desk instead of black, warm off-white type, and the same
+ * inks a step calmer so the jamo tiles, flames and XP still glow without glaring.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-ink: #191c23;
+  --color-ink-2: #22262f;
+  --color-ink-3: #2c313c;
+  --color-rule: #353b48;
+  --color-rule-soft: #2a2f39;
+  --color-hanji: #ece6dc;
+  --color-hanji-2: #a8a198;
+  --color-accent: #178c4e;
+  --color-accent-lip: #0b5530;
+  --color-accent-text: #62d395;
+  --color-accent-wash: #173528;
+  --color-danger: #e5575c;
+  --color-danger-text: #ff8f91;
+  --color-danger-wash: #3a2227;
+  --color-amber: #f0b44c;
+  --color-amber-wash: #382e1b;
+  --color-indigo: #a29dff;
+  --color-indigo-wash: #2a2a4d;
+  --color-sky: #3a87d6;
+  --color-sky-lip: #1d5590;
+  --color-sky-wash: #1b2b40;
+  --color-flame: #f2903f;
+  --color-flame-ink: #ffb87a;
+  --color-flame-wash: #3a2a1d;
+  --color-flame-lip: #a2500f;
+  --color-gold: #f0bd45;
+  --color-gold-lip: #b78714;
 }
 
 html,
 body {
   margin: 0;
+  transition: background-color 240ms ease-out;
+  /* Jua and Black Han Sans ship one weight: never smear them with a synthesized bold. */
+  font-synthesis-weight: none;
   height: 100%;
   background: var(--color-ink);
   color: var(--color-hanji);
@@ -48,30 +107,6 @@ body {
 
 body {
   overflow: hidden;
-}
-
-/*
- * 원고지 (manuscript paper): rows of square cells with a narrow gutter between rows,
- * drawn in faint slate behind everything. Panels sit on top as solid ink, so the paper
- * only shows in the open ground and never under text.
- */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='34'%3E%3Cpath d='M.5 0v28M0 .5h28M0 27.5h28' fill='none' stroke='%2394a3b8' stroke-opacity='.075'/%3E%3C/svg%3E");
-  background-size: 28px 34px;
-  background-position: center 10px;
-  /* Fade toward the edges so the grid reads as paper, not as a UI element. */
-  -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 40%, #000 45%, rgb(0 0 0 / 0.35) 100%);
-  mask-image: radial-gradient(ellipse 120% 90% at 50% 40%, #000 45%, rgb(0 0 0 / 0.35) 100%);
-}
-
-@media print {
-  body::before {
-    display: none;
-  }
 }
 
 #root {
@@ -102,20 +137,18 @@ select {
     scrollbar-width: thin;
     scrollbar-color: var(--color-rule) transparent;
   }
+
+  /* Controls are soft and tactile; a component can still set its own radius. */
+  button,
+  input,
+  select,
+  textarea {
+    border-radius: 12px;
+  }
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
-}
-
-/* A quiet slate outline around the whole screen. */
-.frame-rule {
-  position: absolute;
-  inset: max(6px, env(safe-area-inset-top)) 6px max(6px, env(safe-area-inset-bottom)) 6px;
-  border: 1px solid var(--color-rule);
-  border-radius: 14px;
-  pointer-events: none;
-  z-index: 40;
 }
 
 /* Signature move: a syllable splits into its jamo slots. */
@@ -239,5 +272,196 @@ select {
   .anim-seal,
   .anim-sheet {
     animation: none;
+  }
+}
+
+/* ---------- Warm & tactile: motion for the home hooks and the quiz combo ---------- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes bump {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.25) rotate(-4deg);
+  }
+}
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.9);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.05);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-34px);
+  }
+}
+@keyframes fade-only {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  70% {
+    opacity: 1;
+  }
+}
+@keyframes burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.4);
+  }
+}
+@keyframes flicker {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+  }
+  30% {
+    transform: scale(1.06, 0.96) rotate(-3deg);
+  }
+  65% {
+    transform: scale(0.97, 1.05) rotate(2deg);
+  }
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+  50% {
+    transform: translate(10px, -14px) rotate(8deg);
+  }
+}
+@keyframes sheen {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(220%);
+  }
+}
+
+.anim-rise {
+  animation: rise 560ms var(--ease-out-expo) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+.anim-pop {
+  animation: pop 420ms var(--ease-spring) both;
+}
+.anim-bump {
+  animation: bump 420ms var(--ease-spring);
+}
+.anim-float {
+  animation: float-up 1100ms var(--ease-out-expo) both;
+}
+.anim-burst {
+  animation: burst 700ms var(--ease-out-expo) both;
+}
+.anim-flicker {
+  animation: flicker 1.6s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+.anim-drift {
+  animation: drift 9s ease-in-out infinite;
+}
+.anim-sheen {
+  animation: sheen 2.8s ease-in-out infinite;
+}
+
+/*
+ * Tactile buttons: a solid lip under the face that the face presses into on tap.
+ * Each button sets its own lip color through --lip.
+ */
+.juicy {
+  box-shadow: 0 5px 0 var(--lip, var(--color-rule));
+  transform: translateY(0);
+  transition:
+    transform 90ms ease-out,
+    box-shadow 90ms ease-out,
+    filter 160ms ease-out;
+}
+.juicy:hover {
+  filter: brightness(1.06);
+}
+.juicy:active {
+  box-shadow: 0 1px 0 var(--lip, var(--color-rule));
+  transform: translateY(4px);
+}
+.juicy:disabled {
+  filter: grayscale(0.5) opacity(0.6);
+  box-shadow: 0 5px 0 var(--lip, var(--color-rule));
+  transform: none;
+}
+.lip-accent {
+  --lip: var(--color-accent-lip);
+}
+.lip-sky {
+  --lip: var(--color-sky-lip);
+}
+.lip-gold {
+  --lip: var(--color-gold-lip);
+}
+.lip-rule {
+  --lip: var(--color-rule);
+}
+.lip-flame {
+  --lip: var(--color-flame-lip);
+}
+
+/* A softer squish for everything else that is tappable. */
+.press {
+  transition: transform 160ms var(--ease-spring);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-rise,
+  .anim-pop,
+  .anim-bump,
+  .anim-burst,
+  .anim-flicker,
+  .anim-drift,
+  .anim-sheen {
+    animation: none;
+  }
+  .anim-float {
+    animation-name: fade-only;
+  }
+  .juicy,
+  .press {
+    transition: none;
   }
 }

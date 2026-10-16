@@ -1,5 +1,5 @@
-import type { MemoryLevel, VocabEntry, WordMemory } from '../types';
-import { wordId } from './books';
+import type { Book, MemoryLevel, Stage, VocabEntry, WordMemory } from '../types';
+import { MAX_STAGE, wordId } from './books';
 
 const HOUR = 60 * 60 * 1000;
 
@@ -67,3 +67,10 @@ export function addStats(a: MemoryStats, b: MemoryStats): MemoryStats {
 }
 
 export const EMPTY_STATS: MemoryStats = { levels: [0, 0, 0, 0], learned: 0, due: 0 };
+
+/** The book's words that are ready for their next level, in textbook order, as one playable set (at most one stage long). */
+export function reviewStage(book: Book, memory: Record<string, WordMemory>, now: number): Stage | null {
+  const words = book.words.filter((w) => isDue(memory[wordId(book.id, w)], now)).slice(0, MAX_STAGE);
+  if (!words.length) return null;
+  return { key: `${book.id}|~review|0`, bookId: book.id, unit: '', index: 0, from: 1, to: words.length, words, review: true };
+}

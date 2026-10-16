@@ -3,13 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
-    <meta name="theme-color" content="#0f172a" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#fff8ee" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Apply the saved (or system) theme before the first paint, so night study never flashes white.
+      try {
+        var t = localStorage.getItem('project-vocab:theme');
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+        if (t === 'dark') document.querySelector('meta[name="theme-color"]').setAttribute('content', '#191c23');
+      } catch (e) {}
+    </script>
     <meta name="description" content="Type-to-recall Korean vocabulary trainer with Uzbek, Russian and English prompts." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>어휘장</title>
   </head>
   <body>

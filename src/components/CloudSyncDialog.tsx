@@ -22,12 +22,12 @@ export function CloudSyncDialog({ t, sync, uiLang, onClose }: { t: Strings; sync
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ height: 'var(--app-h)' }}>
-      <button type="button" aria-label={t.close} onClick={onClose} className="absolute inset-0 bg-black/70" />
+      <button type="button" aria-label={t.close} onClick={onClose} className="absolute inset-0 bg-hanji/45 backdrop-blur-[2px]" />
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby="sync-title"
-        className="anim-sheet relative flex max-h-[92%] w-full max-w-xl flex-col border-t border-rule bg-ink sm:max-h-[86%] sm:border"
+        className="anim-sheet relative flex max-h-[92%] w-full max-w-xl flex-col overflow-hidden rounded-t-[28px] border-2 border-b-0 border-rule bg-ink-2 sm:max-h-[86%] sm:rounded-[28px] sm:border-b-2"
       >
         <header className="flex items-start gap-3 border-b border-rule px-5 pb-4 pt-5">
           <div className="min-w-0 flex-1">

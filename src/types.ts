@@ -32,6 +32,8 @@ export interface Stage {
   from: number;
   to: number;
   words: VocabEntry[];
+  /** A cross-unit set of words due for their next level, not a textbook stage: no stage record is kept for it. */
+  review?: boolean;
 }
 
 export interface Settings {
@@ -70,4 +72,6 @@ export interface UserData {
   extraWords: Record<string, VocabEntry[]>;
   /** Deleted collection ids and when, so cloud sync does not bring them back from another device. */
   deletedBooks: Record<string, number>;
+  /** Words recalled per local day (`YYYY-MM-DD`): feeds the daily goal, the streak and XP. */
+  activity: Record<string, number>;
 }
