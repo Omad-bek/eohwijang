@@ -3,6 +3,11 @@ dist
 dev-dist
 *.local
 
+# Environment files (Supabase keys etc.); only the public URL and anon key belong in the build
+.env
+.env.*
+!.env.example
+
 # Local editor/agent tooling and design-process artifacts (not part of the app)
 .claude/
 .cursor/
