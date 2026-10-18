@@ -41,10 +41,12 @@
   --color-on-bright: #33261b;
 
   --font-sans: 'Nunito Variable', Nunito, system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', Roboto, sans-serif;
-  /* Korean words and book/unit names: a rounded, friendly Hangul face. */
-  --font-serif: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  /* Korean words and book/unit names: a rounded, friendly Hangul face. Jua has only the 2,350 common
+     syllables, so the rest (often mid-typing states such as 핛 on the way to 학생) fall to Nanum Gothic
+     ExtraBold, which matches its weight, instead of a thin system face. */
+  --font-serif: 'Jua', 'Nanum Gothic', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   /* The word of the day only: heavy display Hangul. */
-  --font-display: 'Black Han Sans', 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-display: 'Black Han Sans', 'Jua', 'Nanum Gothic', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);

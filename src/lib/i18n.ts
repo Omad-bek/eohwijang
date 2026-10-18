@@ -20,6 +20,9 @@ export interface Strings {
   retypeLabel: string;
   retypeHint: string;
   correctAnswer: string;
+  example: string;
+  showTranslation: string;
+  hideTranslation: string;
   dontKnow: string;
   round: (n: number) => string;
   mistakesLeft: (n: number) => string;
@@ -173,6 +176,9 @@ const en: Strings = {
   retypeLabel: 'Type the correct word',
   retypeHint: 'This word returns in the next round.',
   correctAnswer: 'Correct answer',
+  example: 'Example',
+  showTranslation: 'Show translation',
+  hideTranslation: 'Hide translation',
   dontKnow: "Don't know (Skip)",
   round: (n) => `Round ${n}`,
   mistakesLeft: (n) => `Mistakes: ${n} left`,
@@ -325,6 +331,9 @@ const ru: Strings = {
   retypeLabel: 'Наберите правильное слово',
   retypeHint: 'Это слово вернётся в следующем раунде.',
   correctAnswer: 'Правильный ответ',
+  example: 'Пример',
+  showTranslation: 'Показать перевод',
+  hideTranslation: 'Скрыть перевод',
   dontKnow: 'Не знаю (Пропустить)',
   round: (n) => `Раунд ${n}`,
   mistakesLeft: (n) => `Ошибки: осталось ${n}`,
@@ -477,6 +486,9 @@ const uz: Strings = {
   retypeLabel: "To'g'ri so'zni yozing",
   retypeHint: "Bu so'z keyingi raundda yana chiqadi.",
   correctAnswer: "To'g'ri javob",
+  example: 'Misol',
+  showTranslation: "Tarjimani ko'rsatish",
+  hideTranslation: 'Tarjimani yashirish',
   dontKnow: "Bilmayman (O'tkazish)",
   round: (n) => `${n}-raund`,
   mistakesLeft: (n) => `Xatolar: ${n} ta qoldi`,
@@ -629,6 +641,9 @@ const ko: Strings = {
   retypeLabel: '정답을 다시 입력하세요',
   retypeHint: '이 단어는 다음 회차에 다시 나옵니다.',
   correctAnswer: '정답',
+  example: '예문',
+  showTranslation: '번역 보기',
+  hideTranslation: '번역 숨기기',
   dontKnow: '모르겠어요 (건너뛰기)',
   round: (n) => `${n}회차`,
   mistakesLeft: (n) => `틀린 단어 ${n}개 남음`,

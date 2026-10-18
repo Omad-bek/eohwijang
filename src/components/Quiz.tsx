@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Check, CircleHelp, CornerDownLeft, Flame, Keyboard, RotateCcw, Sparkles, SkipForward, Star, X } from 'lucide-react';
-import type { PromptLang, Settings, Stage, VocabEntry } from '../types';
+import type { Example, GlossLang, PromptLang, Settings, Stage, VocabEntry } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { Outcome } from '../lib/srs';
 import { checkAnswer, isCorrect, type DiffResult } from '../utils/hangulDiff';
@@ -8,6 +8,7 @@ import { backspaceJamo, DUBEOLSIK, typeJamo } from '../utils/hangulInput';
 import { useTouchOnly } from '../lib/hooks';
 import { clearSession, saveSession, stageSignature, type SavedSession } from '../lib/session';
 import { DiffView } from './DiffView';
+import { ExampleSentence } from './ExampleSentence';
 import { KoreanKeyboard } from './KoreanKeyboard';
 import { Seal } from './Seal';
 import { Burst } from './Ring';
@@ -145,7 +146,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   const [xp, setXp] = useState(0);
   /** Restarts the +XP float on every recalled word. */
   const [gain, setGain] = useState(0);
-  const [lastRight, setLastRight] = useState<{ prompt: string; ko: string } | null>(null);
+  const [lastRight, setLastRight] = useState<{ prompt: string; ko: string; word: string; example?: Example } | null>(null);
   const [imeHint, setImeHint] = useState(false);
   /** Onscreen 두벌식 keyboard; remembered per device. */
   const [kbPref, setKbPref] = useState(readKeyboardOpen);
@@ -162,6 +163,8 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
 
   const glossLang = settings.promptLang !== 'all' ? settings.promptLang : settings.uiLang === 'ko' ? 'en' : settings.uiLang;
   const gloss = (w: VocabEntry) => w[glossLang] || w.uz || w.ru || w.en;
+  /** Example translations follow the prompt language: one line, or all three in "all" mode. */
+  const exampleLangs: GlossLang[] = settings.promptLang === 'all' ? ['uz', 'ru', 'en'] : [glossLang];
   const total = stage.words.length;
   const current = queue[0];
   const pendingSet = new Set([...queue, ...nextRound].map((q) => q.n));
@@ -252,7 +255,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
       if (result.correct) {
         const first = !missed.has(current.n);
         onResult(current.word, first ? 'firstTry' : 'relearned');
-        setLastRight({ prompt: gloss(current.word), ko: result.target });
+        setLastRight({ prompt: gloss(current.word), ko: result.target, word: current.word.ko, example: current.word.example });
         // Only first-try recalls grow the combo; a word recovered after a miss neither grows nor breaks it.
         const streak = first ? combo + 1 : combo;
         if (first) {
@@ -612,20 +615,26 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
                       {correctForm}
                     </span>
                   </div>
-                  <p className="mt-2 flex items-center gap-1.5 text-[13px] text-hanji-2">
+                  {current.word.example && (
+                    <ExampleSentence key={`${current.n}-${current.word.ko}`} t={t} example={current.word.example} word={current.word.ko} langs={exampleLangs} />
+                  )}
+                  <p className="mt-3 flex items-center gap-1.5 text-[13px] text-hanji-2">
                     <RotateCcw size={14} aria-hidden /> {t.retypeHint}
                   </p>
                 </div>
               ) : (
                 lastRight && (
-                  <p key={lastRight.ko + cleared} className="anim-cell flex items-center gap-2 border-t border-rule-soft pt-3 text-[14px] text-hanji-2">
-                    <Check size={16} strokeWidth={2.6} className="text-accent-text" aria-label={t.correct} />
-                    <span className="truncate">{lastRight.prompt}</span>
-                    <span aria-hidden>→</span>
-                    <span lang="ko" className="font-serif text-[21px] text-accent-text">
-                      {lastRight.ko}
-                    </span>
-                  </p>
+                  <div key={lastRight.ko + cleared}>
+                    <p className="anim-cell flex items-center gap-2 border-t border-rule-soft pt-3 text-[14px] text-hanji-2">
+                      <Check size={16} strokeWidth={2.6} className="text-accent-text" aria-label={t.correct} />
+                      <span className="truncate">{lastRight.prompt}</span>
+                      <span aria-hidden>→</span>
+                      <span lang="ko" className="shrink-0 whitespace-nowrap font-serif text-[21px] text-accent-text">
+                        {lastRight.ko}
+                      </span>
+                    </p>
+                    {lastRight.example && <ExampleSentence t={t} example={lastRight.example} word={lastRight.word} langs={exampleLangs} compact />}
+                  </div>
                 )
               )}
             </div>

@@ -1,4 +1,4 @@
-import type { VocabEntry } from '../types';
+import type { Example, VocabEntry } from '../types';
 
 /**
  * Seoul National University Korean (서울대 한국어) 1A — unit order as in the book.
@@ -10,8 +10,11 @@ export interface VocabWord extends VocabEntry {
   book: string;
 }
 
-// Format: [ko, uz, ru, en]. `ko` may list alternatives with "/" (e.g. "아래/ 밑"); any one is accepted.
-const RAW_1A_DATA: Record<(typeof UNITS_1A)[number], [string, string, string, string][]> = {
+// Format: [ko, uz, ru, en, example?]. `ko` may list alternatives with "/" (e.g. "아래/ 밑"); any one is accepted.
+// Examples in 1A use only what the book has taught: present tense (-(스)ㅂ니다, -아/어요) and the particles 은/는, 이/가, 을/를, 에, 에서.
+type Row = [ko: string, uz: string, ru: string, en: string, example?: Example];
+
+const RAW_1A_DATA: Record<(typeof UNITS_1A)[number], Row[]> = {
   "한글": [
     ["오", "besh", "пять", "five"],
     ["이", "bu/tish", "это / зуб", "this / tooth"],
@@ -148,57 +151,57 @@ const RAW_1A_DATA: Record<(typeof UNITS_1A)[number], [string, string, string, st
     ["창문", "deraza", "окно", "window"]
   ],
   "1과": [
-    ["나라", "davlat", "страна", "country"],
-    ["중국", "Xitoy", "Китай", "China"],
-    ["일본", "Yaponiya", "Япония", "Japan"],
-    ["미국", "AQSH", "США", "USA"],
-    ["한국", "Koreya", "Корея", "Korea"],
-    ["프랑스", "Fransiya", "Франция", "France"],
-    ["독일", "Germaniya", "Германия", "Germany"],
-    ["호주", "Avstraliya", "Австралия", "Australia"],
-    ["영국", "Angliya", "Великобритания / Англия", "UK / England"],
-    ["빈칸", "bo'sh joy", "пустое поле / пропуск", "blank space"],
-    ["알맞다", "mos", "подходящий / верный", "suitable / appropriate"],
-    ["단어", "so'z", "слово", "word"],
-    ["선생님", "o'qituvchi", "учитель / преподаватель", "teacher"],
-    ["학생", "o'quvchi / talaba", "студент / ученик", "student"],
-    ["의사", "doktor", "врач", "doctor"],
-    ["회사원", "firma ishchisi", "офисный работник", "office worker"],
-    ["요리사", "oshpaz", "повар", "cook / chef"],
-    ["기자", "muxbir", "журналист / репортёр", "reporter / journalist"],
-    ["가수", "qo'shiqchi", "певец", "singer"],
-    ["군인", "askar", "военный / солдат", "soldier"],
-    ["인사말", "salomlashish gapi", "приветствие", "greeting"],
-    ["만나다", "uchrashmoq", "встречаться", "to meet"],
-    ["반갑다", "xursand bo'lmoq", "быть радом (встрече)", "glad to meet"],
-    ["한국말", "koreys tili", "корейская речь / язык", "Korean language"],
-    ["그림", "surat (chizilgan)", "рисунок / картина", "picture / drawing"],
-    ["이야기하다", "suhbatlashmoq", "разговаривать / беседовать", "to talk / to converse"],
-    ["저", "men/anavi", "я (вежл.) / вон тот", "I (humble) / that over there"],
-    ["씨", "janob/xonim", "господин / госпожа (суффикс)", "Mr. / Ms."],
-    ["네", "ha", "да", "yes"],
-    ["주부", "uy bekasi", "домохозяйка", "housewife"],
-    ["말하기", "gaplashish", "говорение / разговорная речь", "speaking"],
-    ["어느", "qaysi", "какой / который", "which"],
-    ["캐나다", "Kanada", "Канада", "Canada"],
-    ["국적", "millat / fuqarolik", "гражданство / национальность", "nationality"],
-    ["묻다", "so'ramoq", "спрашивать", "to ask"],
-    ["인도", "Hindiston", "Индия", "India"],
-    ["직업", "kasb", "профессия", "occupation / job"],
-    ["아니요", "yo'q", "нет", "no"],
-    ["여러분", "sizlar/azizlar", "все вы / уважаемые дамы и господа", "everyone"],
-    ["무엇", "nima", "что", "what"],
-    ["러시아", "Rossiya", "Россия", "Russia"],
-    ["파키스탄", "Pokiston", "Пакистан", "Pakistan"],
-    ["친구", "do’st", "друг", "friend"],
-    ["명함", "ism karta (vizitka)", "визитная карточка", "business card"],
-    ["이름", "ism", "имя", "name"],
-    ["전화번호", "telefon raqam", "номер телефона", "phone number"],
-    ["영어", "ingliz tili", "английский язык", "English language"],
-    ["블로그", "internetdagi blog", "блог", "blog"],
-    ["찾다", "qidirmoq", "искать / находить", "to find / to look for"],
-    ["과제", "topshiriq", "задание / домашняя работа", "assignment / task"],
-    ["문화", "madaniyat", "культура", "culture"]
+    ["나라", "mamlakat", "страна", "country", { ko: "어느 나라 사람이에요?", uz: "Siz qaysi mamlakatdansiz?", ru: "Из какой вы страны?", en: "Which country are you from?" }],
+    ["중국", "Xitoy", "Китай", "China", { ko: "왕밍 씨는 중국 사람이에요.", uz: "Van Min — xitoylik.", ru: "Ван Мин — китаец.", en: "Wang Ming is Chinese." }],
+    ["일본", "Yaponiya", "Япония", "Japan", { ko: "저는 일본 음식을 좋아해요.", uz: "Men yapon taomlarini yaxshi ko'raman.", ru: "Я люблю японскую еду.", en: "I like Japanese food." }],
+    ["미국", "AQSH (Amerika)", "США (Америка)", "the USA (America)", { ko: "마이클 씨는 미국 사람입니다.", uz: "Maykl — amerikalik.", ru: "Майкл — американец.", en: "Michael is American." }],
+    ["한국", "Koreya", "Корея", "Korea", { ko: "저는 한국에서 한국어를 공부해요.", uz: "Men Koreyada koreys tilini o'rganaman.", ru: "Я изучаю корейский язык в Корее.", en: "I study Korean in Korea." }],
+    ["프랑스", "Fransiya", "Франция", "France", { ko: "저는 프랑스 빵을 좋아해요.", uz: "Men fransuz nonini yaxshi ko'raman.", ru: "Я люблю французский хлеб.", en: "I like French bread." }],
+    ["독일", "Germaniya", "Германия", "Germany", { ko: "독일 자동차가 아주 좋아요.", uz: "Nemis mashinalari juda yaxshi.", ru: "Немецкие машины очень хорошие.", en: "German cars are very good." }],
+    ["호주", "Avstraliya", "Австралия", "Australia", { ko: "호주는 아주 커요.", uz: "Avstraliya juda katta.", ru: "Австралия очень большая.", en: "Australia is very big." }],
+    ["영국", "Buyuk Britaniya (Angliya)", "Великобритания (Англия)", "the UK (Britain)", { ko: "영국은 비가 자주 와요.", uz: "Buyuk Britaniyada tez-tez yomg'ir yog'adi.", ru: "В Великобритании часто идёт дождь.", en: "It often rains in the UK." }],
+    ["빈칸", "bo'sh joy (katak)", "пропуск, пустое место", "blank (to fill in)", { ko: "빈칸에 이름을 써요.", uz: "Bo'sh joyga ismimni yozaman.", ru: "Я пишу своё имя в пустое поле.", en: "I write my name in the blank." }],
+    ["알맞다", "mos kelmoq, to'g'ri bo'lmoq", "подходить, быть подходящим", "to be appropriate, to fit", { ko: "이 단어가 알맞아요.", uz: "Bu so'z mos keladi.", ru: "Это слово подходит.", en: "This word fits." }],
+    ["단어", "so'z", "слово", "word", { ko: "저는 매일 한국어 단어를 공부해요.", uz: "Men har kuni koreyscha so'zlarni o'rganaman.", ru: "Я каждый день учу корейские слова.", en: "I study Korean words every day." }],
+    ["선생님", "o'qituvchi, ustoz", "учитель, преподаватель", "teacher", { ko: "선생님은 한국 사람이에요.", uz: "O'qituvchi — koreys.", ru: "Учитель — кореец.", en: "The teacher is Korean." }],
+    ["학생", "o'quvchi, talaba", "ученик, студент", "student", { ko: "저는 서울대학교 학생입니다.", uz: "Men Seul milliy universiteti talabasiman.", ru: "Я студент Сеульского национального университета.", en: "I am a student at Seoul National University." }],
+    ["의사", "shifokor", "врач", "doctor", { ko: "제 친구는 의사예요.", uz: "Do'stim shifokor.", ru: "Мой друг — врач.", en: "My friend is a doctor." }],
+    ["회사원", "kompaniya xodimi", "служащий компании, офисный работник", "office worker, company employee", { ko: "우리 아버지는 회사원이에요.", uz: "Otam kompaniya xodimi.", ru: "Мой отец — служащий компании.", en: "My father is an office worker." }],
+    ["요리사", "oshpaz", "повар", "cook, chef", { ko: "요리사가 음식을 만들어요.", uz: "Oshpaz ovqat tayyorlaydi.", ru: "Повар готовит еду.", en: "The chef makes food." }],
+    ["기자", "jurnalist, muxbir", "журналист, репортёр", "reporter, journalist", { ko: "기자가 질문을 해요.", uz: "Jurnalist savol beradi.", ru: "Журналист задаёт вопрос.", en: "The reporter asks a question." }],
+    ["가수", "qo'shiqchi", "певец, певица", "singer", { ko: "이 가수는 노래를 잘해요.", uz: "Bu qo'shiqchi yaxshi kuylaydi.", ru: "Этот певец хорошо поёт.", en: "This singer sings well." }],
+    ["군인", "harbiy, askar", "военный, солдат", "soldier, service member", { ko: "제 형은 군인이에요.", uz: "Akam harbiy.", ru: "Мой старший брат — военный.", en: "My older brother is a soldier." }],
+    ["인사말", "salomlashish so'zlari", "слова приветствия", "greeting (words)", { ko: "'안녕하세요'는 한국어 인사말이에요.", uz: "«Annyonhaseyo» — koreyscha salomlashish so'zi.", ru: "«Аннёнхасэё» — корейское приветствие.", en: "'Annyeonghaseyo' is a Korean greeting." }],
+    ["만나다", "uchrashmoq, ko'rishmoq", "встречать(ся)", "to meet", { ko: "저는 오늘 친구를 만나요.", uz: "Men bugun do'stim bilan uchrashaman.", ru: "Сегодня я встречаюсь с другом.", en: "I'm meeting a friend today." }],
+    ["반갑다", "(ko'rishganidan) xursand bo'lmoq", "быть радым (встрече)", "to be glad (to meet someone)", { ko: "반갑습니다.", uz: "Tanishganimdan xursandman.", ru: "Рад(а) познакомиться.", en: "Nice to meet you." }],
+    ["한국말", "koreys tili", "корейский язык", "Korean (language)", { ko: "마리아 씨는 한국말을 잘해요.", uz: "Mariya koreyscha yaxshi gapiradi.", ru: "Мария хорошо говорит по-корейски.", en: "Maria speaks Korean well." }],
+    ["그림", "rasm, surat", "рисунок, картина", "picture, drawing", { ko: "이 그림이 아주 예뻐요.", uz: "Bu rasm juda chiroyli.", ru: "Эта картина очень красивая.", en: "This picture is very pretty." }],
+    ["이야기하다", "gaplashmoq, suhbatlashmoq", "разговаривать, беседовать", "to talk, to chat", { ko: "우리는 카페에서 이야기해요.", uz: "Biz kafeda suhbatlashamiz.", ru: "Мы разговариваем в кафе.", en: "We talk at a café." }],
+    ["저", "men (kamtarona); anavi", "я (вежливо); вон тот", "I (humble); that (over there)", { ko: "저는 우즈베키스탄 사람입니다.", uz: "Men o'zbekistonlikman.", ru: "Я из Узбекистана.", en: "I am from Uzbekistan." }],
+    ["씨", "janob / xonim (ismdan keyin)", "господин / госпожа (после имени)", "Mr. / Ms. (after a name)", { ko: "민수 씨는 한국 사람이에요.", uz: "Minsu — koreys.", ru: "Минсу — кореец.", en: "Minsu is Korean." }],
+    ["네", "ha", "да", "yes", { ko: "네, 저는 학생이에요.", uz: "Ha, men talabaman.", ru: "Да, я студент.", en: "Yes, I'm a student." }],
+    ["주부", "uy bekasi", "домохозяйка", "homemaker, housewife", { ko: "우리 어머니는 주부예요.", uz: "Onam uy bekasi.", ru: "Моя мама — домохозяйка.", en: "My mother is a homemaker." }],
+    ["말하기", "gapirish (nutq)", "говорение", "speaking (skill)", { ko: "오늘은 말하기를 연습해요.", uz: "Bugun gapirishni mashq qilamiz.", ru: "Сегодня мы тренируем говорение.", en: "Today we practice speaking." }],
+    ["어느", "qaysi", "какой, который (из)", "which", { ko: "어느 책이 좋아요?", uz: "Qaysi kitob yaxshi?", ru: "Какая книга хорошая?", en: "Which book is good?" }],
+    ["캐나다", "Kanada", "Канада", "Canada", { ko: "제 친구는 캐나다에 살아요.", uz: "Do'stim Kanadada yashaydi.", ru: "Мой друг живёт в Канаде.", en: "My friend lives in Canada." }],
+    ["국적", "fuqarolik", "гражданство", "nationality, citizenship", { ko: "제 국적은 우즈베키스탄이에요.", uz: "Mening fuqaroligim — O'zbekiston.", ru: "Моё гражданство — Узбекистан.", en: "My nationality is Uzbek." }],
+    ["묻다", "so'ramoq", "спрашивать", "to ask", { ko: "선생님이 학생 이름을 물어요.", uz: "O'qituvchi talabaning ismini so'raydi.", ru: "Учитель спрашивает имя студента.", en: "The teacher asks the student's name." }],
+    ["인도", "Hindiston", "Индия", "India", { ko: "라지 씨는 인도 사람이에요.", uz: "Raj — hindistonlik.", ru: "Радж — индиец.", en: "Raj is Indian." }],
+    ["직업", "kasb", "профессия", "occupation, job", { ko: "직업이 뭐예요?", uz: "Kasbingiz nima?", ru: "Кем вы работаете?", en: "What do you do for a living?" }],
+    ["아니요", "yo'q", "нет", "no", { ko: "아니요, 저는 의사가 아니에요.", uz: "Yo'q, men shifokor emasman.", ru: "Нет, я не врач.", en: "No, I'm not a doctor." }],
+    ["여러분", "hammangiz (murojaat)", "все вы (обращение)", "everyone (you all)", { ko: "여러분, 안녕하세요?", uz: "Hammaga salom!", ru: "Здравствуйте, все!", en: "Hello, everyone!" }],
+    ["무엇", "nima", "что", "what", { ko: "이것은 무엇입니까?", uz: "Bu nima?", ru: "Что это?", en: "What is this?" }],
+    ["러시아", "Rossiya", "Россия", "Russia", { ko: "러시아는 겨울이 아주 추워요.", uz: "Rossiyada qish juda sovuq.", ru: "В России очень холодная зима.", en: "Winters in Russia are very cold." }],
+    ["파키스탄", "Pokiston", "Пакистан", "Pakistan", { ko: "파키스탄은 인도 옆에 있어요.", uz: "Pokiston Hindiston yonida joylashgan.", ru: "Пакистан находится рядом с Индией.", en: "Pakistan is next to India." }],
+    ["친구", "do'st", "друг, подруга", "friend", { ko: "친구가 한국에 와요.", uz: "Do'stim Koreyaga keladi.", ru: "Мой друг приезжает в Корею.", en: "My friend is coming to Korea." }],
+    ["명함", "vizitka", "визитная карточка", "business card", { ko: "이것은 제 명함입니다.", uz: "Bu mening vizitkam.", ru: "Это моя визитная карточка.", en: "This is my business card." }],
+    ["이름", "ism", "имя", "name", { ko: "제 이름은 김민수입니다.", uz: "Mening ismim Kim Minsu.", ru: "Меня зовут Ким Минсу.", en: "My name is Kim Minsu." }],
+    ["전화번호", "telefon raqami", "номер телефона", "phone number", { ko: "전화번호가 뭐예요?", uz: "Telefon raqamingiz qanday?", ru: "Какой у вас номер телефона?", en: "What is your phone number?" }],
+    ["영어", "ingliz tili", "английский язык", "English (language)", { ko: "저는 영어를 조금 해요.", uz: "Men biroz inglizcha gapiraman.", ru: "Я немного говорю по-английски.", en: "I speak a little English." }],
+    ["블로그", "blog", "блог", "blog", { ko: "저는 블로그에 글을 써요.", uz: "Men blogimga maqola yozaman.", ru: "Я пишу посты в блог.", en: "I write posts on my blog." }],
+    ["찾다", "qidirmoq; topmoq", "искать; находить", "to look for; to find", { ko: "저는 지금 가방을 찾아요.", uz: "Men hozir sumkamni qidiryapman.", ru: "Я сейчас ищу сумку.", en: "I'm looking for my bag now." }],
+    ["과제", "topshiriq, vazifa", "задание", "assignment, task", { ko: "오늘 과제가 많아요.", uz: "Bugun topshiriqlar ko'p.", ru: "Сегодня много заданий.", en: "There are a lot of assignments today." }],
+    ["문화", "madaniyat", "культура", "culture", { ko: "저는 한국 문화를 좋아해요.", uz: "Men Koreya madaniyatini yaxshi ko'raman.", ru: "Я люблю корейскую культуру.", en: "I like Korean culture." }]
   ],
   "2과": [
     ["책상", "parta", "письменный стол / парта", "desk"],
@@ -615,7 +618,7 @@ const RAW_1A_DATA: Record<(typeof UNITS_1A)[number], [string, string, string, st
 
 /** Book 1A vocabulary, in textbook order within each unit. */
 export const VOCAB_1A: VocabWord[] = UNITS_1A.flatMap((unit) =>
-  RAW_1A_DATA[unit].map(([ko, uz, ru, en], index) => ({
+  RAW_1A_DATA[unit].map(([ko, uz, ru, en, example], index) => ({
     id: `1A-${unit}-${index + 1}`,
     book: '1A',
     unit,
@@ -623,5 +626,6 @@ export const VOCAB_1A: VocabWord[] = UNITS_1A.flatMap((unit) =>
     uz,
     ru,
     en,
+    ...(example ? { example } : {}),
   })),
 );

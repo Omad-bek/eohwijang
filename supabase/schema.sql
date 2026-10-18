@@ -84,6 +84,8 @@ create table if not exists public.global_words (
   uz         text not null default '',
   ru         text not null default '',
   en         text not null default '',
+  -- { ko, uz, ru, en }: a sentence using the word, at the book's grammar level.
+  example    jsonb check (example is null or (jsonb_typeof(example) = 'object' and octet_length(example::text) <= 2000)),
   deleted    boolean not null default false,
   updated_at timestamptz not null default now(),
   primary key (book, unit, ko)
@@ -92,10 +94,10 @@ alter table public.global_words enable row level security;
 revoke all on public.global_words from anon, authenticated;
 
 create or replace function public.get_global_words()
-returns table (book text, unit text, ko text, uz text, ru text, en text, deleted boolean)
+returns table (book text, unit text, ko text, uz text, ru text, en text, deleted boolean, example jsonb)
 language sql stable security definer set search_path = public
 as $$
-  select g.book, g.unit, g.ko, g.uz, g.ru, g.en, g.deleted from public.global_words g order by g.updated_at, g.book, g.unit;
+  select g.book, g.unit, g.ko, g.uz, g.ru, g.en, g.deleted, g.example from public.global_words g order by g.updated_at, g.book, g.unit;
 $$;
 
 create or replace function public.is_admin(p_token text)
@@ -116,13 +118,14 @@ returns boolean
 language sql security definer set search_path = public
 as $$ select public.is_admin(p_token); $$;
 
--- p_words: [{ "book", "unit", "ko", "uz", "ru", "en", "deleted"?, "revert"? }]
+-- p_words: [{ "book", "unit", "ko", "uz", "ru", "en", "example"?, "deleted"?, "revert"? }]
 -- revert = true removes the global row, restoring the bundled word (or dropping an added one).
+-- A write without an "example" key keeps the stored example.
 create or replace function public.admin_put_words(p_token text, p_words jsonb)
 returns integer
 language plpgsql security definer set search_path = public
 as $$
-declare w jsonb; n integer := 0;
+declare w jsonb; ex jsonb; n integer := 0;
 begin
   if not public.is_admin(p_token) then
     raise exception 'forbidden';
@@ -134,11 +137,13 @@ begin
     if coalesce((w->>'revert')::boolean, false) then
       delete from public.global_words where book = w->>'book' and unit = w->>'unit' and ko = w->>'ko';
     else
-      insert into public.global_words as g (book, unit, ko, uz, ru, en, deleted, updated_at)
+      ex := nullif(nullif(w->'example', 'null'::jsonb), '{}'::jsonb);
+      insert into public.global_words as g (book, unit, ko, uz, ru, en, example, deleted, updated_at)
       values (trim(w->>'book'), trim(w->>'unit'), trim(w->>'ko'), coalesce(trim(w->>'uz'), ''), coalesce(trim(w->>'ru'), ''),
-              coalesce(trim(w->>'en'), ''), coalesce((w->>'deleted')::boolean, false), now())
+              coalesce(trim(w->>'en'), ''), ex, coalesce((w->>'deleted')::boolean, false), now())
       on conflict (book, unit, ko) do update
-        set uz = excluded.uz, ru = excluded.ru, en = excluded.en, deleted = excluded.deleted, updated_at = now();
+        set uz = excluded.uz, ru = excluded.ru, en = excluded.en, deleted = excluded.deleted, updated_at = now(),
+            example = case when w ? 'example' then excluded.example else g.example end;
     end if;
     n := n + 1;
   end loop;

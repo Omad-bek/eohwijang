@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Book, VocabEntry } from '../types';
 import { BUILT_IN_BOOKS } from './books';
 import { SYNC_AVAILABLE, rpc } from './sync';
+import { cleanExample } from './storage';
 
 /**
  * Global vocabulary updates published by the author through admin mode: the same for every
@@ -20,7 +21,8 @@ function clean(raw: unknown): GlobalWord | null {
   const r = raw as Partial<GlobalWord> | null;
   if (!r || typeof r.book !== 'string' || typeof r.unit !== 'string' || typeof r.ko !== 'string') return null;
   const s = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
-  const w = { book: s(r.book), unit: s(r.unit).normalize('NFC'), ko: s(r.ko).normalize('NFC'), uz: s(r.uz), ru: s(r.ru), en: s(r.en), deleted: r.deleted === true };
+  const example = cleanExample(r.example);
+  const w = { book: s(r.book), unit: s(r.unit).normalize('NFC'), ko: s(r.ko).normalize('NFC'), uz: s(r.uz), ru: s(r.ru), en: s(r.en), deleted: r.deleted === true, ...(example ? { example } : {}) };
   return w.book && w.unit && w.ko && !w.book.includes('|') && !w.unit.includes('|') ? w : null;
 }
 
@@ -66,11 +68,12 @@ export function applyGlobal(rows: GlobalWord[], bundled: readonly Book[] = BUILT
     const gone = new Set<number>();
     const added: VocabEntry[] = [];
     for (const r of list) {
-      const entry: VocabEntry = { unit: r.unit, ko: r.ko, uz: r.uz, ru: r.ru, en: r.en };
+      const entry: VocabEntry = { unit: r.unit, ko: r.ko, uz: r.uz, ru: r.ru, en: r.en, ...(r.example ? { example: r.example } : {}) };
       const at = index.get(`${r.unit}|${r.ko}`);
       if (at !== undefined) {
+        // An edit without its own example keeps the bundled one.
         if (r.deleted) gone.add(at);
-        else words[at] = entry;
+        else words[at] = { ...words[at], ...entry };
       } else if (!r.deleted) added.push(entry);
     }
     const kept = words.filter((_, i) => !gone.has(i));

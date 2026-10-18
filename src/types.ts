@@ -2,6 +2,14 @@ export type PromptLang = 'uz' | 'ru' | 'en' | 'all';
 export type UiLang = 'en' | 'ru' | 'uz' | 'ko';
 export type GlossLang = 'uz' | 'ru' | 'en';
 
+/** A sentence using the word, pitched at the book's grammar level, with direct translations. */
+export interface Example {
+  ko: string;
+  uz: string;
+  ru: string;
+  en: string;
+}
+
 /** One vocabulary entry. `ko` may hold alternatives separated by "/" (e.g. "아래/ 밑"). */
 export interface VocabEntry {
   unit: string;
@@ -9,6 +17,7 @@ export interface VocabEntry {
   uz: string;
   ru: string;
   en: string;
+  example?: Example;
 }
 
 export interface Book {

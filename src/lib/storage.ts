@@ -1,4 +1,4 @@
-import type { Book, PromptLang, Settings, UiLang, UserData, VocabEntry, WordMemory } from '../types';
+import type { Book, Example, PromptLang, Settings, UiLang, UserData, VocabEntry, WordMemory } from '../types';
 import { DEFAULT_STAGE, MAX_STAGE, MIN_STAGE, builtInBook } from './books';
 
 const KEY = 'project-vocab:v1';
@@ -54,13 +54,24 @@ function isEntry(x: unknown): x is VocabEntry {
   return !!e && typeof e.unit === 'string' && typeof e.ko === 'string' && e.unit.trim() !== '' && e.ko.trim() !== '';
 }
 
+/** A usable example sentence (Korean plus at least one translation), or undefined. */
+export function cleanExample(raw: unknown): Example | undefined {
+  const x = raw as Partial<Example> | null;
+  if (!x || typeof x !== 'object' || typeof x.ko !== 'string' || !x.ko.trim()) return undefined;
+  const s = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
+  const ex = { ko: x.ko.trim().normalize('NFC'), uz: s(x.uz), ru: s(x.ru), en: s(x.en) };
+  return ex.uz || ex.ru || ex.en ? ex : undefined;
+}
+
 function cleanEntry(e: VocabEntry): VocabEntry {
+  const example = cleanExample(e.example);
   return {
     unit: e.unit.trim().normalize('NFC'),
     ko: e.ko.trim().normalize('NFC'),
     uz: String(e.uz ?? '').trim(),
     ru: String(e.ru ?? '').trim(),
     en: String(e.en ?? '').trim(),
+    ...(example ? { example } : {}),
   };
 }
 

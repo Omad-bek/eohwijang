@@ -53,6 +53,15 @@ export default defineConfig(({ mode }) => {
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,webmanifest}'],
+        // The Nanum Gothic fallback is ~1.8 MB in 92 range chunks: cache only the ones actually used, not all of them at install.
+        globIgnores: ['**/nanum-gothic-*'],
+        runtimeCaching: [
+          {
+            urlPattern: /\/assets\/nanum-gothic-.*\.woff2?$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'hangul-fallback', expiration: { maxEntries: 100 } },
+          },
+        ],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: `${base}index.html`,
         cleanupOutdatedCaches: true,
