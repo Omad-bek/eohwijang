@@ -74,4 +74,4 @@ Open the app with `#admin` at the end of the URL. The panel is only hidden, not 
 
 ## Icons
 
-`node scripts/make-icons.mjs` regenerates `public/` icons (the 어 mark in the emerald frame).
+`npx -p playwright node scripts/make-icons.mjs` regenerates `public/` icons from the C4-2nd "Jamo Tiles" art in `src/design-lab/icons.tsx` (the dev-only icon lab at `/#design-lab/icons`).
