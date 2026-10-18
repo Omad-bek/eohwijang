@@ -325,7 +325,7 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
   const uiGloss: GlossLang = data.settings.uiLang === 'ko' ? 'en' : data.settings.uiLang;
 
   return (
-    <main className="h-full overflow-y-auto overscroll-contain">
+    <main className="scroll-smooth-motion h-full overflow-y-auto overscroll-contain">
       <div className="mx-auto max-w-5xl space-y-5 px-4 pb-14 pt-4 sm:px-6 md:pt-6">
         <BookTabs t={t} books={books} bookId={book.id} onBook={onBook} onAddBook={onAddBook} />
 
@@ -380,6 +380,7 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
                     <StageCard
                       key={s.key}
                       t={t}
+                      order={i}
                       stage={s}
                       stats={selected.stats[i]}
                       onPreview={() => onPreview(s)}

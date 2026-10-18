@@ -92,6 +92,10 @@
   --color-gold-lip: #b78714;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   margin: 0;
@@ -404,10 +408,11 @@ select {
 /*
  * Tactile buttons: a solid lip under the face that the face presses into on tap.
  * Each button sets its own lip color through --lip.
+ * No transform at rest: a resting transform can promote each button to its own GPU layer, which
+ * then scrolls out of step with its (unpromoted) card inside the app's overflow scroller.
  */
 .juicy {
   box-shadow: 0 5px 0 var(--lip, var(--color-rule));
-  transform: translateY(0);
   transition:
     transform 90ms ease-out,
     box-shadow 90ms ease-out,
@@ -423,6 +428,20 @@ select {
 .juicy:disabled {
   filter: grayscale(0.5) opacity(0.6);
   box-shadow: 0 5px 0 var(--lip, var(--color-rule));
+  transform: none;
+}
+
+/* Scroll-in for cards: useReveal adds .is-revealed once the element enters the viewport. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 700ms ease-out,
+    transform 700ms var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+.reveal.is-revealed {
+  opacity: 1;
   transform: none;
 }
 .lip-accent {
@@ -465,5 +484,23 @@ select {
   .juicy,
   .press {
     transition: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The home screen scrolls inside <main>, not the page, so smooth it there too. */
+  .scroll-smooth-motion {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

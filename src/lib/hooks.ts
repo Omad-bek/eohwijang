@@ -14,7 +14,7 @@ export function useVisualViewportHeight() {
     const apply = () => {
       const h = vv ? vv.height : window.innerHeight;
       document.documentElement.style.setProperty('--app-h', `${Math.round(h)}px`);
-      if (window.scrollY !== 0) window.scrollTo(0, 0);
+      if (window.scrollY !== 0) window.scrollTo({ top: 0, behavior: 'instant' });
     };
     apply();
     vv?.addEventListener('resize', apply);
@@ -26,6 +26,31 @@ export function useVisualViewportHeight() {
       window.removeEventListener('resize', apply);
     };
   }, []);
+}
+
+/**
+ * Marks an element revealed the first time it scrolls into view (the `.reveal` class does the
+ * fade-and-rise). Uses the viewport as root, so it also works inside nested scrollers like <main>.
+ */
+export function useReveal<T extends Element>() {
+  const ref = useRef<T>(null);
+  const [revealed, setRevealed] = useState(() => typeof IntersectionObserver === 'undefined');
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || revealed) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setRevealed(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [revealed]);
+  return { ref, revealed };
 }
 
 export function useUserData() {
