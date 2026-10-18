@@ -12,6 +12,7 @@ import { KoreanKeyboard } from './KoreanKeyboard';
 import { Seal } from './Seal';
 import { Burst } from './Ring';
 import { XP_PER_WORD } from '../lib/activity';
+import { playCombo, playCorrect, playPop, playWrong } from '../lib/soundEngine';
 
 interface Props {
   t: Strings;
@@ -258,6 +259,8 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
           setCombo(streak);
           setBest((b) => Math.max(b, streak));
         }
+        if (first && MILESTONES.has(streak)) playCombo();
+        else playCorrect(first ? streak : 0);
         cheer(first ? streak : 0);
         setValue('');
         advance(queue.slice(1), nextRound);
@@ -268,6 +271,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
         setPraise(null);
         setPhase({ kind: 'review', result, typed });
         setValue('');
+        playWrong();
         shake(answerRow.current, inputRef.current);
         flashEdge('wrong');
       }
@@ -276,12 +280,14 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
 
     // Review: the learner must type the correct word before moving on; it then waits for the next round.
     if (isCorrect(typed, current.word.ko)) {
+      playCorrect();
       glow(inputRef.current);
       flashEdge('right');
       setValue('');
       setPhase({ kind: 'ask' });
       advance(queue.slice(1), [...nextRound, current]);
     } else {
+      playWrong();
       shake(answerRow.current, inputRef.current);
       flashEdge('wrong');
       setValue('');
@@ -300,6 +306,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
     setPraise(null);
     setPhase({ kind: 'review', result: checkAnswer('', current.word.ko), typed: '' });
     setValue('');
+    playWrong();
     shake(answerRow.current, inputRef.current);
     flashEdge('skip');
     inputRef.current?.focus({ preventScroll: true });
@@ -407,7 +414,10 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
       <div className="mb-3 flex items-center gap-3">
         <button
           type="button"
-          onClick={onExit}
+          onClick={() => {
+            playPop();
+            onExit();
+          }}
           onMouseDown={(e) => e.preventDefault()}
           className="press -ml-1 flex h-9 shrink-0 items-center gap-1.5 rounded-full border-2 border-rule bg-ink-2 px-3 text-[13px] font-extrabold text-hanji hover:border-hanji-2/40"
         >
@@ -513,13 +523,22 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
           <footer className="grid shrink-0 gap-3 border-t-2 border-rule pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 md:grid-cols-2 md:px-8 md:pb-7 md:pt-5">
             <button
               type="button"
-              onClick={onExit}
+              onClick={() => {
+                playPop();
+                onExit();
+              }}
               className={`juicy h-12 rounded-2xl text-[15px] font-black md:order-1 ${nextStage ? 'lip-rule border-2 border-rule bg-ink-2 text-hanji-2 hover:text-hanji' : 'lip-accent bg-accent text-white md:col-span-2'}`}
             >
               {t.backToLevels}
             </button>
             {nextStage && (
-              <button type="button" onClick={onNext} className="juicy lip-accent h-12 rounded-2xl bg-accent text-[15px] font-black text-white md:order-2">
+              <button
+                type="button"
+                onClick={() => {
+                  playPop();
+                  onNext();
+                }}
+                className="juicy lip-accent h-12 rounded-2xl bg-accent text-[15px] font-black text-white md:order-2">
                 {t.nextStage} · <span className="font-serif">{nextStage.unit}</span> {t.stage(nextStage.index + 1)}
               </button>
             )}
@@ -634,7 +653,10 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => toggleKeyboard()}
+              onClick={() => {
+                playPop();
+                toggleKeyboard();
+              }}
               aria-pressed={kbOpen}
               aria-label={t.keyboard}
               title={t.keyboard}
@@ -695,6 +717,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
+                    playPop();
                     setImeHint(false);
                     setValue('');
                     toggleKeyboard(true);
@@ -733,7 +756,10 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
           {kbOpen && (
             <KoreanKeyboard
               t={t}
-              onKey={pressKey}
+              onKey={(key) => {
+                playPop();
+                pressKey(key);
+              }}
               onEnter={() => document.getElementById('answer-submit')?.click()}
               enterLabel={phase.kind === 'review' ? t.continue : t.check}
               flash={keyFlash}

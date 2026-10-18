@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, Cloud, CloudAlert, CloudOff, Database, Languages, Moon, RefreshCw, Sun, WifiOff } from 'lucide-react';
+import { Check, ChevronDown, Cloud, CloudAlert, CloudOff, Database, Languages, Moon, RefreshCw, Sun, Volume2, VolumeX, WifiOff } from 'lucide-react';
 import type { PromptLang, Settings, UiLang } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { CloudSync } from '../lib/hooks';
@@ -18,6 +18,8 @@ interface Props {
   admin?: boolean;
   theme: Theme;
   onToggleTheme: () => void;
+  soundOn: boolean;
+  onToggleSound: () => void;
 }
 
 const UI_LANGS: { value: UiLang; code: string; name: string }[] = [
@@ -138,7 +140,26 @@ function ThemeButton({ t, theme, onToggle }: { t: Strings; theme: Theme; onToggl
   );
 }
 
-export function Navbar({ t, settings, online, onChange, onHome, onData, sync, onSync, admin = false, theme, onToggleTheme }: Props) {
+/** Sound on / off: shows the current state (a speaker with waves, or crossed out). */
+function SoundButton({ t, on, onToggle }: { t: Strings; on: boolean; onToggle: () => void }) {
+  const label = on ? t.muteSounds : t.unmuteSounds;
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      onMouseDown={(e) => e.preventDefault()}
+      aria-label={label}
+      title={label}
+      className="press grid size-9 shrink-0 place-items-center rounded-full border-2 border-rule bg-ink-2 text-hanji-2 hover:border-hanji-2/40 hover:text-hanji"
+    >
+      <span key={on ? 'on' : 'off'} className="anim-pop grid place-items-center">
+        {on ? <Volume2 size={17} strokeWidth={2.4} aria-hidden /> : <VolumeX size={17} strokeWidth={2.4} className="text-hanji-2/70" aria-hidden />}
+      </span>
+    </button>
+  );
+}
+
+export function Navbar({ t, settings, online, onChange, onHome, onData, sync, onSync, admin = false, theme, onToggleTheme, soundOn, onToggleSound }: Props) {
   const prompt: { value: PromptLang; label: string; title: string }[] = [
     { value: 'uz', label: 'UZ', title: `${t.langName.uz} → 한국어` },
     { value: 'ru', label: 'RU', title: `${t.langName.ru} → 한국어` },
@@ -153,6 +174,8 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, sync, on
           <span className="whitespace-nowrap font-serif text-[24px] leading-none text-accent sm:text-[26px] md:text-[30px]">어휘장</span>
           {t.appName !== '어휘장' && <span className="hidden text-[13px] font-bold text-hanji-2 lg:inline">{t.appName}</span>}
         </button>
+
+        {!admin && <SoundButton t={t} on={soundOn} onToggle={onToggleSound} />}
 
         <ThemeButton t={t} theme={theme} onToggle={onToggleTheme} />
 

@@ -122,6 +122,8 @@ export interface Strings {
   bestCombo: string;
   darkMode: string;
   lightMode: string;
+  muteSounds: string;
+  unmuteSounds: string;
   offline: string;
   cloudSync: string;
   cloudSyncHint: string;
@@ -299,6 +301,8 @@ const en: Strings = {
   bestCombo: 'Best combo',
   darkMode: 'Dark mode',
   lightMode: 'Light mode',
+  muteSounds: 'Mute sounds',
+  unmuteSounds: 'Turn sounds on',
 };
 
 const ru: Strings = {
@@ -449,6 +453,8 @@ const ru: Strings = {
   bestCombo: 'Лучшее комбо',
   darkMode: 'Тёмная тема',
   lightMode: 'Светлая тема',
+  muteSounds: 'Выключить звук',
+  unmuteSounds: 'Включить звук',
 };
 
 const uz: Strings = {
@@ -599,6 +605,8 @@ const uz: Strings = {
   bestCombo: 'Eng yaxshi kombo',
   darkMode: 'Tungi rejim',
   lightMode: 'Kunduzgi rejim',
+  muteSounds: "Ovozni o'chirish",
+  unmuteSounds: 'Ovozni yoqish',
 };
 
 const ko: Strings = {
@@ -749,6 +757,8 @@ const ko: Strings = {
   bestCombo: '최고 콤보',
   darkMode: '다크 모드',
   lightMode: '라이트 모드',
+  muteSounds: '소리 끄기',
+  unmuteSounds: '소리 켜기',
 };
 
 export const STRINGS: Record<UiLang, Strings> = { en, ru, uz, ko };

@@ -6,6 +6,7 @@ import { useCloudSync, useNow, useOnline, useUserData, useVisualViewportHeight }
 import { applyOutcome, type Outcome } from './lib/srs';
 import { addActivity } from './lib/activity';
 import { useTheme } from './lib/theme';
+import { useSound } from './lib/soundEngine';
 import { clearSession, loadSession, sessionFor, type SavedSession } from './lib/session';
 import { Home } from './components/Home';
 import { Manager } from './components/Manager';
@@ -44,6 +45,7 @@ export default function App() {
   const [admin, setAdmin] = useState(isAdminHash);
   const now = useNow();
   const { theme, toggle: toggleTheme } = useTheme();
+  const { on: soundOn, toggle: toggleSound } = useSound();
 
   const [bookId, setBookId] = useState(() => readBook() ?? '1A');
   const [view, setView] = useState<View>({ kind: 'home' });
@@ -170,6 +172,8 @@ export default function App() {
           onSync={() => setSyncOpen(true)}
           theme={theme}
           onToggleTheme={toggleTheme}
+          soundOn={soundOn}
+          onToggleSound={toggleSound}
         />
 
         <div className="mx-auto min-h-0 w-full max-w-7xl flex-1">
