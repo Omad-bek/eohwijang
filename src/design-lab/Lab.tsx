@@ -6,6 +6,7 @@
  */
 import { Suspense, lazy, useEffect, useState, type ComponentType, type LazyExoticComponent } from 'react';
 import { FlaskConical, Moon, Sun } from 'lucide-react';
+import { AmbientParticles } from '../components/AmbientParticles';
 
 interface Variant {
   id: string;
@@ -19,9 +20,9 @@ const PAGES: { id: string; label: string; variants: Variant[] }[] = [
     id: 'welcome',
     label: 'Welcome',
     variants: [
-      { id: 'a', label: 'Warm desk', Page: lazy(() => import('../pages/welcome/WelcomeA')) },
-      { id: 'b', label: 'Quiet hanji', Page: lazy(() => import('../pages/welcome/WelcomeB')) },
-      { id: 'c', label: 'Jamo tiles', Page: lazy(() => import('../pages/welcome/WelcomeC')) },
+      { id: 'a', label: 'Playground', Page: lazy(() => import('../pages/welcome/WelcomeA')) },
+      { id: 'b', label: 'Story', Page: lazy(() => import('../pages/welcome/WelcomeB')) },
+      { id: 'c', label: 'Bento', Page: lazy(() => import('../pages/welcome/WelcomeC')) },
     ],
   },
 ];
@@ -54,8 +55,10 @@ export default function Lab() {
 
   const { Page } = variant;
   return (
-    <div className="flex h-full flex-col bg-ink text-hanji">
-      <nav aria-label="Design lab" className="flex h-11 shrink-0 items-center gap-1.5 overflow-x-auto border-b-2 border-rule bg-ink-2 px-3">
+    <div className="relative flex h-full flex-col bg-ink text-hanji">
+      {/* The app-wide ambient layer, so previews sit on the same ground as the live app. */}
+      <AmbientParticles />
+      <nav aria-label="Design lab" className="relative flex h-11 shrink-0 items-center gap-1.5 overflow-x-auto border-b-2 border-rule bg-ink-2 px-3">
         <span className="mr-1.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-amber">
           <FlaskConical size={14} aria-hidden /> Lab
         </span>
@@ -102,7 +105,7 @@ export default function Lab() {
           {dark ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
         </button>
       </nav>
-      <div className="min-h-0 flex-1">
+      <div className="relative min-h-0 flex-1">
         <Suspense fallback={null}>
           {/* Keyed so switching variants remounts: entrance motion and the install delay replay. */}
           <Page key={`${page.id}/${variant.id}`} />

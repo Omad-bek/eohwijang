@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, Cloud, CloudAlert, CloudOff, Database, Languages, Moon, RefreshCw, Sun, Volume2, VolumeX, WifiOff } from 'lucide-react';
+import { Check, ChevronDown, Cloud, CloudAlert, CloudOff, Database, Info, Languages, Moon, RefreshCw, Sun, Volume2, VolumeX, WifiOff } from 'lucide-react';
 import type { PromptLang, Settings, UiLang } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { CloudSync } from '../lib/hooks';
@@ -12,6 +12,8 @@ interface Props {
   onChange: (patch: Partial<Settings>) => void;
   onHome: () => void;
   onData: () => void;
+  /** Opens the Welcome page (#about). The button shows from md up; phones get a link at the foot of the dashboard. */
+  onAbout?: () => void;
   sync: CloudSync;
   onSync: () => void;
   /** Admin view (#admin): only the logo and Cloud Sync status, no learner controls. */
@@ -159,7 +161,7 @@ function SoundButton({ t, on, onToggle }: { t: Strings; on: boolean; onToggle: (
   );
 }
 
-export function Navbar({ t, settings, online, onChange, onHome, onData, sync, onSync, admin = false, theme, onToggleTheme, soundOn, onToggleSound }: Props) {
+export function Navbar({ t, settings, online, onChange, onHome, onData, onAbout, sync, onSync, admin = false, theme, onToggleTheme, soundOn, onToggleSound }: Props) {
   const prompt: { value: PromptLang; label: string; title: string }[] = [
     { value: 'uz', label: 'UZ', title: `${t.langName.uz} → 한국어` },
     { value: 'ru', label: 'RU', title: `${t.langName.ru} → 한국어` },
@@ -218,6 +220,18 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, sync, on
               → 한국어
             </span>
           </div>
+
+          {onAbout && (
+            <button
+              type="button"
+              onClick={onAbout}
+              aria-label={t.about}
+              title={t.about}
+              className="press hidden size-9 shrink-0 place-items-center rounded-full border-2 border-rule bg-ink-2 text-hanji-2 hover:border-hanji-2/40 hover:text-hanji md:grid"
+            >
+              <Info size={17} strokeWidth={2.4} aria-hidden />
+            </button>
+          )}
 
           <button
             type="button"

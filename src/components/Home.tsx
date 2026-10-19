@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronRight, Flame, Plus, RotateCcw, Star, StepForward } from 'lucide-react';
+import { ChevronRight, Flame, Info, Plus, RotateCcw, Star, StepForward } from 'lucide-react';
 import type { Book, GlossLang, Stage, UserData, WordMemory } from '../types';
 import type { Strings } from '../lib/i18n';
 import { stagesForUnit } from '../lib/books';
@@ -27,6 +27,8 @@ interface Props {
   resumable: (s: Stage) => SavedSession | null;
   onResume: (s: Stage) => void;
   onAddBook: () => void;
+  /** Opens the Welcome page; shown here only below md, where the navbar has no room for it. */
+  onAbout?: () => void;
 }
 
 interface UnitSummary {
@@ -284,7 +286,7 @@ function ReviewCard({ t, stage, onStart }: { t: Strings; stage: Stage; onStart: 
   );
 }
 
-export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, onStart, resumable, onResume, onAddBook }: Props) {
+export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, onStart, resumable, onResume, onAddBook, onAbout }: Props) {
   const book = books.find((b) => b.id === bookId) ?? books[0];
   const size = data.settings.stageSize;
 
@@ -398,6 +400,16 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
               {review && <ReviewCard t={t} stage={review} onStart={onStart} />}
             </div>
           </>
+        )}
+
+        {onAbout && (
+          <button
+            type="button"
+            onClick={onAbout}
+            className="press mx-auto flex items-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-bold text-hanji-2 hover:text-hanji md:hidden"
+          >
+            <Info size={15} aria-hidden /> {t.about}
+          </button>
         )}
       </div>
     </main>

@@ -61,6 +61,8 @@ export interface Strings {
   stageSize: string;
   stageSizeHint: string;
   data: string;
+  /** The navbar info button and the dashboard link that open the Welcome page (#about). */
+  about: string;
   addWords: string;
   addWordsHint: string;
   targetBook: string;
@@ -217,6 +219,7 @@ const en: Strings = {
   stageSize: 'Words per stage',
   stageSizeHint: 'Units are split into stages of this size. Progress is kept per word, so changing it loses nothing.',
   data: 'Words & data',
+  about: 'About 어휘장',
   addWords: 'Add words',
   addWordsHint: 'One word per line: Korean - Uzbek - Russian - English (dashes or tabs between columns). A line like "1과" or "# Unit 2" starts a new unit. JSON ([{ "unit", "ko", "uz", "ru", "en" }]) also works.',
   targetBook: 'Add to',
@@ -372,6 +375,7 @@ const ru: Strings = {
   stageSize: 'Слов в этапе',
   stageSizeHint: 'Уроки делятся на этапы такого размера. Прогресс хранится по словам, поэтому ничего не теряется.',
   data: 'Слова и данные',
+  about: 'О проекте',
   addWords: 'Добавить слова',
   addWordsHint: 'Одно слово на строку: корейский - узбекский - русский - английский (через дефис или табуляцию). Строка вида «1과» или «# Урок 2» начинает новый урок. Подходит и JSON ([{ "unit", "ko", "uz", "ru", "en" }]).',
   targetBook: 'Куда',
@@ -527,6 +531,7 @@ const uz: Strings = {
   stageSize: "Bosqichdagi so'zlar",
   stageSizeHint: "Darslar shu o'lchamdagi bosqichlarga bo'linadi. Natija har bir so'z bo'yicha saqlanadi, hech narsa yo'qolmaydi.",
   data: "So'zlar va ma'lumotlar",
+  about: 'Loyiha haqida',
   addWords: "So'z qo'shish",
   addWordsHint: "Har qatorda bitta so'z: koreyscha - o'zbekcha - ruscha - inglizcha (chiziqcha yoki tab bilan). \"1과\" yoki \"# Dars 2\" kabi qator yangi darsni boshlaydi. JSON ([{ \"unit\", \"ko\", \"uz\", \"ru\", \"en\" }]) ham bo'ladi.",
   targetBook: 'Qayerga',
@@ -682,6 +687,7 @@ const ko: Strings = {
   stageSize: '단계당 단어 수',
   stageSizeHint: '단원을 이 크기의 단계로 나눕니다. 진도는 단어별로 저장되므로 바꿔도 사라지지 않습니다.',
   data: '단어와 데이터',
+  about: '어휘장 소개',
   addWords: '단어 추가',
   addWordsHint: '한 줄에 한 단어: 한국어 - 우즈베크어 - 러시아어 - 영어 (하이픈이나 탭으로 구분). "1과"나 "# 2단원" 같은 줄은 새 단원을 시작합니다. JSON([{ "unit", "ko", "uz", "ru", "en" }])도 됩니다.',
   targetBook: '추가할 컬렉션',

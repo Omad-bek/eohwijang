@@ -504,3 +504,55 @@ select {
     scroll-behavior: auto;
   }
 }
+
+/*
+ * The app-wide ambient layer (AmbientParticles): faint jamo bob a few pixels over half a minute,
+ * sparkles breathe, and two color washes wander. Slow enough to read as texture, never motion.
+ */
+@keyframes ambient-float {
+  0%,
+  100% {
+    transform: translate3d(-50%, -50%, 0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translate3d(-50%, calc(-50% - 26px), 0) rotate(calc(var(--r, 0deg) * -1));
+  }
+}
+
+@keyframes ambient-twinkle {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: scale(0.7) rotate(0deg);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+@keyframes ambient-wash {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6vmax, 4vmax, 0) scale(1.08);
+  }
+}
+
+.ambient {
+  contain: strict;
+}
+.ambient-anim {
+  will-change: transform;
+}
+.ambient-glyph {
+  transform: translate3d(-50%, -50%, 0) rotate(var(--r, 0deg));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-anim {
+    animation: none !important;
+  }
+}

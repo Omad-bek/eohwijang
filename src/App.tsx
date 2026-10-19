@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Settings, Stage, VocabEntry } from './types';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import type { Settings, Stage, UserData, VocabEntry } from './types';
 import { STRINGS } from './lib/i18n';
 import { allBooks, stagesForUnit, wordId } from './lib/books';
 import { useCloudSync, useNow, useOnline, useUserData, useVisualViewportHeight } from './lib/hooks';
@@ -16,6 +16,10 @@ import { AdminPanel } from './components/AdminPanel';
 import { useSharedBooks } from './lib/global';
 import { Quiz } from './components/Quiz';
 import { StagePreview } from './components/StagePreview';
+import { AmbientParticles } from './components/AmbientParticles';
+
+// Only new learners and #about need it, so it loads on demand (and is precached for offline like every chunk).
+const Welcome = lazy(() => import('./pages/welcome/WelcomeA'));
 
 type View =
   | { kind: 'home' }
@@ -25,6 +29,29 @@ type View =
 const BOOK_KEY = 'project-vocab:book';
 
 const isAdminHash = () => window.location.hash === '#admin';
+const isAboutHash = () => window.location.hash === '#about';
+
+/** Set once a learner leaves the Welcome page through one of its start buttons. */
+const WELCOMED_KEY = 'project-vocab:welcomed';
+
+function readWelcomed(): boolean {
+  try {
+    return localStorage.getItem(WELCOMED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Anything a learner leaves behind: answered words, finished stages, activity, or their own words. */
+function hasProgress(d: UserData): boolean {
+  return (
+    Object.keys(d.memory).length > 0 ||
+    Object.keys(d.stages).length > 0 ||
+    Object.keys(d.activity).length > 0 ||
+    d.customBooks.length > 0 ||
+    Object.values(d.extraWords).some((w) => w.length > 0)
+  );
+}
 
 function readBook(): string | null {
   try {
@@ -43,6 +70,9 @@ export default function App() {
   const shared = useSharedBooks(online);
   const books = useMemo(() => allBooks(data, shared.books), [data, shared.books]);
   const [admin, setAdmin] = useState(isAdminHash);
+  const [about, setAbout] = useState(isAboutHash);
+  // New learners land on the Welcome page; anyone with progress, a saved run or the flag goes straight to the dashboard.
+  const [welcomed, setWelcomed] = useState(() => readWelcomed() || hasProgress(data) || loadSession() !== null);
   const now = useNow();
   const { theme, toggle: toggleTheme } = useTheme();
   const { on: soundOn, toggle: toggleSound } = useSound();
@@ -60,7 +90,10 @@ export default function App() {
   const resumable = useCallback((stage: Stage) => sessionFor(saved, stage), [saved]);
 
   useEffect(() => {
-    const onHash = () => setAdmin(isAdminHash());
+    const onHash = () => {
+      setAdmin(isAdminHash());
+      setAbout(isAboutHash());
+    };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
@@ -68,6 +101,23 @@ export default function App() {
   const exitAdmin = () => {
     history.replaceState(null, '', window.location.pathname + window.location.search);
     setAdmin(false);
+  };
+
+  const openAbout = () => {
+    window.location.hash = 'about';
+  };
+
+  /** Every start button on the Welcome page: remember the visit and show the dashboard. */
+  const enterApp = () => {
+    try {
+      localStorage.setItem(WELCOMED_KEY, '1');
+    } catch {
+      // Private mode: they'll simply see the Welcome page again next visit.
+    }
+    setWelcomed(true);
+    if (isAboutHash()) history.replaceState(null, '', window.location.pathname + window.location.search);
+    setAbout(false);
+    setView({ kind: 'home' });
   };
 
   useEffect(() => {
@@ -148,8 +198,21 @@ export default function App() {
     setView({ kind: 'quiz', stage, run: Date.now(), resume });
   };
 
+  if (!admin && (about || !welcomed)) {
+    return (
+      <div className="relative h-full">
+        <AmbientParticles />
+        <Suspense fallback={null}>
+          <Welcome onStart={enterApp} returning={welcomed} />
+        </Suspense>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex h-full flex-col">
+      {/* First child, so the shell and every screen paint over it. */}
+      <AmbientParticles />
       <div className="relative flex min-h-0 flex-1 flex-col pb-[max(8px,env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)]">
         {saveFailed && (
           <p role="alert" className="shrink-0 rounded-xl bg-danger-wash px-5 py-2 text-[13px] font-semibold text-danger-text">
@@ -168,6 +231,7 @@ export default function App() {
           }}
           admin={admin}
           onData={() => setView({ kind: 'data', newBook: false })}
+          onAbout={openAbout}
           sync={sync}
           onSync={() => setSyncOpen(true)}
           theme={theme}
@@ -193,6 +257,7 @@ export default function App() {
               resumable={resumable}
               onResume={resumeStage}
               onAddBook={() => setView({ kind: 'data', newBook: true })}
+              onAbout={openAbout}
             />
           )}
 

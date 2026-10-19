@@ -1,0 +1,159 @@
+/*
+ * Motion for the Welcome variants in the design lab. Kept beside the pages instead of in
+ * src/index.css so the preview never touches the live stylesheet. Everything stops under
+ * reduced motion.
+ */
+
+@keyframes wl-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translate3d(0, var(--lift, -18px), 0) rotate(calc(var(--r, 0deg) * -1));
+  }
+}
+
+@keyframes wl-blob {
+  0%,
+  100% {
+    border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+    transform: rotate(0deg) scale(1);
+  }
+  33% {
+    border-radius: 63% 37% 41% 59% / 58% 36% 64% 42%;
+    transform: rotate(28deg) scale(1.06);
+  }
+  66% {
+    border-radius: 38% 62% 52% 48% / 62% 55% 45% 38%;
+    transform: rotate(-16deg) scale(0.96);
+  }
+}
+
+@keyframes wl-twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.6) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(45deg);
+  }
+}
+
+@keyframes wl-shake {
+  0%,
+  100% {
+    translate: 0;
+  }
+  20% {
+    translate: -7px;
+  }
+  40% {
+    translate: 6px;
+  }
+  60% {
+    translate: -4px;
+  }
+  80% {
+    translate: 2px;
+  }
+}
+
+@keyframes wl-pop {
+  0% {
+    transform: scale(0.35);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.14);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes wl-burst {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(1) rotate(var(--br, 90deg));
+    opacity: 0;
+  }
+}
+
+@keyframes wl-marker {
+  from {
+    background-size: 0% 42%;
+  }
+  to {
+    background-size: 100% 42%;
+  }
+}
+
+@keyframes wl-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.wl-anim {
+  will-change: transform;
+}
+.wl-shake {
+  animation: wl-shake 420ms ease-in-out;
+}
+.wl-pop {
+  animation: wl-pop 520ms var(--ease-spring) both;
+}
+.wl-burst {
+  animation: wl-burst 900ms var(--ease-out-expo) both;
+}
+.wl-marker {
+  background-image: linear-gradient(color-mix(in srgb, var(--color-gold) 55%, transparent), color-mix(in srgb, var(--color-gold) 55%, transparent));
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  background-size: 0% 42%;
+}
+.is-revealed .wl-marker {
+  animation: wl-marker 900ms var(--ease-out-expo) 250ms both;
+}
+.wl-marquee {
+  animation: wl-marquee 38s linear infinite;
+}
+
+/* Parallax layers follow the pointer and scroll (vars written by useParallax), easing behind it. */
+.wl-layer {
+  transform: translate3d(calc(var(--mx, 0) * var(--d, 0) * 28px), calc(var(--my, 0) * var(--d, 0) * 22px - var(--sy, 0) * var(--d, 0) * 0.35px), 0);
+  transition: transform 700ms var(--ease-out-expo);
+}
+
+/* Scroll-lit words fade from muted to full ink. */
+.wl-word {
+  transition: opacity 260ms ease-out, color 260ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-anim,
+  .wl-shake,
+  .wl-pop,
+  .wl-burst,
+  .wl-marquee,
+  .is-revealed .wl-marker {
+    animation: none !important;
+  }
+  .is-revealed .wl-marker {
+    background-size: 100% 42%;
+  }
+  .wl-burst {
+    display: none;
+  }
+  .wl-layer {
+    transform: none;
+    transition: none;
+  }
+}
