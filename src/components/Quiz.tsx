@@ -81,11 +81,13 @@ function shake(row: HTMLElement | null, field: HTMLElement | null) {
 
 const KEYBOARD_KEY = 'project-vocab:keyboard';
 
-function readKeyboardOpen(): boolean {
+/** The learner's own choice of onscreen keyboard on this device, or null if they never chose. */
+function readKeyboardPref(): boolean | null {
   try {
-    return localStorage.getItem(KEYBOARD_KEY) === '1';
+    const v = localStorage.getItem(KEYBOARD_KEY);
+    return v === '1' ? true : v === '0' ? false : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -149,10 +151,13 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
   const [lastRight, setLastRight] = useState<{ prompt: string; ko: string; word: string; example?: Example } | null>(null);
   const [imeHint, setImeHint] = useState(false);
   /** Onscreen 두벌식 keyboard; remembered per device. */
-  const [kbPref, setKbPref] = useState(readKeyboardOpen);
-  /** Phones and tablets always use the onscreen keyboard; the field is read-only so the system keyboard never opens. */
+  const [kbPref, setKbPref] = useState(readKeyboardPref);
+  /**
+   * Phones and tablets start on the onscreen keyboard (the field is read-only so the system one
+   * stays down); the 한글 toggle switches to the device's own keyboard, as on desktop.
+   */
   const touch = useTouchOnly();
-  const kbOpen = touch || kbPref;
+  const kbOpen = kbPref ?? touch;
   /** Full-width glow rising from the bottom edge of the screen; `id` restarts it. */
   const [edge, setEdge] = useState<{ id: number; kind: EdgeKind } | null>(null);
   const [keyFlash, setKeyFlash] = useState<{ code: string; n: number } | null>(null);
@@ -322,7 +327,15 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
     } catch {
       /* per-device convenience only */
     }
-    inputRef.current?.focus({ preventScroll: true });
+    const el = inputRef.current;
+    if (!el) return;
+    if (touch) {
+      // Swap the field's mode now, inside the tap, so this focus raises (or drops) the phone's own keyboard.
+      el.blur();
+      el.readOnly = open;
+      el.inputMode = open ? 'none' : 'text';
+    }
+    el.focus({ preventScroll: true });
   };
 
   /** Apply an onscreen (or remapped physical) key at the caret: a jamo, " ", or "back". */
@@ -658,7 +671,6 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               {phase.kind === 'review' ? t.retypeLabel : t.typeInKorean}
             </label>
             <span className="tabular shrink-0 whitespace-nowrap normal-case tracking-normal">{t.remaining(left)}</span>
-            {!touch && (
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
@@ -678,7 +690,6 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
                 한글
               </span>
             </button>
-            )}
           </div>
           <div ref={answerRow} className="flex gap-2">
             <input
@@ -687,7 +698,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
               lang="ko"
               // An open onscreen keyboard replaces the phone's own, so it doesn't cover the screen.
               inputMode={kbOpen ? 'none' : 'text'}
-              readOnly={touch}
+              readOnly={touch && kbOpen}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"

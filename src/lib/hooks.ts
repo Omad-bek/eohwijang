@@ -101,12 +101,14 @@ export function useNow(intervalMs = 60_000) {
 }
 
 const TOUCH_ONLY = '(hover: none) and (pointer: coarse)';
+/** Dev only: `?touch` in the URL acts as a touch-only device (the Design Lab's phone frame). */
+const FORCE_TOUCH = import.meta.env.DEV && new URLSearchParams(window.location.search).has('touch');
 
-/** True on phones and tablets without a mouse, where the onscreen keyboard replaces the system one. */
+/** True on phones and tablets without a mouse, where the onscreen keyboard is the default. */
 export function useTouchOnly(): boolean {
-  const [touch, setTouch] = useState(() => typeof matchMedia === 'function' && matchMedia(TOUCH_ONLY).matches);
+  const [touch, setTouch] = useState(() => FORCE_TOUCH || (typeof matchMedia === 'function' && matchMedia(TOUCH_ONLY).matches));
   useEffect(() => {
-    if (typeof matchMedia !== 'function') return;
+    if (FORCE_TOUCH || typeof matchMedia !== 'function') return;
     const mq = matchMedia(TOUCH_ONLY);
     const on = () => setTouch(mq.matches);
     mq.addEventListener('change', on);

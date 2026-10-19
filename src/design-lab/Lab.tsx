@@ -17,6 +17,16 @@ interface Variant {
 const PAGES: { id: string; label: string; variants: Variant[] }[] = [
   { id: 'icons', label: 'Icons', variants: [{ id: 'gallery', label: 'Gallery', Page: lazy(() => import('./IconLab')) }] },
   {
+    id: 'header',
+    label: 'Header',
+    variants: [
+      { id: 'a', label: 'Compact row', Page: lazy(() => import('./HeaderLab').then((m) => ({ default: m.HeaderLabA }))) },
+      { id: 'b', label: 'More menu', Page: lazy(() => import('./HeaderLab').then((m) => ({ default: m.HeaderLabB }))) },
+      { id: 'c', label: 'Settings menu', Page: lazy(() => import('./HeaderLab').then((m) => ({ default: m.HeaderLabC }))) },
+    ],
+  },
+  { id: 'phone', label: 'Phone', variants: [{ id: 'app', label: 'App', Page: lazy(() => import('./PhoneLab')) }] },
+  {
     id: 'welcome',
     label: 'Welcome',
     variants: [
@@ -45,6 +55,8 @@ export default function Lab() {
   }, []);
 
   useEffect(() => {
+    // A framed preview follows the parent lab's theme itself.
+    if (window.self !== window.top) return;
     const root = document.documentElement;
     const saved = root.dataset.theme;
     root.dataset.theme = dark ? 'dark' : 'light';
@@ -54,6 +66,14 @@ export default function Lab() {
   }, [dark]);
 
   const { Page } = variant;
+  // Inside a preview iframe (e.g. the Header page's device frames): the page alone, no lab strip.
+  if (window.self !== window.top) {
+    return (
+      <Suspense fallback={null}>
+        <Page />
+      </Suspense>
+    );
+  }
   return (
     <div className="relative flex h-full flex-col bg-ink text-hanji">
       {/* The app-wide ambient layer, so previews sit on the same ground as the live app. */}

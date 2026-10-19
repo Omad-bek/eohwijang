@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Check, ChevronDown, Cloud, CloudAlert, CloudOff, Database, Info, Languages, Moon, RefreshCw, Sun, Volume2, VolumeX, WifiOff } from 'lucide-react';
+import { Check, ChevronDown, Cloud, CloudAlert, CloudOff, Database, Ellipsis, Info, Languages, Moon, RefreshCw, Settings2, Sun, Volume2, VolumeX, WifiOff } from 'lucide-react';
 import type { PromptLang, Settings, UiLang } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { CloudSync } from '../lib/hooks';
@@ -22,6 +22,12 @@ interface Props {
   onToggleTheme: () => void;
   soundOn: boolean;
   onToggleSound: () => void;
+  /**
+   * Design Lab only: how phones (below md) make room for the About button. Unset is the live layout.
+   * a: every control in the row, buttons 32px below 400px; b: Data and About share a "more" menu;
+   * c: sound and theme share a settings menu.
+   */
+  phoneVariant?: 'a' | 'b' | 'c';
 }
 
 const UI_LANGS: { value: UiLang; code: string; name: string }[] = [
@@ -63,9 +69,9 @@ function useMenu() {
 }
 
 const MENU_TRIGGER =
-  'press flex h-9 items-center gap-1 rounded-full border-2 border-rule bg-ink-2 px-2.5 text-[12px] font-extrabold tracking-[0.06em] text-hanji hover:border-hanji-2/40 sm:gap-1.5 sm:px-3';
+  'press flex h-(--hb) items-center gap-1 rounded-full border-2 border-rule bg-ink-2 px-2.5 text-[12px] font-extrabold tracking-[0.06em] text-hanji hover:border-hanji-2/40 sm:gap-1.5 sm:px-3';
 const MENU_PANEL =
-  'anim-sheet absolute right-0 top-[calc(100%+8px)] z-50 max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-2xl border-2 border-rule bg-ink-2 py-1.5 shadow-[0_5px_0_var(--color-rule)]';
+  'anim-sheet absolute top-[calc(100%+8px)] z-50 max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-2xl border-2 border-rule bg-ink-2 py-1.5 shadow-[0_5px_0_var(--color-rule)]';
 
 function MenuHeading({ children }: { children: ReactNode }) {
   return <p className="px-3 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2">{children}</p>;
@@ -111,7 +117,7 @@ function UiLangMenu({ t, value, onChange }: { t: Strings; value: UiLang; onChang
         <ChevronDown size={13} aria-hidden className={`hidden text-hanji-2 transition-transform sm:block ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div role="menu" aria-label={t.uiLang} className={`${MENU_PANEL} w-48`}>
+        <div role="menu" aria-label={t.uiLang} className={`${MENU_PANEL} right-0 w-48`}>
           <MenuHeading>{t.uiLang}</MenuHeading>
           {UI_LANGS.map((l) => (
             <MenuItem
@@ -163,7 +169,7 @@ function LangMenu({ t, settings, onChange }: { t: Strings; settings: Settings; o
         <ChevronDown size={13} aria-hidden className={`hidden text-hanji-2 transition-transform sm:block ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div role="menu" aria-label={`${t.promptLang} · ${t.uiLang}`} className={`${MENU_PANEL} w-56`}>
+        <div role="menu" aria-label={`${t.promptLang} · ${t.uiLang}`} className={`${MENU_PANEL} right-0 w-56`}>
           <div role="group" aria-label={`${t.promptLang} → 한국어`}>
             <MenuHeading>
               {t.promptLang} <span lang="ko" className="normal-case tracking-normal">→ 한국어</span>
@@ -179,6 +185,54 @@ function LangMenu({ t, settings, onChange }: { t: Strings; settings: Settings; o
               <MenuItem key={l.value} code={l.code} name={l.name} lang={l.value} checked={l.value === settings.uiLang} onSelect={() => pick({ uiLang: l.value })} />
             ))}
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const ROUND_BUTTON =
+  'press grid size-(--hb) shrink-0 place-items-center rounded-full border-2 border-rule bg-ink-2 text-hanji-2 hover:border-hanji-2/40 hover:text-hanji';
+
+function MenuAction({ icon, label, onSelect }: { icon: ReactNode; label: string; onSelect: () => void }) {
+  return (
+    <button type="button" role="menuitem" onClick={onSelect} className="flex w-full items-center gap-3 rounded-none px-3 py-2.5 text-left text-[14px] font-semibold hover:bg-ink-3">
+      <span className="grid w-6 place-items-center text-hanji-2">{icon}</span>
+      <span className="flex-1">{label}</span>
+    </button>
+  );
+}
+
+/** A round icon button that opens a short menu of actions (phone layouts in the Design Lab). `align` is the edge the menu hangs from. */
+function IconMenu({ icon, label, items, align = 'right' }: { icon: ReactNode; label: string; items: { icon: ReactNode; label: string; onSelect: () => void }[]; align?: 'left' | 'right' }) {
+  const { open, setOpen, ref } = useMenu();
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={label}
+        title={label}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => setOpen((o) => !o)}
+        className={`${ROUND_BUTTON} ${open ? 'border-hanji-2/40 text-hanji' : ''}`}
+      >
+        {icon}
+      </button>
+      {open && (
+        <div role="menu" aria-label={label} className={`${MENU_PANEL} w-52 ${align === 'left' ? 'left-0' : 'right-0'}`}>
+          {items.map((item) => (
+            <MenuAction
+              key={item.label}
+              icon={item.icon}
+              label={item.label}
+              onSelect={() => {
+                item.onSelect();
+                setOpen(false);
+              }}
+            />
+          ))}
         </div>
       )}
     </div>
@@ -202,7 +256,7 @@ function SyncButton({ t, sync, online, onClick }: { t: Strings; sync: CloudSync;
       onClick={onClick}
       title={`${t.cloudSync}: ${label}`}
       aria-label={`${t.cloudSync}: ${label}`}
-      className={`press relative flex h-9 shrink-0 items-center gap-1.5 rounded-full border-2 bg-ink-2 px-3 text-[13px] font-extrabold hover:border-hanji-2/40 ${
+      className={`press relative flex h-(--hb) shrink-0 items-center gap-1.5 rounded-full border-2 bg-ink-2 px-3 text-[13px] font-extrabold hover:border-hanji-2/40 ${
         state === 'ok' ? 'border-accent/50' : state === 'error' ? 'border-danger/60' : 'border-rule'
       } ${tone}`}
     >
@@ -224,7 +278,7 @@ function ThemeButton({ t, theme, onToggle }: { t: Strings; theme: Theme; onToggl
       onMouseDown={(e) => e.preventDefault()}
       aria-label={label}
       title={label}
-      className="press grid size-9 shrink-0 place-items-center rounded-full border-2 border-rule bg-ink-2 text-hanji-2 hover:border-hanji-2/40 hover:text-hanji"
+      className={ROUND_BUTTON}
     >
       <span key={theme} className="anim-pop grid place-items-center">
         {dark ? <Sun size={17} strokeWidth={2.4} className="text-gold" aria-hidden /> : <Moon size={16} strokeWidth={2.4} aria-hidden />}
@@ -243,7 +297,7 @@ function SoundButton({ t, on, onToggle }: { t: Strings; on: boolean; onToggle: (
       onMouseDown={(e) => e.preventDefault()}
       aria-label={label}
       title={label}
-      className="press grid size-9 shrink-0 place-items-center rounded-full border-2 border-rule bg-ink-2 text-hanji-2 hover:border-hanji-2/40 hover:text-hanji"
+      className={ROUND_BUTTON}
     >
       <span key={on ? 'on' : 'off'} className="anim-pop grid place-items-center">
         {on ? <Volume2 size={17} strokeWidth={2.4} aria-hidden /> : <VolumeX size={17} strokeWidth={2.4} className="text-hanji-2/70" aria-hidden />}
@@ -252,20 +306,46 @@ function SoundButton({ t, on, onToggle }: { t: Strings; on: boolean; onToggle: (
   );
 }
 
-export function Navbar({ t, settings, online, onChange, onHome, onData, onAbout, sync, onSync, admin = false, theme, onToggleTheme, soundOn, onToggleSound }: Props) {
+export function Navbar({ t, settings, online, onChange, onHome, onData, onAbout, sync, onSync, admin = false, theme, onToggleTheme, soundOn, onToggleSound, phoneVariant }: Props) {
   const prompt = promptOptions(t);
+  const v = admin ? undefined : phoneVariant;
+  const dark = theme === 'dark';
+  // Below md, which controls sit in the row and which fold into a menu.
+  const aboutOnPhones = v === 'a' || v === 'c';
+  const dataInMenu = v === 'b' && onAbout;
+  const settingsInMenu = v === 'c';
 
   return (
     <header className="shrink-0 border-b-2 border-rule bg-ink">
-      <div className="mx-auto flex h-14 w-full max-w-7xl items-center gap-1.5 px-3 min-[400px]:gap-2 sm:gap-3 md:h-16 md:px-5">
+      <div
+        className={`mx-auto flex h-14 w-full max-w-7xl items-center [--hb:2.25rem] sm:gap-3 md:h-16 md:px-5 ${
+          v === 'a' ? 'gap-1 px-2 max-[399px]:[--hb:2rem] min-[400px]:gap-2 min-[400px]:px-3' : 'gap-1.5 px-3 min-[400px]:gap-2'
+        }`}
+      >
         <button type="button" onClick={onHome} className="mr-auto flex min-w-0 shrink-0 items-baseline gap-2 text-left" aria-label={`${t.appName} — ${t.books}`}>
-          <span className="whitespace-nowrap font-serif text-[24px] leading-none text-accent sm:text-[26px] md:text-[30px]">어휘장</span>
+          <span className={`whitespace-nowrap font-serif leading-none text-accent sm:text-[26px] md:text-[30px] ${v === 'a' ? 'text-[20px] min-[400px]:text-[24px]' : 'text-[24px]'}`}>어휘장</span>
           {t.appName !== '어휘장' && <span className="hidden text-[13px] font-bold text-hanji-2 lg:inline">{t.appName}</span>}
         </button>
 
-        {!admin && <SoundButton t={t} on={soundOn} onToggle={onToggleSound} />}
+        {settingsInMenu && (
+          <div className="md:hidden">
+            <IconMenu
+              icon={<Settings2 size={17} strokeWidth={2.4} aria-hidden />}
+              label={t.settings}
+              align="left"
+              items={[
+                { icon: soundOn ? <VolumeX size={17} aria-hidden /> : <Volume2 size={17} aria-hidden />, label: soundOn ? t.muteSounds : t.unmuteSounds, onSelect: onToggleSound },
+                { icon: dark ? <Sun size={17} className="text-gold" aria-hidden /> : <Moon size={17} aria-hidden />, label: dark ? t.lightMode : t.darkMode, onSelect: onToggleTheme },
+              ]}
+            />
+          </div>
+        )}
 
-        <ThemeButton t={t} theme={theme} onToggle={onToggleTheme} />
+        <div className={settingsInMenu ? 'hidden md:contents' : 'contents'}>
+          {!admin && <SoundButton t={t} on={soundOn} onToggle={onToggleSound} />}
+
+          <ThemeButton t={t} theme={theme} onToggle={onToggleTheme} />
+        </div>
 
         <SyncButton t={t} sync={sync} online={online} onClick={onSync} />
 
@@ -319,10 +399,23 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, onAbout,
               onClick={onAbout}
               aria-label={t.about}
               title={t.about}
-              className="press hidden size-9 shrink-0 place-items-center rounded-full border-2 border-rule bg-ink-2 text-hanji-2 hover:border-hanji-2/40 hover:text-hanji md:grid"
+              className={`${ROUND_BUTTON} ${aboutOnPhones ? '' : 'max-md:hidden'}`}
             >
               <Info size={17} strokeWidth={2.4} aria-hidden />
             </button>
+          )}
+
+          {dataInMenu && (
+            <div className="md:hidden">
+              <IconMenu
+                icon={<Ellipsis size={18} strokeWidth={2.6} aria-hidden />}
+                label={`${t.data} · ${t.about}`}
+                items={[
+                  { icon: <Database size={16} aria-hidden />, label: t.data, onSelect: onData },
+                  { icon: <Info size={17} aria-hidden />, label: t.about, onSelect: onAbout },
+                ]}
+              />
+            </div>
           )}
 
           <button
@@ -330,7 +423,7 @@ export function Navbar({ t, settings, online, onChange, onHome, onData, onAbout,
             onClick={onData}
             title={t.data}
             aria-label={t.data}
-            className="press flex h-9 w-9 shrink-0 items-center justify-center gap-1.5 rounded-full border-2 border-rule bg-ink-2 text-[13px] font-extrabold text-hanji hover:border-hanji-2/40 xl:w-auto xl:px-3"
+            className={`press flex size-(--hb) shrink-0 items-center justify-center gap-1.5 rounded-full border-2 border-rule bg-ink-2 text-[13px] font-extrabold text-hanji hover:border-hanji-2/40 xl:w-auto xl:px-3 ${dataInMenu ? 'max-md:hidden' : ''}`}
           >
             <Database size={15} aria-hidden />
             <span className="hidden xl:inline">{t.data}</span>
