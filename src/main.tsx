@@ -7,8 +7,8 @@ import './fonts.css';
 import './index.css';
 import App from './App';
 
-// Dev-only design lab (#design-lab/icons). The DEV constant drops it, and its chunk, from production builds.
-const IconLab = import.meta.env.DEV ? lazy(() => import('./design-lab/IconLab')) : null;
+// Dev-only design lab (#design-lab/icons, #design-lab/welcome). The DEV constant drops it, and its chunks, from production builds.
+const Lab = import.meta.env.DEV ? lazy(() => import('./design-lab/Lab')) : null;
 const isLabHash = () => window.location.hash.startsWith('#design-lab');
 
 function Root() {
@@ -18,9 +18,9 @@ function Root() {
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
-  return IconLab && lab ? (
+  return Lab && lab ? (
     <Suspense fallback={null}>
-      <IconLab />
+      <Lab />
     </Suspense>
   ) : (
     <App />
