@@ -1,24 +1,44 @@
 /**
- * Dev-only design lab shell: a slim tab strip over the page being previewed.
- * #design-lab and #design-lab/icons open the icon lab; #design-lab/welcome previews the landing page.
- * The theme switch here only flips html[data-theme] for this visit; the learner's saved theme is untouched.
+ * Dev-only design lab shell: a slim strip of page tabs, a variant switcher (A / B / C) for pages
+ * under review, and the page being previewed below it. Hashes are #design-lab/<page>/<variant>;
+ * #design-lab alone opens the icon lab. The theme switch here only flips html[data-theme] for this
+ * visit; the learner's saved theme is untouched.
  */
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState, type ComponentType, type LazyExoticComponent } from 'react';
 import { FlaskConical, Moon, Sun } from 'lucide-react';
 
-const PAGES = [
-  { id: 'icons', label: 'Icons', Page: lazy(() => import('./IconLab')) },
-  { id: 'welcome', label: 'Welcome', Page: lazy(() => import('../pages/Welcome')) },
-] as const;
+interface Variant {
+  id: string;
+  label: string;
+  Page: LazyExoticComponent<ComponentType>;
+}
 
-const pageFromHash = () => PAGES.find((p) => window.location.hash === `#design-lab/${p.id}`) ?? PAGES[0];
+const PAGES: { id: string; label: string; variants: Variant[] }[] = [
+  { id: 'icons', label: 'Icons', variants: [{ id: 'gallery', label: 'Gallery', Page: lazy(() => import('./IconLab')) }] },
+  {
+    id: 'welcome',
+    label: 'Welcome',
+    variants: [
+      { id: 'a', label: 'Warm desk', Page: lazy(() => import('../pages/welcome/WelcomeA')) },
+      { id: 'b', label: 'Quiet hanji', Page: lazy(() => import('../pages/welcome/WelcomeB')) },
+      { id: 'c', label: 'Jamo tiles', Page: lazy(() => import('../pages/welcome/WelcomeC')) },
+    ],
+  },
+];
+
+function fromHash() {
+  const [pageId, variantId] = window.location.hash.replace(/^#design-lab\/?/, '').split('/');
+  const page = PAGES.find((p) => p.id === pageId) ?? PAGES[0];
+  const variant = page.variants.find((v) => v.id === variantId) ?? page.variants[0];
+  return { page, variant };
+}
 
 export default function Lab() {
-  const [page, setPage] = useState(pageFromHash);
+  const [{ page, variant }, setView] = useState(fromHash);
   const [dark, setDark] = useState(() => document.documentElement.dataset.theme === 'dark');
 
   useEffect(() => {
-    const onHash = () => setPage(pageFromHash());
+    const onHash = () => setView(fromHash());
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
@@ -32,10 +52,10 @@ export default function Lab() {
     };
   }, [dark]);
 
-  const { Page } = page;
+  const { Page } = variant;
   return (
     <div className="flex h-full flex-col bg-ink text-hanji">
-      <nav aria-label="Design lab" className="flex h-11 shrink-0 items-center gap-1.5 border-b-2 border-rule bg-ink-2 px-3">
+      <nav aria-label="Design lab" className="flex h-11 shrink-0 items-center gap-1.5 overflow-x-auto border-b-2 border-rule bg-ink-2 px-3">
         <span className="mr-1.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-amber">
           <FlaskConical size={14} aria-hidden /> Lab
         </span>
@@ -44,23 +64,48 @@ export default function Lab() {
             key={p.id}
             href={`#design-lab/${p.id}`}
             aria-current={p.id === page.id ? 'page' : undefined}
-            className={`flex h-7 items-center rounded-full px-3 text-[12.5px] font-extrabold ${p.id === page.id ? 'bg-accent text-white' : 'text-hanji-2 hover:bg-ink-3 hover:text-hanji'}`}
+            className={`flex h-7 shrink-0 items-center rounded-full px-3 text-[12.5px] font-extrabold ${p.id === page.id ? 'bg-accent text-white' : 'text-hanji-2 hover:bg-ink-3 hover:text-hanji'}`}
           >
             {p.label}
           </a>
         ))}
+
+        {page.variants.length > 1 && (
+          <>
+            <span aria-hidden className="mx-1.5 h-5 w-0.5 shrink-0 rounded-full bg-rule" />
+            <div role="group" aria-label="Variant" className="flex shrink-0 rounded-full border-2 border-rule bg-ink p-0.5">
+              {page.variants.map((v, i) => {
+                const on = v.id === variant.id;
+                return (
+                  <a
+                    key={v.id}
+                    href={`#design-lab/${page.id}/${v.id}`}
+                    aria-current={on ? 'true' : undefined}
+                    title={`Variant ${v.id.toUpperCase()}: ${v.label}`}
+                    className={`flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-extrabold ${on ? 'bg-hanji text-ink' : 'text-hanji-2 hover:text-hanji'}`}
+                  >
+                    {String.fromCharCode(65 + i)}
+                    <span className={`hidden font-bold md:inline ${on ? 'opacity-70' : ''}`}>{v.label}</span>
+                  </a>
+                );
+              })}
+            </div>
+          </>
+        )}
+
         <button
           type="button"
           onClick={() => setDark((d) => !d)}
           aria-label={dark ? 'Preview light theme' : 'Preview dark theme'}
-          className="press ml-auto grid size-8 place-items-center rounded-full text-hanji-2 hover:bg-ink-3 hover:text-hanji"
+          className="press ml-auto grid size-8 shrink-0 place-items-center rounded-full text-hanji-2 hover:bg-ink-3 hover:text-hanji"
         >
           {dark ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
         </button>
       </nav>
       <div className="min-h-0 flex-1">
         <Suspense fallback={null}>
-          <Page />
+          {/* Keyed so switching variants remounts: entrance motion and the install delay replay. */}
+          <Page key={`${page.id}/${variant.id}`} />
         </Suspense>
       </div>
     </div>

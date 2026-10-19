@@ -7,7 +7,7 @@ import './fonts.css';
 import './index.css';
 import App from './App';
 
-// Dev-only design lab (#design-lab/icons, #design-lab/welcome). The DEV constant drops it, and its chunks, from production builds.
+// Dev-only design lab (#design-lab/<page>/<variant>). The DEV constant drops it, and its chunks, from production builds.
 const Lab = import.meta.env.DEV ? lazy(() => import('./design-lab/Lab')) : null;
 const isLabHash = () => window.location.hash.startsWith('#design-lab');
 

@@ -1,21 +1,15 @@
 /**
- * Welcome / landing page for first-time visitors. Design-lab preview only (#design-lab/welcome):
- * nothing in App routes here yet, and the CTA and install buttons are inert until the page is approved.
+ * Welcome, variant A, "Warm desk": a split hero beside a live-looking recall card, three tactile
+ * feature cards, and a centered install sheet. Design-lab preview only (#design-lab/welcome/a);
+ * nothing in App routes here yet, and the CTA and install buttons are inert until a variant is approved.
  */
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
-import { ArrowRight, BookOpen, Download, Flame, Leaf, Moon, Quote, Volume2, WifiOff, X, type LucideIcon } from 'lucide-react';
-import { Seal } from '../components/Seal';
-import { useReveal } from '../lib/hooks';
-
-const ICON_SRC = `${import.meta.env.BASE_URL}favicon.svg`;
+import type { CSSProperties, ReactNode } from 'react';
+import { ArrowRight, Download, Flame, Moon, Volume2, WifiOff, X } from 'lucide-react';
+import { Seal } from '../../components/Seal';
+import { useReveal } from '../../lib/hooks';
+import { BOOKS, DISCLAIMER, FEATURES, HERO, ICON_SRC, SAMPLE, useInstallBanner } from './content';
 
 /* ---------- Hero visual: one recall, split into jamo ---------- */
-
-// 학생 (prompts as in vocab1A) = ㅎㅏㄱ + ㅅㅐㅇ, the app's signature diff cell.
-const CELLS = [
-  { syl: '학', jamo: ['ㅎ', 'ㅏ', 'ㄱ'] },
-  { syl: '생', jamo: ['ㅅ', 'ㅐ', 'ㅇ'] },
-];
 
 function RecallCard() {
   return (
@@ -33,11 +27,7 @@ function RecallCard() {
         </div>
 
         <dl className="mt-6 space-y-1.5">
-          {[
-            ['EN', 'student'],
-            ['UZ', "o'quvchi, talaba"],
-            ['RU', 'ученик, студент'],
-          ].map(([code, word], i) => (
+          {SAMPLE.prompts.map(([code, word], i) => (
             <div key={code} className="flex items-baseline gap-3">
               <dt className="w-6 text-[11px] font-black tracking-[0.06em] text-accent-text">{code}</dt>
               <dd className={i === 0 ? 'text-[26px] font-black leading-tight' : 'text-[15px] font-semibold text-hanji-2'}>{word}</dd>
@@ -46,7 +36,7 @@ function RecallCard() {
         </dl>
 
         <div className="mt-6 flex gap-3">
-          {CELLS.map((c, ci) => (
+          {SAMPLE.cells.map((c, ci) => (
             <div key={c.syl} className="anim-cell flex-1 overflow-hidden rounded-2xl border-2 border-accent/50 bg-accent-wash" style={{ animationDelay: `${300 + ci * 90}ms` }}>
               <div className="grid h-[76px] place-items-center font-serif text-[48px] leading-none text-accent-text">{c.syl}</div>
               <div className="grid grid-cols-3 border-t-2 border-accent/30">
@@ -83,84 +73,56 @@ function RecallCard() {
 
 /* ---------- Features ---------- */
 
-interface Feature {
-  icon: LucideIcon;
-  tone: string;
-  title: string;
-  body: string;
-  detail: ReactNode;
-}
+const TONES = ['bg-accent-wash text-accent-text', 'bg-flame-wash text-flame-ink', 'bg-sky-wash text-sky'];
 
-const FEATURES: Feature[] = [
-  {
-    icon: BookOpen,
-    tone: 'bg-accent-wash text-accent-text',
-    title: 'Curated for Textbooks',
-    body: 'Every word follows the SNU Korean course, unit by unit, so what you drill tonight is what your class covers tomorrow.',
-    detail: (
-      <div className="flex gap-2">
-        {['1A', '1B', '2A'].map((b) => (
-          <span key={b} className="rounded-xl border-2 border-rule-soft bg-ink px-3 py-1 font-serif text-[17px] leading-none">
-            {b}
-          </span>
-        ))}
-      </div>
-    ),
-  },
-  {
-    icon: Leaf,
-    tone: 'bg-flame-wash text-flame-ink',
-    title: 'Zen & Gamified',
-    body: 'Soft sounds, a daily streak and a night mode for late study. Calm enough to focus, rewarding enough to come back.',
-    detail: (
-      <div className="flex flex-wrap gap-2 text-[12px] font-bold text-hanji-2">
-        {(
-          [
-            [Volume2, 'Soft sounds'],
-            [Flame, 'Streaks'],
-            [Moon, 'Night mode'],
-          ] as const
-        ).map(([Icon, label]) => (
-          <span key={label} className="flex items-center gap-1.5 rounded-full bg-ink px-2.5 py-1">
-            <Icon size={13} aria-hidden /> {label}
-          </span>
-        ))}
-      </div>
-    ),
-  },
-  {
-    icon: Quote,
-    tone: 'bg-sky-wash text-sky',
-    title: 'Contextual Examples',
-    body: 'Each word comes with a short, grammar-accurate sentence, so you learn how it is used, not just what it means.',
-    detail: (
-      <p className="rounded-xl bg-ink px-3 py-2">
-        <span className="block font-serif text-[17px] leading-snug">
-          네, 저는 <span className="text-accent-text">학생</span>이에요.
-        </span>
-        <span className="text-[12px] font-semibold text-hanji-2">Yes, I’m a student.</span>
-      </p>
-    ),
-  },
+const DETAILS: ReactNode[] = [
+  <div className="flex gap-2">
+    {BOOKS.map((b) => (
+      <span key={b} className="rounded-xl border-2 border-rule-soft bg-ink px-3 py-1 font-serif text-[17px] leading-none">
+        {b}
+      </span>
+    ))}
+  </div>,
+  <div className="flex flex-wrap gap-2 text-[12px] font-bold text-hanji-2">
+    {(
+      [
+        [Volume2, 'Soft sounds'],
+        [Flame, 'Streaks'],
+        [Moon, 'Night mode'],
+      ] as const
+    ).map(([Icon, label]) => (
+      <span key={label} className="flex items-center gap-1.5 rounded-full bg-ink px-2.5 py-1">
+        <Icon size={13} aria-hidden /> {label}
+      </span>
+    ))}
+  </div>,
+  <p className="rounded-xl bg-ink px-3 py-2">
+    <span className="block font-serif text-[17px] leading-snug">
+      {SAMPLE.example.before}
+      <span className="text-accent-text">{SAMPLE.example.word}</span>
+      {SAMPLE.example.after}
+    </span>
+    <span className="text-[12px] font-semibold text-hanji-2">{SAMPLE.example.en}</span>
+  </p>,
 ];
 
-function FeatureCard({ f, i }: { f: Feature; i: number }) {
+function FeatureCard({ i }: { i: number }) {
   const { ref, revealed } = useReveal<HTMLElement>();
-  const Icon = f.icon;
+  const { icon: Icon, title, body } = FEATURES[i];
   return (
     <article
       ref={ref}
       style={{ '--i': i } as CSSProperties}
       className={`reveal flex flex-col gap-4 rounded-[24px] border-2 border-rule bg-ink-2 p-6 sm:p-7 ${revealed ? 'is-revealed' : ''}`}
     >
-      <span className={`grid size-12 place-items-center rounded-2xl ${f.tone}`}>
+      <span className={`grid size-12 place-items-center rounded-2xl ${TONES[i]}`}>
         <Icon size={22} strokeWidth={2.2} aria-hidden />
       </span>
       <div>
-        <h3 className="text-[19px] font-black leading-tight">{f.title}</h3>
-        <p className="mt-2 text-[15px] leading-relaxed text-hanji-2">{f.body}</p>
+        <h3 className="text-[19px] font-black leading-tight">{title}</h3>
+        <p className="mt-2 text-[15px] leading-relaxed text-hanji-2">{body}</p>
       </div>
-      <div className="mt-auto pt-2">{f.detail}</div>
+      <div className="mt-auto pt-2">{DETAILS[i]}</div>
     </article>
   );
 }
@@ -176,7 +138,9 @@ function InstallBanner({ onDismiss }: { onDismiss: () => void }) {
       >
         <img src={ICON_SRC} alt="" width={48} height={48} className="size-11 shrink-0 sm:size-12" />
         <div className="min-w-0 flex-1">
-          <p className="text-[15px] font-black leading-tight">Install <span className="font-serif font-normal">어휘장</span></p>
+          <p className="text-[15px] font-black leading-tight">
+            Install <span className="font-serif font-normal">어휘장</span>
+          </p>
           <p className="mt-0.5 flex items-center gap-1.5 text-[13px] leading-snug text-hanji-2">
             <WifiOff size={13} className="hidden shrink-0 sm:block" aria-hidden />
             Opens in a tap and studies offline.
@@ -195,14 +159,8 @@ function InstallBanner({ onDismiss }: { onDismiss: () => void }) {
 
 /* ---------- Page ---------- */
 
-export default function Welcome({ onStart }: { onStart?: () => void }) {
-  const [install, setInstall] = useState(false);
-
-  // Let the hero land first; the install suggestion arrives a moment later.
-  useEffect(() => {
-    const id = window.setTimeout(() => setInstall(true), 1400);
-    return () => window.clearTimeout(id);
-  }, []);
+export default function WelcomeA({ onStart }: { onStart?: () => void }) {
+  const install = useInstallBanner();
 
   return (
     <div className="scroll-smooth-motion h-full overflow-y-auto overflow-x-hidden bg-ink text-hanji">
@@ -215,31 +173,32 @@ export default function Welcome({ onStart }: { onStart?: () => void }) {
       <main>
         <section className="mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-14 sm:px-8 md:pt-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16 lg:pb-28 lg:pt-24">
           <div className="anim-rise max-w-xl">
-            <p className="text-[12px] font-black uppercase tracking-[0.16em] text-accent-text">Korean vocabulary · SNU 1A–2A</p>
+            <p className="text-[12px] font-black uppercase tracking-[0.16em] text-accent-text">{HERO.eyebrow}</p>
             <h1 className="mt-5 text-[44px] font-black leading-[1.02] tracking-[-0.03em] sm:text-[60px] lg:text-[68px]">
-              Master Korean vocabulary. <span className="text-accent">Beautifully.</span>
+              {HERO.lead} <span className="text-accent">{HERO.accent}</span>
             </h1>
-            <p className="mt-6 max-w-[46ch] text-[17px] leading-relaxed text-hanji-2 sm:text-[18px]">
-              Type each word from memory in small, calm blocks. Prompts in Uzbek, Russian or English, and every mistake shown down to the letter.
-            </p>
+            <p className="mt-6 max-w-[46ch] text-[17px] leading-relaxed text-hanji-2 sm:text-[18px]">{HERO.sub}</p>
             <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
               <button
                 type="button"
                 onClick={onStart}
                 className="juicy lip-accent group flex h-14 items-center gap-2.5 bg-accent px-7 text-[16px] font-black tracking-[0.02em] text-white"
               >
-                Start Learning Now
+                {HERO.cta}
                 <ArrowRight size={19} strokeWidth={2.8} className="transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
               </button>
-              <a href="#features" onClick={(e) => {
+              <a
+                href="#features"
+                onClick={(e) => {
                   e.preventDefault();
                   document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                 className="text-[14px] font-extrabold text-hanji-2 underline decoration-rule decoration-2 underline-offset-[6px] hover:text-hanji">
+                className="text-[14px] font-extrabold text-hanji-2 underline decoration-rule decoration-2 underline-offset-[6px] hover:text-hanji"
+              >
                 See what’s inside
               </a>
             </div>
-            <p className="mt-8 text-[13px] font-semibold text-hanji-2/80">Free · No account needed · Works offline</p>
+            <p className="mt-8 text-[13px] font-semibold text-hanji-2/80">{HERO.note}</p>
           </div>
 
           <div className="anim-rise [--i:2]">
@@ -250,22 +209,24 @@ export default function Welcome({ onStart }: { onStart?: () => void }) {
         <section id="features" aria-labelledby="features-title" className="border-t-2 border-rule-soft">
           <div className="mx-auto max-w-6xl px-5 pb-40 pt-20 sm:px-8 lg:pt-24">
             <div className="max-w-xl">
-              <p className="text-[12px] font-black uppercase tracking-[0.16em] text-hanji-2">Why <span className="font-serif font-normal tracking-normal">어휘장</span></p>
+              <p className="text-[12px] font-black uppercase tracking-[0.16em] text-hanji-2">
+                Why <span className="font-serif font-normal tracking-normal">어휘장</span>
+              </p>
               <h2 id="features-title" className="mt-3 text-[30px] font-black leading-tight tracking-[-0.02em] sm:text-[38px]">
                 Quiet tools for exact recall.
               </h2>
             </div>
             <div className="mt-10 grid gap-5 md:grid-cols-3 md:gap-6">
               {FEATURES.map((f, i) => (
-                <FeatureCard key={f.title} f={f} i={i} />
+                <FeatureCard key={f.title} i={i} />
               ))}
             </div>
-            <p className="mt-16 text-center text-[12px] text-hanji-2/80">Not affiliated with Seoul National University or its publisher.</p>
+            <p className="mt-16 text-center text-[12px] text-hanji-2/80">{DISCLAIMER}</p>
           </div>
         </section>
       </main>
 
-      {install && <InstallBanner onDismiss={() => setInstall(false)} />}
+      {install.show && <InstallBanner onDismiss={install.dismiss} />}
     </div>
   );
 }
