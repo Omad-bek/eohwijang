@@ -90,23 +90,24 @@ export function JamoField({ className = '', onDark = false, tiles = true }: { cl
 
 /* ---------- Orbs ---------- */
 
-const ORB: Record<'accent' | 'gold' | 'sky' | 'flame', [hi: string, mid: string, lip: string]> = {
-  accent: ['rgba(214,255,230,0.95)', 'var(--color-accent)', 'var(--color-accent-lip)'],
-  gold: ['rgba(255,250,225,0.95)', 'var(--color-gold)', 'var(--color-gold-lip)'],
-  sky: ['rgba(225,240,255,0.95)', 'var(--color-sky)', 'var(--color-sky-lip)'],
-  flame: ['rgba(255,236,214,0.95)', 'var(--color-flame)', 'var(--color-flame-lip)'],
+const ORB: Record<'accent' | 'gold' | 'sky' | 'flame', string> = {
+  accent: 'var(--color-accent)',
+  gold: 'var(--color-gold)',
+  sky: 'var(--color-sky)',
+  flame: 'var(--color-flame)',
 };
 
-/** A glossy, slowly morphing blob lit from the top left, so it reads as a soft 3D object. */
+/**
+ * A soft, slowly breathing glow of light. Round by its own style, not by the animation, so it
+ * stays a circle under reduced motion too; faint and heavily blurred so it reads as ambient light.
+ */
 export function Orb({ tone, className = '', depth = 0.4, dur = 20 }: { tone: keyof typeof ORB; className?: string; depth?: number; dur?: number }) {
-  const [hi, mid, lip] = ORB[tone];
   return (
     <div aria-hidden className={`wl-layer pointer-events-none absolute ${className}`} style={{ '--d': depth } as CSSProperties}>
       <div
-        className="wl-anim size-full"
+        className="wl-anim size-full rounded-full opacity-[0.18] blur-3xl"
         style={{
-          background: `radial-gradient(circle at 30% 26%, ${hi} 0%, transparent 30%), radial-gradient(circle at 64% 72%, ${lip} 0%, ${mid} 70%)`,
-          boxShadow: `inset -14px -18px 40px rgba(0,0,0,0.18), 0 30px 60px -20px ${lip}`,
+          background: `radial-gradient(circle, ${ORB[tone]} 0%, color-mix(in srgb, ${ORB[tone]} 45%, transparent) 45%, transparent 72%)`,
           animation: `wl-blob ${dur}s ease-in-out infinite`,
         }}
       />

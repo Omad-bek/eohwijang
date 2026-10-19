@@ -14,19 +14,17 @@
   }
 }
 
+/* Orbs breathe and drift a little; their round shape is their own, never animated. */
 @keyframes wl-blob {
   0%,
   100% {
-    border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
-    transform: rotate(0deg) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
   33% {
-    border-radius: 63% 37% 41% 59% / 58% 36% 64% 42%;
-    transform: rotate(28deg) scale(1.06);
+    transform: translate3d(4%, -3%, 0) scale(1.08);
   }
   66% {
-    border-radius: 38% 62% 52% 48% / 62% 55% 45% 38%;
-    transform: rotate(-16deg) scale(0.96);
+    transform: translate3d(-3%, 4%, 0) scale(0.94);
   }
 }
 

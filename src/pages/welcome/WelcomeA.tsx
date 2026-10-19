@@ -442,10 +442,10 @@ export default function WelcomeA({ onStart, returning = false }: { onStart?: () 
         {/* Depth, back to front: a soft wash, orbs, letters, sparkles. */}
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_55%_at_50%_42%,var(--color-accent-wash),transparent_75%)]" />
         <div className="absolute inset-0 -z-10">
-          <Orb tone="accent" className="-left-28 top-[46%] size-64 opacity-90 sm:-left-20 sm:size-[340px]" depth={0.5} dur={22} />
+          <Orb tone="accent" className="-left-28 top-[46%] size-64 sm:-left-20 sm:size-[340px]" depth={0.5} dur={22} />
           <Orb tone="gold" className="-right-10 top-20 size-32 sm:right-[4%] sm:top-24 sm:size-44" depth={0.9} dur={17} />
-          <Orb tone="sky" className="-right-16 bottom-[8%] size-40 opacity-90 sm:right-[6%] sm:size-52" depth={1.2} dur={24} />
-          <Orb tone="flame" className="left-[14%] top-[14%] hidden size-16 sm:block" depth={1.5} dur={14} />
+          <Orb tone="sky" className="-right-16 bottom-[8%] size-40 sm:right-[6%] sm:size-52" depth={1.2} dur={24} />
+          <Orb tone="flame" className="left-[10%] top-[10%] hidden size-28 sm:block" depth={1.5} dur={14} />
           <JamoField />
           <Sparkles />
         </div>

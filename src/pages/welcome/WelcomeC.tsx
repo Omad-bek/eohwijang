@@ -37,8 +37,8 @@ function HeroCell({ onStart }: { onStart?: () => void }) {
   const ref = useParallax<HTMLElement>();
   return (
     <section ref={ref} className={`${CELL} anim-rise isolate flex flex-col bg-accent text-white motion-safe:hover:translate-y-0 lg:col-span-7 lg:row-span-4 lg:p-10`}>
-      <Orb tone="gold" className="-right-14 top-[34%] size-36 opacity-90" depth={0.6} dur={18} />
-      <Orb tone="sky" className="-bottom-16 right-[18%] size-36 opacity-70" depth={1} dur={22} />
+      <Orb tone="gold" className="-right-14 top-[34%] size-36" depth={0.6} dur={18} />
+      <Orb tone="sky" className="-bottom-16 right-[18%] size-36" depth={1} dur={22} />
       <JamoField onDark tiles={false} className="-z-10 left-[42%]" />
       <Sparkles className="-z-10" />
 

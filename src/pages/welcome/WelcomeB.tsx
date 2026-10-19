@@ -190,7 +190,7 @@ function LitStory() {
   const lit = Math.round(p * 1.25 * words.length);
   return (
     <section aria-labelledby="story-b" className="relative overflow-hidden border-y border-rule">
-      <Orb tone="accent" className="-right-32 top-16 size-80 opacity-25 blur-2xl" depth={0} dur={26} />
+      <Orb tone="accent" className="-right-32 top-16 size-80" depth={0} dur={26} />
       <div className="relative mx-auto max-w-5xl px-5 py-32 sm:px-8 lg:py-44">
         <p className="text-[13px] font-bold uppercase tracking-[0.22em] text-accent-text">{STORY.eyebrow}</p>
         <h2 id="story-b" className="mt-5 max-w-[16ch] text-[44px] font-black leading-[1] tracking-[-0.04em] sm:text-[68px]">
