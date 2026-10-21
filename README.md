@@ -190,8 +190,8 @@ Open the app with `#admin` at the end of the URL. The panel is only hidden, not 
 
 ## Author
 
-Built between lectures at Inha University (인하대학교), Incheon, by [@Omad-bek](https://github.com/Omad-bek), a student who sits the same vocabulary tests this app trains for. Feedback and word-list corrections are welcome in [Issues](https://github.com/Omad-bek/eohwijang/issues).
+Built between lectures at Inha University (인하대학교), Incheon, by **Omadbek Khudoyberdiev** ([@Omad-bek](https://github.com/Omad-bek)), a student who sits the same vocabulary tests this app trains for. Feedback and word-list corrections are welcome in [Issues](https://github.com/Omad-bek/eohwijang/issues).
 
 ## License
 
-[MIT](LICENSE) © Omad-bek. Vocabulary lists follow the SNU Korean textbooks and remain the property of their respective owners.
+[MIT](LICENSE) © 2026 Omadbek Khudoyberdiev. Vocabulary lists follow the SNU Korean textbooks and remain the property of their respective owners.
