@@ -12,6 +12,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-0f172a?style=flat-square&logo=tailwindcss&logoColor=38bdf8)
 ![PWA](https://img.shields.io/badge/PWA-offline--first-5a0fc8?style=flat-square&logo=pwa&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-3fcf8e?style=flat-square&logo=supabase&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/license-MIT-f59e0b?style=flat-square)](LICENSE)
 
 **[Open the app →](https://eohwijang.fyi/)**
 
@@ -26,6 +27,27 @@
 Most Korean apps stop at recognition flashcards and rarely support Uzbek. 어휘장 is built for exact recall, follows the textbook's structure, and treats all three source languages as equals.
 
 > Independent project — not affiliated with or endorsed by Seoul National University or its publisher.
+
+## Screenshots
+
+<p align="center">
+  <a href="https://eohwijang.fyi/"><img src="docs/screenshots/landing.webp" alt="Landing page: Stop memorizing. Start feeling the language." width="100%"></a>
+</p>
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/dashboard.webp" alt="Dashboard with word of the day, streak and current stage"><br><sub><b>Dashboard</b> · word of the day split into jamo, streak, XP and the next stage</sub></td>
+    <td width="50%"><img src="docs/screenshots/stages.webp" alt="Stage cards with mastery progress and memory levels"><br><sub><b>Stages</b> · 20–30 word blocks with mastery and spaced-repetition levels</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/how-it-works.webp" alt="Three steps: see it in your language, type it from memory, every letter checked"><br><sub><b>How a round works</b> · prompt → typed recall → every letter checked</sub></td>
+    <td width="50%"><img src="docs/screenshots/keyboard.webp" alt="Built-in on-screen Hangul keyboard"><br><sub><b>Built-in 두벌식 keyboard</b> · real jamo composition, no system IME needed</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/mastery.webp" alt="Word mastery breakdown by level and review prompt"><br><sub><b>Word mastery</b> · level breakdown and words ready to level up</sub></td>
+    <td width="50%"><img src="docs/screenshots/add-words.webp" alt="Add words screen with paste and file import"><br><sub><b>Your own collections</b> · paste a list or import .txt / .tsv / .json</sub></td>
+  </tr>
+</table>
 
 ## Features
 
@@ -168,4 +190,8 @@ Open the app with `#admin` at the end of the URL. The panel is only hidden, not 
 
 ## Author
 
-Built by [@Omad-bek](https://github.com/Omad-bek). Feedback and word-list corrections are welcome in [Issues](https://github.com/Omad-bek/eohwijang/issues).
+Built between lectures at Inha University (인하대학교), Incheon, by [@Omad-bek](https://github.com/Omad-bek), a student who sits the same vocabulary tests this app trains for. Feedback and word-list corrections are welcome in [Issues](https://github.com/Omad-bek/eohwijang/issues).
+
+## License
+
+[MIT](LICENSE) © Omad-bek. Vocabulary lists follow the SNU Korean textbooks and remain the property of their respective owners.
