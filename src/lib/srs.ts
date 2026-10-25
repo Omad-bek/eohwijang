@@ -68,6 +68,18 @@ export function addStats(a: MemoryStats, b: MemoryStats): MemoryStats {
 
 export const EMPTY_STATS: MemoryStats = { levels: [0, 0, 0, 0], learned: 0, due: 0 };
 
+/**
+ * The one status a stage (or a unit) shows. Words ready to level up outrank "complete": a
+ * finished stage with ready words asks for a review instead of showing both at once.
+ */
+export type StageStatus = 'new' | 'learning' | 'levelUp' | 'complete';
+
+export function stageStatus(stats: MemoryStats, total: number): StageStatus {
+  if (stats.due > 0) return 'levelUp';
+  if (total > 0 && stats.learned >= total) return 'complete';
+  return stats.learned > 0 ? 'learning' : 'new';
+}
+
 /** The book's words that are ready for their next level, in textbook order, as one playable set (at most one stage long). */
 export function reviewStage(book: Book, memory: Record<string, WordMemory>, now: number): Stage | null {
   const words = book.words.filter((w) => isDue(memory[wordId(book.id, w)], now)).slice(0, MAX_STAGE);

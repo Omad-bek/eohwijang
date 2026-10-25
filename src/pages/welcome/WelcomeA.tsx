@@ -3,15 +3,38 @@
  * sparkles that lean with the pointer, and a playable word block right under the headline
  * (tap ㅎ + ㅗ = 호, then ㅈ + ㅜ = 주, and 호주 lands). Below: benefit cards that tilt, a three-beat
  * round, a short "Our story" with the GitHub link, and a green closing panel. App.tsx shows it to
- * new learners on / and to everyone on #about; the design lab still previews it at
+ * new learners on / and to everyone on /about; the design lab still previews it at
  * #design-lab/welcome/a. The install button is hidden until the install flow is ready.
+ *
+ * Every claim about which books exist and whether words have sentences comes from `coverage`,
+ * i.e. from the shared word lists themselves, never from hardcoded copy.
  */
-import type { CSSProperties } from 'react';
+import { useEffect, type CSSProperties } from 'react';
 import { ArrowDown, ArrowRight, ArrowUpRight, BookOpen, Check, Download, Flame, Github, Moon, Plus, RotateCcw, Sparkle, Volume2 } from 'lucide-react';
+import { DiffView } from '../../components/DiffView';
 import { Seal } from '../../components/Seal';
+import { BUILT_IN_BOOKS } from '../../lib/books';
 import { useReveal } from '../../lib/hooks';
+import { STRINGS } from '../../lib/i18n';
+import { FEEDBACK_URL, dropPrerender, hrefFor } from '../../lib/route';
+import { diffSyllables } from '../../utils/hangulDiff';
 import { DUBEOLSIK, DUBEOLSIK_ROWS } from '../../utils/hangulInput';
-import { BENEFITS, DEMO_STREAK, DEMO_WORD, DISCLAIMER, GITHUB_URL, HERO, ICON_SRC, LEVELS, STORY, useJamoDemo, useParallax, useTilt } from './content';
+import {
+  BENEFITS,
+  DEMO_STREAK,
+  DEMO_WORD,
+  DISCLAIMER,
+  GITHUB_URL,
+  HERO,
+  ICON_SRC,
+  STORY,
+  coverageCopy,
+  coverageOf,
+  type Coverage,
+  useJamoDemo,
+  useParallax,
+  useTilt,
+} from './content';
 import { Burst, JamoField, Orb, Sparkles } from './fx';
 
 /* ---------- The playable word block ---------- */
@@ -153,21 +176,24 @@ const TONE: Record<number, string> = {
   7: 'bg-amber-wash text-amber',
 };
 
-/** Every SNU level as a shelf of tiles, 1A lit. */
-function LevelsVisual() {
+/** The textbooks that have words today, each with its word count, and an open slot for the next. */
+function LevelsVisual({ coverage }: { coverage: Coverage }) {
   return (
-    <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
-      {LEVELS.map((l, k) => (
-        <span
-          key={l}
-          className={`grid h-11 place-items-center rounded-xl font-serif text-[16px] leading-none ${
-            k === 0 ? 'bg-accent text-white shadow-[0_4px_0_var(--color-accent-lip)]' : 'border-2 border-rule bg-ink shadow-[0_4px_0_var(--color-rule)]'
-          }`}
+    <ul className="grid grid-cols-4 gap-1.5 sm:gap-2" aria-label="Textbooks available">
+      {coverage.books.map((b) => (
+        <li
+          key={b.id}
+          title={`${b.words} words in ${b.units} units`}
+          className="flex h-14 flex-col items-center justify-center rounded-xl bg-accent text-white shadow-[0_4px_0_var(--color-accent-lip)]"
         >
-          {l}
-        </span>
+          <span className="font-serif text-[17px] leading-none">{b.id}</span>
+          <span className="tabular mt-1 text-[10px] font-extrabold leading-none text-white/80">{b.words} words</span>
+        </li>
       ))}
-    </div>
+      <li className="flex h-14 items-center justify-center rounded-xl border-2 border-dashed border-rule px-1 text-center text-[11px] font-extrabold leading-tight text-hanji-2">
+        More soon
+      </li>
+    </ul>
   );
 }
 
@@ -269,13 +295,46 @@ function DeckVisual() {
   );
 }
 
-const VISUAL: Record<number, () => JSX.Element> = { 0: LevelsVisual, 1: StreakVisual, 2: SentenceVisual, 6: KeyboardVisual, 7: DeckVisual };
+/** The app's own letter-by-letter check, on the misspelling from "Our story": 학셍 for 학생. */
+const SLIP = diffSyllables('학셍', '학생');
 
-/** A big benefit card with its visual; `wide` sets text and visual side by side from lg up. */
-function BenefitCard({ i, n, wide = false, className = '' }: { i: number; n: number; wide?: boolean; className?: string }) {
+function DiffVisual() {
+  return (
+    <div aria-hidden className="rounded-2xl bg-ink p-4">
+      <DiffView t={STRINGS.en} cells={SLIP} />
+    </div>
+  );
+}
+
+const VISUAL: Record<number, (p: { coverage: Coverage }) => JSX.Element> = {
+  0: LevelsVisual,
+  1: StreakVisual,
+  2: SentenceVisual,
+  4: DiffVisual,
+  6: KeyboardVisual,
+  7: DeckVisual,
+};
+
+/** A big benefit card with its visual; `wide` sets text and visual side by side from lg up. `body` overrides the stock copy. */
+function BenefitCard({
+  i,
+  n,
+  coverage,
+  body: bodyOverride,
+  wide = false,
+  className = '',
+}: {
+  i: number;
+  n: number;
+  coverage: Coverage;
+  body?: string;
+  wide?: boolean;
+  className?: string;
+}) {
   const { ref: revealRef, revealed } = useReveal<HTMLDivElement>();
   const tilt = useTilt<HTMLElement>(wide ? 3 : 6);
-  const { icon: Icon, kicker, title, body } = BENEFITS[i];
+  const { icon: Icon, kicker, title, body: stockBody } = BENEFITS[i];
+  const body = bodyOverride ?? stockBody;
   const Visual = VISUAL[i];
   return (
     <div ref={revealRef} style={{ '--i': n } as CSSProperties} className={`reveal ${className} ${revealed ? 'is-revealed' : ''}`}>
@@ -296,7 +355,7 @@ function BenefitCard({ i, n, wide = false, className = '' }: { i: number; n: num
           <p className="mt-3 text-[16px] leading-relaxed text-hanji-2">{body}</p>
         </div>
         <div className={`mt-auto pt-8 ${wide ? 'lg:mt-0 lg:min-w-0 lg:flex-1 lg:pt-0' : ''}`}>
-          <Visual />
+          <Visual coverage={coverage} />
         </div>
       </article>
     </div>
@@ -430,11 +489,23 @@ function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 }
 
-/** `returning`: opened from the dashboard (#about), so the start buttons read as a way back. */
-export default function WelcomeA({ onStart, returning = false }: { onStart?: () => void; returning?: boolean }) {
+const BUNDLED = coverageOf(BUILT_IN_BOOKS);
+
+/**
+ * `returning`: opened from the dashboard (/about), so the start buttons read as a way back.
+ * `coverage`: the textbooks that really have words (App passes the shared lists; the lab and a
+ * first offline visit fall back to the bundled ones).
+ */
+export default function WelcomeA({ onStart, returning = false, coverage = BUNDLED }: { onStart?: () => void; returning?: boolean; coverage?: Coverage }) {
   const cta = returning ? 'Back to learning' : HERO.cta;
   const hero = useParallax<HTMLElement>();
   const closer = useParallax<HTMLElement>();
+  const copy = coverageCopy(coverage);
+  // The third card promises example sentences only while most words have one; otherwise it shows the letter check.
+  const third = copy.examples ? 2 : 4;
+  const small = [3, 4, 5].filter((i) => i !== third);
+
+  useEffect(dropPrerender, []);
 
   return (
     <div className="scroll-smooth-motion h-full overflow-y-auto overflow-x-hidden text-hanji">
@@ -475,7 +546,7 @@ export default function WelcomeA({ onStart, returning = false }: { onStart?: () 
             <span className="min-w-0">
               <span className="block text-[17px] font-black leading-tight tracking-[-0.01em] sm:text-[22px]">{HERO.badge}</span>
               <span className="mt-1 block text-[13px] font-bold leading-snug text-hanji-2 sm:text-[14px]">
-                <span className="font-serif text-[15px] text-accent-text sm:text-[16px]">서울대 한국어</span> · {HERO.badgeSub}
+                <span className="font-serif text-[15px] text-accent-text sm:text-[16px]">서울대 한국어</span> · {copy.badgeSub}
               </span>
             </span>
           </p>
@@ -513,14 +584,14 @@ export default function WelcomeA({ onStart, returning = false }: { onStart?: () 
             Everything your class asks for. Nothing it doesn’t.
           </h2>
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <BenefitCard i={0} n={0} />
-            <BenefitCard i={1} n={1} />
-            <BenefitCard i={2} n={2} className="md:col-span-2 lg:col-span-1" />
-            <BenefitCard i={6} n={0} wide className="md:col-span-2" />
-            <BenefitCard i={7} n={1} className="md:col-span-2 lg:col-span-1" />
+            <BenefitCard i={0} n={0} coverage={coverage} body={copy.textbookBody} />
+            <BenefitCard i={1} n={1} coverage={coverage} />
+            <BenefitCard i={third} n={2} coverage={coverage} className="md:col-span-2 lg:col-span-1" />
+            <BenefitCard i={6} n={0} coverage={coverage} wide className="md:col-span-2" />
+            <BenefitCard i={7} n={1} coverage={coverage} className="md:col-span-2 lg:col-span-1" />
           </div>
-          <div className="mt-16 grid gap-10 border-t-2 border-rule-soft pt-12 md:grid-cols-3 md:gap-8">
-            {[3, 4, 5].map((i) => (
+          <div className={`mt-16 grid gap-10 border-t-2 border-rule-soft pt-12 md:gap-8 ${small.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+            {small.map((i) => (
               <SmallBenefit key={i} i={i} />
             ))}
           </div>
@@ -567,6 +638,17 @@ export default function WelcomeA({ onStart, returning = false }: { onStart?: () 
               <img src={ICON_SRC} alt="" width={24} height={24} className="size-6" />
               <span className="font-serif text-[18px] leading-none">어휘장</span>
             </span>
+            <nav aria-label="Site" className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-[13px] font-bold text-hanji-2">
+              <a href={hrefFor('privacy')} className="hover:text-hanji">
+                Privacy
+              </a>
+              <a href={FEEDBACK_URL} target="_blank" rel="noreferrer" className="hover:text-hanji">
+                Feedback &amp; contact
+              </a>
+              <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="hover:text-hanji">
+                Source code
+              </a>
+            </nav>
             <p className="text-[12px] text-hanji-2/80">{DISCLAIMER}</p>
           </footer>
         </div>

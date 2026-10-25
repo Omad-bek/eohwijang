@@ -154,3 +154,25 @@ $$;
 revoke all on function public.is_admin(text) from public, anon, authenticated;
 revoke all on function public.get_global_words(), public.admin_check(text), public.admin_put_words(text, jsonb) from public;
 grant execute on function public.get_global_words(), public.admin_check(text), public.admin_put_words(text, jsonb) to anon, authenticated;
+
+-- The whole list as one JSON value: set-returning RPCs are cut at PostgREST's max-rows (1000 on
+-- Supabase), a single value is not. The app prefers this one (see global-words-json.sql).
+create or replace function public.get_global_words_all()
+returns jsonb
+language sql stable security definer set search_path = public
+as $$
+  select jsonb_build_object(
+    'total', count(*),
+    'words', coalesce(
+      jsonb_agg(
+        jsonb_build_object('book', g.book, 'unit', g.unit, 'ko', g.ko, 'uz', g.uz, 'ru', g.ru, 'en', g.en, 'deleted', g.deleted, 'example', g.example)
+        order by g.updated_at, g.book, g.unit
+      ),
+      '[]'::jsonb
+    )
+  )
+  from public.global_words g;
+$$;
+
+revoke all on function public.get_global_words_all() from public, anon, authenticated;
+grant execute on function public.get_global_words_all() to anon, authenticated;

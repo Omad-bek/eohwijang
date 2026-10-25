@@ -12,7 +12,7 @@ interface Props {
   onChange: (patch: Partial<Settings>) => void;
   onHome: () => void;
   onData: () => void;
-  /** Opens the Welcome page (#about). The button shows from md up; phones get a link at the foot of the dashboard. */
+  /** Opens the Welcome page (/about). On phones too: sound and theme fold into the ⚙ menu to make room for it. */
   onAbout?: () => void;
   sync: CloudSync;
   onSync: () => void;
@@ -23,9 +23,9 @@ interface Props {
   soundOn: boolean;
   onToggleSound: () => void;
   /**
-   * Design Lab only: how phones (below md) make room for the About button. Unset is the live layout.
-   * a: every control in the row, buttons 32px below 400px; b: Data and About share a "more" menu;
-   * c: sound and theme share a settings menu.
+   * How phones (below md) make room for the About button. c is the live layout (chosen 2026-10-25);
+   * the Design Lab passes a or b to compare. a: every control in the row, buttons 32px below 400px;
+   * b: Data and About share a "more" menu; c: sound and theme share a settings menu.
    */
   phoneVariant?: 'a' | 'b' | 'c';
 }
@@ -308,7 +308,7 @@ function SoundButton({ t, on, onToggle }: { t: Strings; on: boolean; onToggle: (
 
 export function Navbar({ t, settings, online, onChange, onHome, onData, onAbout, sync, onSync, admin = false, theme, onToggleTheme, soundOn, onToggleSound, phoneVariant }: Props) {
   const prompt = promptOptions(t);
-  const v = admin ? undefined : phoneVariant;
+  const v = admin ? undefined : (phoneVariant ?? 'c');
   const dark = theme === 'dark';
   // Below md, which controls sit in the row and which fold into a menu.
   const aboutOnPhones = v === 'a' || v === 'c';

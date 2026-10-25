@@ -1,7 +1,7 @@
 import { Eye, Play, RotateCcw, StepForward } from 'lucide-react';
 import type { Stage } from '../types';
 import type { Strings } from '../lib/i18n';
-import type { MemoryStats } from '../lib/srs';
+import { stageStatus, type MemoryStats } from '../lib/srs';
 import { sessionCleared, type SavedSession } from '../lib/session';
 import { DueBadge, LevelBar, LevelChips } from './Levels';
 import { Seal } from './Seal';
@@ -27,7 +27,11 @@ export function StageCard({ t, stage, order, stats, onPreview, onStart, resume, 
   const { ref, revealed } = useReveal<HTMLDivElement>();
   const total = stage.words.length;
   const mastered = stats.learned;
-  const complete = mastered === total;
+  /** Every word learned at least once: the main button replays instead of starting. */
+  const allLearned = mastered === total;
+  // One status at a time: words ready to level up, or the seal of a complete stage, never both.
+  const status = stageStatus(stats, total);
+  const complete = status === 'complete';
   const pct = total ? Math.round((mastered / total) * 100) : 0;
   const titleId = `stage-${stage.key}`;
 
@@ -54,7 +58,7 @@ export function StageCard({ t, stage, order, stats, onPreview, onStart, resume, 
           )}
         </header>
 
-        {stats.due > 0 && (
+        {status === 'levelUp' && (
           <div className="mt-3">
             <DueBadge t={t} due={stats.due} />
           </div>
@@ -101,8 +105,8 @@ export function StageCard({ t, stage, order, stats, onPreview, onStart, resume, 
               resume ? 'lip-rule border-2 border-rule bg-ink-2 font-extrabold text-hanji-2 hover:text-hanji' : 'lip-accent bg-accent font-black text-white'
             }`}
           >
-            {complete ? <RotateCcw size={16} aria-hidden className="shrink-0" /> : <Play size={15} fill="currentColor" aria-hidden className="shrink-0" />}
-            <span className="truncate">{complete ? t.replay : t.startQuiz}</span>
+            {allLearned ? <RotateCcw size={16} aria-hidden className="shrink-0" /> : <Play size={15} fill="currentColor" aria-hidden className="shrink-0" />}
+            <span className="truncate">{allLearned ? t.replay : t.startQuiz}</span>
           </button>
           {resume && (
             <button

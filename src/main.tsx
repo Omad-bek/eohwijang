@@ -6,6 +6,7 @@ import '@fontsource/nanum-gothic/800.css';
 import './fonts.css';
 import './index.css';
 import App from './App';
+import { initAnalytics } from './lib/analytics';
 
 // Dev-only design lab (#design-lab/<page>/<variant>). The DEV constant drops it, and its chunks, from production builds.
 const Lab = import.meta.env.DEV ? lazy(() => import('./design-lab/Lab')) : null;
@@ -26,6 +27,8 @@ function Root() {
     <App />
   );
 }
+
+initAnalytics();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

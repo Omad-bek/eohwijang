@@ -37,6 +37,10 @@ jobs:
           # by design; leave them unset to ship without Cloud Sync.
           VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL || secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY || secrets.SUPABASE_ANON_KEY }}
+          # Umami analytics (cookieless): repo Variable UMAMI_WEBSITE_ID from cloud.umami.is, and
+          # UMAMI_SCRIPT_URL only when self-hosting. Leave unset to ship without analytics.
+          VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+          VITE_UMAMI_SCRIPT_URL: ${{ vars.UMAMI_SCRIPT_URL }}
 
       - uses: actions/configure-pages@v5
 

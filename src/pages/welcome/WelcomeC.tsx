@@ -12,8 +12,14 @@ import { VOCAB_1A } from '../../data/vocab1A';
 import { useReveal } from '../../lib/hooks';
 import { firstForm } from '../../lib/wordOfDay';
 import { checkAnswer } from '../../utils/hangulDiff';
-import { BENEFITS, BOOKS, DEMO_STREAK, DEMO_WORD, DISCLAIMER, HERO, ICON_SRC, STORY, useJamoDemo, useParallax } from './content';
+import { BENEFITS, coverageCopy, coverageOf, DEMO_STREAK, DEMO_WORD, DISCLAIMER, HERO, ICON_SRC, STORY, useJamoDemo, useParallax } from './content';
+import { BUILT_IN_BOOKS } from '../../lib/books';
 import { Burst, JamoField, Orb, Sparkles } from './fx';
+
+/** Lab-only variant: shows the bundled books, so its claims stay true without the server. */
+const COVERAGE = coverageOf(BUILT_IN_BOOKS);
+const BOOKS = COVERAGE.books.map((b) => b.id);
+const EYEBROW = coverageCopy(COVERAGE).eyebrow;
 
 const CELL = 'relative overflow-hidden rounded-[28px] p-6 transition-transform duration-300 ease-[var(--ease-out-expo)] motion-safe:hover:-translate-y-1 sm:p-7';
 const PLAIN = `${CELL} border-2 border-rule bg-ink-2 shadow-[0_6px_0_var(--color-rule)]`;
@@ -45,7 +51,7 @@ function HeroCell({ onStart }: { onStart?: () => void }) {
       <header className="flex items-center gap-2.5">
         <img src={ICON_SRC} alt="" width={36} height={36} className="size-9 rounded-[10px]" />
         <span className="font-serif text-[26px] leading-none">어휘장</span>
-        <span className="ml-auto hidden rounded-full bg-black/15 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-white/90 sm:block">{HERO.eyebrow}</span>
+        <span className="ml-auto hidden rounded-full bg-black/15 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-white/90 sm:block">{EYEBROW}</span>
       </header>
 
       <div className="mt-auto pt-14 lg:pt-8">

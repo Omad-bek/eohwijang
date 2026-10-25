@@ -25,7 +25,9 @@ export default defineConfig(({ mode }) => {
   const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env };
   return {
   base,
-  define: Object.fromEntries(PUBLIC_ENV.map((k) => [`import.meta.env.${k}`, JSON.stringify(env[k] ?? '')])),
+  // scripts/prerender.mjs reads it to link the Welcome chunk's stylesheet into the static pages, then deletes it.
+  build: { manifest: true },
+  define:Object.fromEntries(PUBLIC_ENV.map((k) => [`import.meta.env.${k}`, JSON.stringify(env[k] ?? '')])),
   plugins: [
     react(),
     tailwindcss(),

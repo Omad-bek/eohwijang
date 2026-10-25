@@ -165,6 +165,8 @@ Backend setup (one time):
 
 Without these values the app builds normally and the Cloud Sync section says it is not set up.
 
+Access rules: [`supabase/harden.sql`](supabase/harden.sql) re-applies them (RLS on with no policies, no table grants, only the app's RPCs executable) and can be run any number of times. Run [`supabase/global-words-json.sql`](supabase/global-words-json.sql) first: it adds `get_global_words_all`, which returns every shared word in one JSON value instead of rows capped at PostgREST's 1000-row limit. Until it exists, the app pages through `get_global_words`. `npm run check:words` (with `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` set) confirms the app receives as many rows as the server holds.
+
 ### Shared vs personal data
 
 - **Shared, read-only:** the bundled collections (`src/data`) plus global updates published in admin mode. Identical for every learner, never written by the app, never stored in anyone's progress or Sync ID vault.
@@ -178,6 +180,12 @@ Open the app with `#admin` at the end of the URL. The panel is only hidden, not 
    `insert into public.admin_secrets (token_hash) values (encode(extensions.digest('YOUR-LONG-RANDOM-TOKEN', 'sha256'), 'hex'));`
 2. Visit `…/#admin`, enter the token, then add or edit words, hide bundled ones, revert edits, or bulk-paste a whole unit (heading lines like `9과` start units; a new book name such as `1B` creates a new shared collection).
 3. Changes reach every learner the next time their app opens online (cached for offline). **Export** downloads a book as JSON to commit into `src/data` when you want it bundled with the app.
+
+### Public pages, SEO and analytics
+
+- `/about` (the Welcome page) and `/privacy` are real paths. `npm run build` ends with `scripts/prerender.mjs`, which renders them, and the landing page in `index.html`, to static HTML with the book list taken from the live shared lists, so search engines and link previews see text. GitHub Pages serves `about.html` at `/about`.
+- Link previews use `public/og-image.png` (1200 × 630), made from the design lab's Share image page: `npx -p playwright node scripts/make-og.mjs a` (or `b`).
+- Analytics are off unless the repo variable `UMAMI_WEBSITE_ID` is set ([Umami Cloud](https://cloud.umami.is), cookieless). Events: `practice-started`, `round-completed`, `collection-created`, `sync-enabled`.
 
 ### Icons
 

@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- English: the landing page and its prerendered copy are English. The app switches lang to the learner's interface language. -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -14,14 +15,50 @@
         if (t === 'dark') document.querySelector('meta[name="theme-color"]').setAttribute('content', '#191c23');
       } catch (e) {}
     </script>
-    <meta name="description" content="Type-to-recall Korean vocabulary trainer with Uzbek, Russian and English prompts." />
+    <title>어휘장 · Korean vocabulary trainer for the SNU textbooks</title>
+    <meta name="description" content="Type-to-recall Korean vocabulary for the SNU Korean textbooks, with Uzbek, Russian and English prompts. Free, no account, works offline." />
+    <link rel="canonical" href="https://eohwijang.fyi/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <title>어휘장</title>
+
+    <!-- Sharing previews. scripts/prerender.mjs rewrites the title, description and URL per page. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="어휘장" />
+    <meta property="og:title" content="어휘장 · Korean vocabulary trainer for the SNU textbooks" />
+    <meta property="og:description" content="Type-to-recall Korean vocabulary for the SNU Korean textbooks, with Uzbek, Russian and English prompts. Free, no account, works offline." />
+    <meta property="og:url" content="https://eohwijang.fyi/" />
+    <meta property="og:image" content="https://eohwijang.fyi/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="어휘장: type Korean words from memory, letter by letter" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="어휘장 · Korean vocabulary trainer for the SNU textbooks" />
+    <meta name="twitter:description" content="Type-to-recall Korean vocabulary for the SNU Korean textbooks, with Uzbek, Russian and English prompts. Free, no account, works offline." />
+    <meta name="twitter:image" content="https://eohwijang.fyi/og-image.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "어휘장",
+        "alternateName": "Eohwijang",
+        "url": "https://eohwijang.fyi/",
+        "description": "Type-to-recall Korean vocabulary trainer for the SNU Korean textbooks, with Uzbek, Russian and English prompts.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Any (web browser)",
+        "browserRequirements": "Requires JavaScript",
+        "inLanguage": ["ko", "en", "ru", "uz"],
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "image": "https://eohwijang.fyi/og-image.png",
+        "sameAs": ["https://github.com/Omad-bek/eohwijang"]
+      }
+    </script>
   </head>
   <body>
+    <!-- prerender -->
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

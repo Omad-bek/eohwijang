@@ -29,8 +29,11 @@ export interface Strings {
   level: (n: 1 | 2 | 3) => string;
   newWords: string;
   memoryLevels: string;
+  /** Words ready for their next level. One wording everywhere: stage cards, unit header, path and review card. */
   dueReview: (n: number) => string;
   dueShort: (n: number) => string;
+  /** Under the review card when the book has more ready words than one round takes. */
+  levelUpRound: (n: number) => string;
   youTyped: string;
   correct: string;
   requeued: string;
@@ -61,7 +64,7 @@ export interface Strings {
   stageSize: string;
   stageSizeHint: string;
   data: string;
-  /** The navbar info button and the dashboard link that open the Welcome page (#about). */
+  /** The navbar info button that opens the Welcome page (/about). */
   about: string;
   addWords: string;
   addWordsHint: string;
@@ -107,6 +110,10 @@ export interface Strings {
   notQuite: string;
   revealed: string;
   streak: (n: number) => string;
+  /** The streak is 0 but there is history: the longest run so far. */
+  streakEnded: (best: number) => string;
+  /** Above the quiz prompt when the chosen prompt language has no translation for this word; `code` is UZ / RU / EN. */
+  promptMissing: (code: string) => string;
   goalLeft: (n: number) => string;
   goalDone: string;
   dailyGoal: (done: number, goal: number) => string;
@@ -133,6 +140,10 @@ export interface Strings {
   cloudSync: string;
   cloudSyncHint: string;
   privacyNote: string;
+  privacyFeedback: string;
+  privacyFeedbackHint: string;
+  privacyPolicy: string;
+  sendFeedback: string;
   connectCloud: string;
   linkDevice: string;
   linkDeviceHint: string;
@@ -187,8 +198,9 @@ const en: Strings = {
   level: (n) => (n === 3 ? 'Lvl 3 MAX' : `Lvl ${n}`),
   newWords: 'New',
   memoryLevels: 'Memory levels',
-  dueReview: (n) => `Ready for Level-Up Review (${n} ${n === 1 ? 'word' : 'words'} due)`,
-  dueShort: (n) => `${n} due`,
+  dueReview: (n) => `${n} ${n === 1 ? 'word' : 'words'} ready to level up`,
+  dueShort: (n) => `${n} to level up`,
+  levelUpRound: (n) => `This round takes the first ${n}; the rest wait for the next one.`,
   youTyped: 'You typed',
   correct: 'Correct',
   requeued: 'Back in the queue',
@@ -254,6 +266,10 @@ const en: Strings = {
   cloudSync: 'Cloud Sync',
   cloudSyncHint: 'Keep memory levels, stage records and your collections in step across your phone, tablet and computer.',
   privacyNote: 'Fully anonymous: no email, password, name or any personal information is ever asked for. Your progress is stored under a random code, and that code is the only key to it.',
+  privacyFeedback: 'Privacy & feedback',
+  privacyFeedbackHint: 'What is stored where, how to erase it, and how to reach us.',
+  privacyPolicy: 'Privacy',
+  sendFeedback: 'Send feedback',
   connectCloud: 'Connect Cloud',
   linkDevice: 'Link this device',
   linkDeviceHint: 'Already synced on another device? Enter its Sync ID to pull and merge that progress here.',
@@ -290,6 +306,8 @@ const en: Strings = {
   notQuite: 'Not quite: compare it letter by letter',
   revealed: "Here's the word: type it once to remember it",
   streak: (n) => `${n}-day streak`,
+  streakEnded: (best) => `Streak ended · best: ${best} ${best === 1 ? 'day' : 'days'}`,
+  promptMissing: (code) => `No ${code} translation for this word yet, so the others are shown.`,
   goalLeft: (n) => `${n} more ${n === 1 ? 'word' : 'words'} today to hit your goal`,
   goalDone: 'Goal done for today. Anything more is a bonus.',
   dailyGoal: (a, b) => `Daily goal: ${a} of ${b} words`,
@@ -343,8 +361,9 @@ const ru: Strings = {
   level: (n) => (n === 3 ? 'Ур. 3 MAX' : `Ур. ${n}`),
   newWords: 'Новые',
   memoryLevels: 'Уровни памяти',
-  dueReview: (n) => `Готово к повышению уровня (к повторению: ${n})`,
-  dueShort: (n) => `${n} к повтору`,
+  dueReview: (n) => `Готово к повышению уровня: ${n}`,
+  dueShort: (n) => `${n} к повышению`,
+  levelUpRound: (n) => `В этот раунд войдут первые ${n}, остальные — в следующий.`,
   youTyped: 'Вы написали',
   correct: 'Верно',
   requeued: 'Снова в очереди',
@@ -410,6 +429,10 @@ const ru: Strings = {
   cloudSync: 'Облачная синхронизация',
   cloudSyncHint: 'Уровни памяти, результаты этапов и ваши коллекции совпадают на телефоне, планшете и компьютере.',
   privacyNote: 'Полностью анонимно: мы никогда не спрашиваем email, пароль, имя или другие личные данные. Прогресс хранится под случайным кодом, и только этот код открывает к нему доступ.',
+  privacyFeedback: 'Конфиденциальность и отзывы',
+  privacyFeedbackHint: 'Что и где хранится, как это удалить и как с нами связаться.',
+  privacyPolicy: 'Конфиденциальность',
+  sendFeedback: 'Написать отзыв',
   connectCloud: 'Подключить облако',
   linkDevice: 'Связать это устройство',
   linkDeviceHint: 'Уже синхронизируете на другом устройстве? Введите его Sync ID, чтобы загрузить и объединить прогресс.',
@@ -446,6 +469,9 @@ const ru: Strings = {
   notQuite: 'Не совсем: сравните по буквам',
   revealed: 'Вот это слово: наберите его, чтобы запомнить',
   streak: (n) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'день' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 'дня' : 'дней'} подряд`,
+  streakEnded: (best) =>
+    `Серия прервалась · рекорд: ${best} ${best % 10 === 1 && best % 100 !== 11 ? 'день' : best % 10 >= 2 && best % 10 <= 4 && (best % 100 < 12 || best % 100 > 14) ? 'дня' : 'дней'}`,
+  promptMissing: (code) => `Для этого слова пока нет перевода ${code}, поэтому показаны другие.`,
   goalLeft: (n) => `Ещё ${n} до цели на сегодня`,
   goalDone: 'Цель на сегодня выполнена. Дальше — бонус.',
   dailyGoal: (a, b) => `Цель дня: ${a} из ${b} слов`,
@@ -499,8 +525,9 @@ const uz: Strings = {
   level: (n) => (n === 3 ? '3-daraja MAX' : `${n}-daraja`),
   newWords: 'Yangi',
   memoryLevels: 'Xotira darajalari',
-  dueReview: (n) => `Darajani oshirish vaqti keldi (${n} ta so'z takrorga tayyor)`,
-  dueShort: (n) => `${n} ta takrorga`,
+  dueReview: (n) => `${n} ta so'z darajasini oshirishga tayyor`,
+  dueShort: (n) => `${n} ta oshirishga`,
+  levelUpRound: (n) => `Bu raundga dastlabki ${n} tasi kiradi, qolganlari keyingisiga.`,
   youTyped: 'Siz yozdingiz',
   correct: "To'g'ri",
   requeued: 'Navbatga qaytdi',
@@ -566,6 +593,10 @@ const uz: Strings = {
   cloudSync: 'Bulutli sinxronlash',
   cloudSyncHint: "Xotira darajalari, bosqich natijalari va to'plamlaringiz telefon, planshet va kompyuterda bir xil bo'ladi.",
   privacyNote: "To'liq anonim: email, parol, ism yoki boshqa shaxsiy ma'lumot hech qachon so'ralmaydi. Natijalaringiz tasodifiy kod ostida saqlanadi va faqat shu kod ularga kalit bo'ladi.",
+  privacyFeedback: 'Maxfiylik va fikr-mulohaza',
+  privacyFeedbackHint: "Nima qayerda saqlanadi, uni qanday o'chirish va biz bilan qanday bog'lanish.",
+  privacyPolicy: 'Maxfiylik',
+  sendFeedback: 'Fikr yuborish',
   connectCloud: 'Bulutga ulash',
   linkDevice: 'Bu qurilmani bog‘lash',
   linkDeviceHint: "Boshqa qurilmada sinxronlaganmisiz? Natijalarni bu yerga yuklab birlashtirish uchun o'sha Sync ID ni kiriting.",
@@ -602,6 +633,8 @@ const uz: Strings = {
   notQuite: "Biroz xato: harfma-harf solishtiring",
   revealed: "Mana bu so'z: eslab qolish uchun bir marta yozing",
   streak: (n) => `${n} kun ketma-ket`,
+  streakEnded: (best) => `Ketma-ketlik uzildi · rekord: ${best} kun`,
+  promptMissing: (code) => `Bu so'z uchun hali ${code} tarjimasi yo'q, shuning uchun boshqalari ko'rsatildi.`,
   goalLeft: (n) => `Bugungi maqsadgacha yana ${n} ta so'z`,
   goalDone: "Bugungi maqsad bajarildi. Bundan keyingisi — bonus.",
   dailyGoal: (a, b) => `Kunlik maqsad: ${b} tadan ${a} ta so'z`,
@@ -655,8 +688,9 @@ const ko: Strings = {
   level: (n) => (n === 3 ? '레벨 3 MAX' : `레벨 ${n}`),
   newWords: '새 단어',
   memoryLevels: '기억 레벨',
-  dueReview: (n) => `레벨 업 복습 가능 (${n}개 단어)`,
-  dueShort: (n) => `복습 ${n}개`,
+  dueReview: (n) => `레벨 업 준비된 단어 ${n}개`,
+  dueShort: (n) => `레벨 업 ${n}개`,
+  levelUpRound: (n) => `이번 라운드는 처음 ${n}개만, 나머지는 다음 라운드에서 해요.`,
   youTyped: '입력한 답',
   correct: '정답',
   requeued: '다시 대기열로',
@@ -722,6 +756,10 @@ const ko: Strings = {
   cloudSync: '클라우드 동기화',
   cloudSyncHint: '기억 단계, 스테이지 기록, 내 단어장을 휴대폰·태블릿·컴퓨터에서 똑같이 유지합니다.',
   privacyNote: '완전히 익명입니다. 이메일, 비밀번호, 이름 등 어떤 개인 정보도 묻지 않습니다. 진도는 무작위 코드로만 저장되며, 그 코드가 유일한 열쇠입니다.',
+  privacyFeedback: '개인정보 및 의견',
+  privacyFeedbackHint: '무엇이 어디에 저장되는지, 지우는 방법, 연락하는 방법.',
+  privacyPolicy: '개인정보 처리방침',
+  sendFeedback: '의견 보내기',
   connectCloud: '클라우드 연결',
   linkDevice: '이 기기 연결',
   linkDeviceHint: '다른 기기에서 이미 동기화 중인가요? 그 기기의 Sync ID를 입력하면 진도를 가져와 합칩니다.',
@@ -758,6 +796,8 @@ const ko: Strings = {
   notQuite: '아쉬워요: 자모를 하나씩 비교해 보세요',
   revealed: '정답이에요: 한 번 따라 써 보세요',
   streak: (n) => `${n}일 연속`,
+  streakEnded: (best) => `연속 기록 끊김 · 최고 ${best}일`,
+  promptMissing: (code) => `이 단어는 아직 ${code} 번역이 없어서 다른 언어로 보여 줘요.`,
   goalLeft: (n) => `오늘 목표까지 ${n}개 남았어요`,
   goalDone: '오늘 목표 달성! 이제부터는 보너스예요.',
   dailyGoal: (a, b) => `오늘의 목표: ${b}개 중 ${a}개`,

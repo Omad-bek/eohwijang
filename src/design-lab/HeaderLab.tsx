@@ -2,7 +2,7 @@
  * Header preview: the live Navbar inside device-width frames. Media queries follow the frame's
  * own width, so each iframe shows the layout a real phone, tablet or desktop gets. Inside a
  * frame (Lab renders bare there) this page draws just the Navbar, with local, unsaved settings.
- * Variants A / B / C are ways to fit the About (info) button on phones.
+ * Variants A / B / C are ways to fit the About (info) button on phones; C is live (chosen 2026-10-25).
  */
 import { useEffect, useState } from 'react';
 import { Navbar } from '../components/Navbar';
@@ -24,7 +24,7 @@ const FRAMES = [
 const NOTES: Record<Variant, string> = {
   a: 'Compact row: the info button sits in the header on phones too. To make room, header buttons shrink from 36px to 32px below 400px wide.',
   b: 'More menu: on phones the Data button becomes a ••• menu holding Words & data and About. Buttons keep their full size.',
-  c: 'Settings menu: on phones sound and dark mode fold into one ⚙ menu, so the info button gets its own spot in the row at full size.',
+  c: 'Settings menu (live): on phones sound and dark mode fold into one ⚙ menu, so the info button gets its own spot in the row at full size.',
 };
 
 const noop = () => {};

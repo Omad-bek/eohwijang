@@ -35,6 +35,23 @@ const PAGES: { id: string; label: string; variants: Variant[] }[] = [
       { id: 'c', label: 'Bento', Page: lazy(() => import('../pages/welcome/WelcomeC')) },
     ],
   },
+  {
+    id: 'privacy',
+    label: 'Privacy',
+    variants: [
+      { id: 'a', label: 'Document', Page: lazy(() => import('../pages/privacy/PrivacyA')) },
+      { id: 'b', label: 'Cards', Page: lazy(() => import('../pages/privacy/PrivacyB')) },
+    ],
+  },
+  {
+    id: 'og',
+    label: 'Share image',
+    variants: [
+      { id: 'a', label: 'Product', Page: lazy(() => import('./OgLab').then((m) => ({ default: m.OgA }))) },
+      { id: 'b', label: 'Brand', Page: lazy(() => import('./OgLab').then((m) => ({ default: m.OgB }))) },
+    ],
+  },
+  { id: 'states', label: 'States', variants: [{ id: 'fixtures', label: 'Fixtures', Page: lazy(() => import('./StatesLab')) }] },
 ];
 
 function fromHash() {

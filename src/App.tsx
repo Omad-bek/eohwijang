@@ -17,9 +17,13 @@ import { useSharedBooks } from './lib/global';
 import { Quiz } from './components/Quiz';
 import { StagePreview } from './components/StagePreview';
 import { AmbientParticles } from './components/AmbientParticles';
+import { coverageOf } from './lib/coverage';
+import { PAGE_TITLE, dropPrerender, useRoute } from './lib/route';
+import { track } from './lib/analytics';
 
-// Only new learners and #about need it, so it loads on demand (and is precached for offline like every chunk).
+// Only new learners, /about and /privacy need these, so they load on demand (and are precached for offline like every chunk).
 const Welcome = lazy(() => import('./pages/welcome/WelcomeA'));
+const Privacy = lazy(() => import('./pages/privacy/Privacy'));
 
 type View =
   | { kind: 'home' }
@@ -29,7 +33,6 @@ type View =
 const BOOK_KEY = 'project-vocab:book';
 
 const isAdminHash = () => window.location.hash === '#admin';
-const isAboutHash = () => window.location.hash === '#about';
 
 /** Set once a learner leaves the Welcome page through one of its start buttons. */
 const WELCOMED_KEY = 'project-vocab:welcomed';
@@ -69,8 +72,9 @@ export default function App() {
   const t = STRINGS[data.settings.uiLang];
   const shared = useSharedBooks(online);
   const books = useMemo(() => allBooks(data, shared.books), [data, shared.books]);
+  const coverage = useMemo(() => coverageOf(shared.books), [shared.books]);
   const [admin, setAdmin] = useState(isAdminHash);
-  const [about, setAbout] = useState(isAboutHash);
+  const [route, go] = useRoute();
   // New learners land on the Welcome page; anyone with progress, a saved run or the flag goes straight to the dashboard.
   const [welcomed, setWelcomed] = useState(() => readWelcomed() || hasProgress(data) || loadSession() !== null);
   const now = useNow();
@@ -90,10 +94,7 @@ export default function App() {
   const resumable = useCallback((stage: Stage) => sessionFor(saved, stage), [saved]);
 
   useEffect(() => {
-    const onHash = () => {
-      setAdmin(isAdminHash());
-      setAbout(isAboutHash());
-    };
+    const onHash = () => setAdmin(isAdminHash());
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
@@ -103,9 +104,8 @@ export default function App() {
     setAdmin(false);
   };
 
-  const openAbout = () => {
-    window.location.hash = 'about';
-  };
+  const openAbout = () => go('about');
+  const openPrivacy = () => go('privacy');
 
   /** Every start button on the Welcome page: remember the visit and show the dashboard. */
   const enterApp = () => {
@@ -115,15 +115,24 @@ export default function App() {
       // Private mode: they'll simply see the Welcome page again next visit.
     }
     setWelcomed(true);
-    if (isAboutHash()) history.replaceState(null, '', window.location.pathname + window.location.search);
-    setAbout(false);
+    if (route !== 'app') go('app');
     setView({ kind: 'home' });
   };
 
+  const showWelcome = !admin && (route === 'about' || (route === 'app' && !welcomed));
+  const showPrivacy = !admin && route === 'privacy';
+
   useEffect(() => {
-    document.documentElement.lang = data.settings.uiLang;
-    document.title = t.appName === '어휘장' ? '어휘장' : `${t.appName} · 어휘장`;
-  }, [data.settings.uiLang, t.appName]);
+    // The Welcome and Privacy pages are English-only for now; the app follows the interface language.
+    const page = showPrivacy ? 'privacy' : showWelcome ? route : null;
+    document.documentElement.lang = page ? 'en' : data.settings.uiLang;
+    document.title = page ? PAGE_TITLE[page] : t.appName === '어휘장' ? '어휘장' : `${t.appName} · 어휘장`;
+  }, [data.settings.uiLang, t.appName, showWelcome, showPrivacy, route]);
+
+  // The dashboard has no static copy of its own: clear the prerendered landing page once it is up.
+  useEffect(() => {
+    if (!showWelcome && !showPrivacy) dropPrerender();
+  }, [showWelcome, showPrivacy]);
 
   const chooseBook = (id: string) => {
     setBookId(id);
@@ -156,6 +165,7 @@ export default function App() {
 
   const completeStage = useCallback(
     (stage: Stage, share: number) => {
+      track('round-completed', { book: stage.bookId, review: !!stage.review, firstTry: Math.round(share * 100) });
       if (stage.review) return;
       update((d) => {
         const prev = d.stages[stage.key] ?? { completions: 0 };
@@ -186,6 +196,7 @@ export default function App() {
 
   /** Starts the stage afresh, discarding any unfinished run (of this or any other stage). */
   const startStage = (stage: Stage) => {
+    track('practice-started', { book: stage.bookId, review: !!stage.review, words: stage.words.length });
     clearSession();
     setPreview(null);
     setView({ kind: 'quiz', stage, run: Date.now(), resume: null });
@@ -198,12 +209,12 @@ export default function App() {
     setView({ kind: 'quiz', stage, run: Date.now(), resume });
   };
 
-  if (!admin && (about || !welcomed)) {
+  if (showPrivacy || showWelcome) {
     return (
       <div className="relative h-full">
         <AmbientParticles />
         <Suspense fallback={null}>
-          <Welcome onStart={enterApp} returning={welcomed} />
+          {showPrivacy ? <Privacy onBack={() => go('app')} /> : <Welcome onStart={enterApp} returning={welcomed} coverage={coverage} />}
         </Suspense>
       </div>
     );
@@ -257,7 +268,6 @@ export default function App() {
               resumable={resumable}
               onResume={resumeStage}
               onAddBook={() => setView({ kind: 'data', newBook: true })}
-              onAbout={openAbout}
             />
           )}
 
@@ -288,8 +298,12 @@ export default function App() {
               startWithNewBook={view.newBook}
               update={update}
               replace={replace}
-              onBookCreated={chooseBook}
+              onBookCreated={(id) => {
+                track('collection-created');
+                chooseBook(id);
+              }}
               onBack={() => setView({ kind: 'home' })}
+              onPrivacy={openPrivacy}
               sync={sync}
             />
           )}

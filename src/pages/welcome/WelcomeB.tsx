@@ -7,8 +7,14 @@
 import type { ReactNode } from 'react';
 import { ArrowRight, Flame, Moon, RotateCcw, Volume2, X } from 'lucide-react';
 import { useReveal } from '../../lib/hooks';
-import { BENEFITS, BOOKS, DEMO_STREAK, DEMO_WORD, DISCLAIMER, HERO, ICON_SRC, STORY, useCountUp, useInstallBanner, useJamoDemo, useScrollProgress } from './content';
+import { BENEFITS, coverageCopy, coverageOf, DEMO_STREAK, DEMO_WORD, DISCLAIMER, HERO, ICON_SRC, STORY, useCountUp, useInstallBanner, useJamoDemo, useScrollProgress } from './content';
+import { BUILT_IN_BOOKS } from '../../lib/books';
 import { Orb } from './fx';
+
+/** Lab-only variant: shows the bundled books, so its claims stay true without the server. */
+const COVERAGE = coverageOf(BUILT_IN_BOOKS);
+const BOOKS = COVERAGE.books.map((b) => b.id);
+const EYEBROW = coverageCopy(COVERAGE).eyebrow;
 
 /* ---------- The equation demo ---------- */
 
@@ -273,7 +279,7 @@ export default function WelcomeB({ onStart }: { onStart?: () => void }) {
 
       <main>
         <section className="mx-auto max-w-6xl px-5 pb-28 pt-20 text-center sm:px-8 sm:pt-28 lg:pb-36">
-          <p className="anim-rise text-[13px] font-bold uppercase tracking-[0.24em] text-hanji-2">{HERO.eyebrow}</p>
+          <p className="anim-rise text-[13px] font-bold uppercase tracking-[0.24em] text-hanji-2">{EYEBROW}</p>
           <h1 className="anim-rise mt-8 text-[54px] leading-[0.95] tracking-[-0.05em] [--i:1] sm:text-[96px] lg:text-[128px]">
             <span className="block font-light text-hanji-2">{HERO.lead}</span>
             <span className="block font-black">{HERO.accent}</span>

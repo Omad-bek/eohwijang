@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronRight, Flame, Info, Plus, RotateCcw, Star, StepForward } from 'lucide-react';
+import { ChevronRight, Flame, Plus, RotateCcw, Star, StepForward } from 'lucide-react';
 import type { Book, GlossLang, Stage, UserData, WordMemory } from '../types';
 import type { Strings } from '../lib/i18n';
 import { stagesForUnit } from '../lib/books';
@@ -27,8 +27,6 @@ interface Props {
   resumable: (s: Stage) => SavedSession | null;
   onResume: (s: Stage) => void;
   onAddBook: () => void;
-  /** Opens the Welcome page; shown here only below md, where the navbar has no room for it. */
-  onAbout?: () => void;
 }
 
 interface UnitSummary {
@@ -86,6 +84,8 @@ function BookTabs({ t, books, bookId, onBook, onAddBook }: Pick<Props, 't' | 'bo
 function StatusStrip({ t, data, now }: { t: Strings; data: UserData; now: number }) {
   const s = summarize(data.activity, now);
   const left = Math.max(0, DAILY_GOAL - s.today);
+  // At 0 with days behind it, "0-day streak" next to lit days reads like a bug: say it ended, and the record.
+  const ended = s.streak === 0 && s.best > 0;
   const weekday = new Intl.DateTimeFormat(data.settings.uiLang, { weekday: 'narrow' });
   return (
     <section
@@ -99,9 +99,9 @@ function StatusStrip({ t, data, now }: { t: Strings; data: UserData; now: number
         </span>
       </Ring>
       <div className="min-w-0">
-        <p className="flex items-center gap-2 text-[21px] font-black leading-tight">
+        <p className={`flex items-center gap-2 font-black leading-tight ${ended ? 'text-[17px]' : 'text-[21px]'}`}>
           <Flame className={`shrink-0 ${s.streak ? 'anim-flicker fill-flame text-flame' : 'text-rule'}`} size={26} strokeWidth={2.2} aria-hidden />
-          <span className="tabular">{t.streak(s.streak)}</span>
+          <span className="tabular">{ended ? t.streakEnded(s.best) : t.streak(s.streak)}</span>
         </p>
         <p className="mt-0.5 text-[14px] font-bold leading-snug text-hanji-2">{left > 0 ? t.goalLeft(left) : t.goalDone}</p>
         <ol className="mt-2.5 grid max-w-[280px] grid-cols-7 gap-1" aria-label={t.lastWeek}>
@@ -197,16 +197,35 @@ function ContinueCard({
 }
 
 /** The units as a path of rings: tap one to see its stages below. */
-function UnitPath({ t, book, units, selected, onPick }: { t: Strings; book: Book; units: UnitSummary[]; selected: string | undefined; onPick: (u: string) => void }) {
+function UnitPath({
+  t,
+  book,
+  units,
+  due,
+  selected,
+  onPick,
+}: {
+  t: Strings;
+  book: Book;
+  units: UnitSummary[];
+  /** Ready words across the book: the sum of the unit badges, and the review card's number. */
+  due: number;
+  selected: string | undefined;
+  onPick: (u: string) => void;
+}) {
   return (
     <nav aria-labelledby="path-title" className="anim-rise" style={{ ['--i' as string]: 2 }}>
-      <h2 id="path-title" className="mb-2 text-[20px] font-black">
-        {t.yourPath(book.title)}
-      </h2>
+      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <h2 id="path-title" className="text-[20px] font-black">
+          {t.yourPath(book.title)}
+        </h2>
+        <DueBadge t={t} due={due} />
+      </div>
       <ol className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3 pt-2 sm:mx-0 sm:px-0">
         {units.map((u) => {
           const on = u.unit === selected;
-          const done = u.pct === 100;
+          // One status per unit: ready words show as the ↑ badge, so "Complete" waits until there are none.
+          const done = u.pct === 100 && u.due === 0;
           return (
             <li key={u.unit} className="shrink-0">
               <button
@@ -271,13 +290,14 @@ function MasteryCard({ t, book, stats, total, pct }: { t: Strings; book: Book; s
   );
 }
 
-function ReviewCard({ t, stage, onStart }: { t: Strings; stage: Stage; onStart: (s: Stage) => void }) {
+function ReviewCard({ t, stage, due, onStart }: { t: Strings; stage: Stage; due: number; onStart: (s: Stage) => void }) {
   return (
     <section aria-labelledby="review-title" className="anim-rise flex flex-col rounded-[28px] bg-sky-wash p-5" style={{ ['--i' as string]: 4 }}>
       <h2 id="review-title" className="text-[19px] font-black leading-tight">
-        {t.levelUpReady(stage.words.length)}
+        {t.levelUpReady(due)}
       </h2>
       <p className="mt-1 text-[14px] font-bold text-hanji-2">{t.levelUpHint}</p>
+      {stage.words.length < due && <p className="mt-1 text-[13px] font-semibold text-hanji-2">{t.levelUpRound(stage.words.length)}</p>}
       <button type="button" onClick={() => onStart(stage)} className="juicy lip-sky mt-5 flex h-13 items-center justify-center gap-2 rounded-2xl bg-sky text-[16px] font-black uppercase tracking-wide text-white sm:mt-auto">
         <RotateCcw size={18} strokeWidth={3} aria-hidden />
         {t.review}
@@ -286,7 +306,7 @@ function ReviewCard({ t, stage, onStart }: { t: Strings; stage: Stage; onStart: 
   );
 }
 
-export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, onStart, resumable, onResume, onAddBook, onAbout }: Props) {
+export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, onStart, resumable, onResume, onAddBook }: Props) {
   const book = books.find((b) => b.id === bookId) ?? books[0];
   const size = data.settings.stageSize;
 
@@ -352,7 +372,7 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
               </div>
             </div>
 
-            <UnitPath t={t} book={book} units={units} selected={selected?.unit} onPick={pickUnit} />
+            <UnitPath t={t} book={book} units={units} due={bookStats.due} selected={selected?.unit} onPick={pickUnit} />
 
             {selected && (
               <section aria-labelledby="unit-title" className="@container">
@@ -361,8 +381,8 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
                     <h2 id="unit-title" className="shrink-0 whitespace-nowrap font-serif text-[40px] leading-none md:text-[48px]">
                       {selected.unit}
                     </h2>
-                    {selected.pct === 100 && <Seal size={40} />}
-                    <DueBadge t={t} due={selected.due} />
+                    {/* One status: ready words to level up, or the seal once there are none. */}
+                    {selected.due > 0 ? <DueBadge t={t} due={selected.due} /> : selected.pct === 100 && <Seal size={40} />}
                   </div>
                   <div className="min-w-[12rem] flex-1 md:max-w-xs">
                     <p className="tabular flex justify-between text-[13px] font-bold text-hanji-2">
@@ -397,19 +417,9 @@ export function Home({ t, books, data, memory, now, bookId, onBook, onPreview, o
 
             <div className={`grid gap-4 ${review ? 'sm:grid-cols-[1.4fr_1fr]' : ''}`}>
               <MasteryCard t={t} book={book} stats={bookStats} total={bookTotal} pct={bookPct} />
-              {review && <ReviewCard t={t} stage={review} onStart={onStart} />}
+              {review && <ReviewCard t={t} stage={review} due={bookStats.due} onStart={onStart} />}
             </div>
           </>
-        )}
-
-        {onAbout && (
-          <button
-            type="button"
-            onClick={onAbout}
-            className="press mx-auto flex items-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-bold text-hanji-2 hover:text-hanji md:hidden"
-          >
-            <Info size={15} aria-hidden /> {t.about}
-          </button>
         )}
       </div>
     </main>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Check, CircleHelp, CornerDownLeft, Flame, Keyboard, RotateCcw, Sparkles, SkipForward, Star, X } from 'lucide-react';
+import { ArrowLeft, Check, CircleHelp, CornerDownLeft, Flame, Keyboard, Languages, RotateCcw, Sparkles, SkipForward, Star, X } from 'lucide-react';
 import type { Example, GlossLang, PromptLang, Settings, Stage, VocabEntry } from '../types';
 import type { Strings } from '../lib/i18n';
 import type { Outcome } from '../lib/srs';
@@ -99,20 +99,30 @@ const EDGE_TONE: Record<EdgeKind, { glow: string; bar: string }> = {
   skip: { glow: 'from-amber/35 via-amber/10', bar: 'bg-amber shadow-[0_-20px_50px_rgba(251,191,36,0.45)]' },
 };
 
-function Prompt({ word, lang }: { word: VocabEntry; lang: PromptLang }) {
+function Prompt({ t, word, lang }: { t: Strings; word: VocabEntry; lang: PromptLang }) {
   const langs = (['uz', 'ru', 'en'] as const).filter((l) => word[l]);
-  if (lang === 'all' || !word[lang as 'uz' | 'ru' | 'en']) {
+  // The chosen language has no translation for this word: say so instead of silently switching.
+  const missing = lang !== 'all' && !word[lang];
+  if (lang === 'all' || missing) {
     return (
-      <dl className="space-y-2.5">
-        {langs.map((l) => (
-          <div key={l} className="flex items-baseline gap-3">
-            <dt className="w-7 shrink-0 text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">{l}</dt>
-            <dd lang={l} className="text-[24px] font-black leading-tight">
-              {word[l]}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <div>
+        {missing && (
+          <p role="note" className="mb-2.5 inline-flex items-center gap-1.5 rounded-full bg-amber-wash px-2.5 py-1 text-[12px] font-bold leading-snug text-amber">
+            <Languages size={13} strokeWidth={2.5} aria-hidden className="shrink-0" />
+            {t.promptMissing(lang.toUpperCase())}
+          </p>
+        )}
+        <dl className="space-y-2.5">
+          {langs.map((l) => (
+            <div key={l} className="flex items-baseline gap-3">
+              <dt className="w-7 shrink-0 text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">{l}</dt>
+              <dd lang={l} className="text-[24px] font-black leading-tight">
+                {word[l]}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
     );
   }
   const l = lang as 'uz' | 'ru' | 'en';
@@ -599,7 +609,7 @@ export function Quiz({ t, stage, settings, onResult, onComplete, onExit, nextSta
         <div className={`relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-4 pt-6 md:px-8 ${kbOpen ? 'md:pt-6' : 'md:pt-8'}`}>
           <div className="relative">
             <div className="flex items-start justify-between gap-4">
-              <Prompt word={current.word} lang={settings.promptLang} />
+              <Prompt t={t} word={current.word} lang={settings.promptLang} />
               <span className="mt-0.5 shrink-0 rounded-lg bg-ink px-2.5 py-1 font-serif text-[15px] text-hanji-2" title={current.word.unit}>
                 {current.word.unit}
               </span>

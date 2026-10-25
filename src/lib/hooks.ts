@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { UserData } from '../types';
 import { emptyData, loadData, saveData } from './storage';
 import { clearSession } from './session';
+import { track } from './analytics';
 import { SYNC_AVAILABLE, clearLastSyncId, deleteVault, fingerprint, loadLastSyncId, loadSyncId, mergeData, newSyncId, saveSyncId, syncNow as runSync } from './sync';
 
 /**
@@ -102,7 +103,7 @@ export function useNow(intervalMs = 60_000) {
 
 const TOUCH_ONLY = '(hover: none) and (pointer: coarse)';
 /** Dev only: `?touch` in the URL acts as a touch-only device (the Design Lab's phone frame). */
-const FORCE_TOUCH = import.meta.env.DEV && new URLSearchParams(window.location.search).has('touch');
+const FORCE_TOUCH = import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('touch');
 
 /** True on phones and tablets without a mouse, where the onscreen keyboard is the default. */
 export function useTouchOnly(): boolean {
@@ -202,6 +203,7 @@ export function useCloudSync(data: UserData, update: (fn: (d: UserData) => UserD
 
   const adopt = async (id: string, mustExist: boolean) => {
     await run(id, mustExist, mustExist && !!previousSyncId && previousSyncId !== id);
+    track('sync-enabled', { method: mustExist ? 'link' : 'new' });
     saveSyncId(id);
     setSyncId(id);
     setPreviousSyncId(id);

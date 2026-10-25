@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Book, VocabEntry } from '../types';
 import { BUILT_IN_BOOKS } from './books';
-import { SYNC_AVAILABLE, rpc } from './sync';
+import { SYNC_AVAILABLE, SyncError, rpc, rpcResponse } from './sync';
 import { cleanExample } from './storage';
 
 /**
@@ -43,9 +43,53 @@ function writeCache(rows: GlobalWord[]) {
   }
 }
 
+/** PostgREST caps every response at its max-rows setting (1000 on Supabase), so longer lists come in pages. */
+export const PAGE_SIZE = 1000;
+
+export interface GlobalFetch {
+  /** Rows as the server sent them, before cleaning. */
+  raw: unknown[];
+  /** How many rows the server says it holds, when it says. */
+  total: number | null;
+}
+
+/**
+ * Every row, however many there are. Prefers get_global_words_all (supabase/global-words-json.sql),
+ * which returns the whole list as one JSON value and so is never cut at max-rows. Until that SQL
+ * is run, pages through get_global_words with limit / offset, asking for the exact count once.
+ */
+export async function fetchGlobalRows(): Promise<GlobalFetch> {
+  try {
+    const all = await rpc<{ total?: unknown; words?: unknown } | null>('get_global_words_all', {});
+    if (all && Array.isArray(all.words)) return { raw: all.words, total: typeof all.total === 'number' ? all.total : null };
+  } catch (e) {
+    if (!(e instanceof SyncError && e.code === 'missing')) throw e;
+  }
+  const raw: unknown[] = [];
+  let total: number | null = null;
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const res = await rpcResponse('get_global_words', {}, {
+      query: `limit=${PAGE_SIZE}&offset=${offset}`,
+      headers: offset === 0 ? { Prefer: 'count=exact' } : {},
+    });
+    // "0-999/1001": the total after the slash ("*" when not counted).
+    const count = Number(res.headers.get('Content-Range')?.split('/')[1]);
+    if (offset === 0 && Number.isFinite(count)) total = count;
+    const text = await res.text();
+    const page = text ? JSON.parse(text) : [];
+    if (!Array.isArray(page)) break;
+    raw.push(...page);
+    if (page.length < PAGE_SIZE) break;
+  }
+  return { raw, total };
+}
+
 export async function fetchGlobalWords(): Promise<GlobalWord[]> {
-  const rows = await rpc<unknown[] | null>('get_global_words', {});
-  return Array.isArray(rows) ? (rows.map(clean).filter(Boolean) as GlobalWord[]) : [];
+  const { raw, total } = await fetchGlobalRows();
+  const rows = raw.map(clean).filter(Boolean) as GlobalWord[];
+  // A short count means rows were cut off in transit (max-rows) or dropped as malformed.
+  if (total !== null && rows.length !== total) console.warn(`[global words] server has ${total} rows, client kept ${rows.length}`);
+  return rows;
 }
 
 const byNumber = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });

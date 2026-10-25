@@ -184,23 +184,33 @@ export function fingerprint(d: UserData): string {
 // Transport
 
 export class SyncError extends Error {
-  constructor(public code: 'network' | 'notFound' | 'server' | 'forbidden') {
+  constructor(public code: 'network' | 'notFound' | 'server' | 'forbidden' | 'missing') {
     super(code);
   }
 }
 
-export async function rpc<T>(fn: string, body: Record<string, unknown>): Promise<T> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json', apikey: API_KEY };
+/**
+ * One RPC call, returning the raw response so callers can read headers such as Content-Range.
+ * `query` is appended to the URL (PostgREST's limit / offset / order); `missing` is a 404 for a
+ * function that does not exist yet, so callers can fall back to an older one.
+ */
+export async function rpcResponse(fn: string, body: Record<string, unknown>, opts: { query?: string; headers?: Record<string, string> } = {}): Promise<Response> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', apikey: API_KEY, ...opts.headers };
   // Legacy anon keys are JWTs and also go in Authorization; new publishable keys must not.
   if (API_KEY.startsWith('eyJ')) headers.Authorization = `Bearer ${API_KEY}`;
   let res: Response;
   try {
-    res = await fetch(`${API_URL}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(body), cache: 'no-store' });
+    res = await fetch(`${API_URL}/rest/v1/rpc/${fn}${opts.query ? `?${opts.query}` : ''}`, { method: 'POST', headers, body: JSON.stringify(body), cache: 'no-store' });
   } catch {
     throw new SyncError('network');
   }
+  if (res.status === 404) throw new SyncError('missing');
   if (!res.ok) throw new SyncError((await res.text().catch(() => '')).includes('forbidden') ? 'forbidden' : 'server');
-  const text = await res.text();
+  return res;
+}
+
+export async function rpc<T>(fn: string, body: Record<string, unknown>): Promise<T> {
+  const text = await (await rpcResponse(fn, body)).text();
   return (text ? JSON.parse(text) : null) as T;
 }
 

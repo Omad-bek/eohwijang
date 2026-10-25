@@ -13,16 +13,16 @@ export const ICON_SRC = `${import.meta.env.BASE_URL}favicon.svg`;
 export const GITHUB_URL = 'https://github.com/Omad-bek/eohwijang';
 
 export const HERO = {
-  eyebrow: 'From SNU 1A to advanced · All textbooks covered',
   lead: 'Stop memorizing.',
   accent: 'Start feeling the language.',
   sub: 'The most beautiful, textbook-accurate way to master Korean.',
   /** The prominent textbook badge in the hero. */
   badge: 'Based on SNU Korean Textbooks',
-  badgeSub: 'From 1A to advanced, every book covered',
   cta: 'Start learning free',
   note: 'Free · No account · Works offline',
 };
+
+export { EXAMPLES_CLAIM_AT, bookList, coverageCopy, coverageOf, type Coverage } from '../../lib/coverage';
 
 export interface Benefit {
   icon: LucideIcon;
@@ -37,7 +37,8 @@ export const BENEFITS: Benefit[] = [
     icon: GraduationCap,
     kicker: 'Textbook-true',
     title: 'Ace your classes.',
-    body: 'Perfectly synced with the SNU Korean textbooks, from 1A all the way to advanced, so you only study exactly what’s on tomorrow’s test. No filler words, no guessing which list matters.',
+    // Replaced on the page by coverageCopy().textbookBody, which names the books that really have words.
+    body: 'Synced unit by unit with the SNU Korean textbooks, so you study exactly what’s on tomorrow’s test.',
   },
   {
     icon: Flame,
@@ -49,7 +50,8 @@ export const BENEFITS: Benefit[] = [
     icon: Quote,
     kicker: 'In context',
     title: 'Words that live in sentences.',
-    body: 'Words come with short sentences pitched at your level, so you remember how a word is used, not only what it means.',
+    // Shown only while most words have a sentence (coverageCopy().examples).
+    body: 'Most words come with a short sentence pitched at your level, so you remember how a word is used, not only what it means.',
   },
   {
     icon: Languages,
@@ -82,11 +84,6 @@ export const BENEFITS: Benefit[] = [
     body: 'Not limited to the textbook: add your own words, paste or import a list, create custom decks, and study exactly what you want.',
   },
 ];
-
-export const BOOKS = ['1A', '1B', '2A'];
-
-/** Every SNU Korean level, 1A to 6B. */
-export const LEVELS = [1, 2, 3, 4, 5, 6].flatMap((n) => [`${n}A`, `${n}B`]);
 
 export const STORY = {
   eyebrow: 'Our story',
