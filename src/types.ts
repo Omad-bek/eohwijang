@@ -79,6 +79,8 @@ export interface UserData {
   customBooks: Book[];
   /** Words appended to built-in books, keyed by book id. */
   extraWords: Record<string, VocabEntry[]>;
+  /** When words were last appended to each built-in book; a removal only wins over additions made before it. */
+  extraAddedAt: Record<string, number>;
   /** Deleted collection ids and when, so cloud sync does not bring them back from another device. */
   deletedBooks: Record<string, number>;
   /** Words recalled per local day (`YYYY-MM-DD`): feeds the daily goal, the streak and XP. */

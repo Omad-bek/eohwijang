@@ -82,7 +82,11 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
     }
     update((d) => {
       if (book?.builtIn) {
-        return { ...d, extraWords: { ...d.extraWords, [bookId]: [...(d.extraWords[bookId] ?? []), ...fresh] } };
+        return {
+          ...d,
+          extraWords: { ...d.extraWords, [bookId]: [...(d.extraWords[bookId] ?? []), ...fresh] },
+          extraAddedAt: { ...d.extraAddedAt, [bookId]: Date.now() },
+        };
       }
       if (book) {
         return {
@@ -134,7 +138,40 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
     }
   };
 
-  const customBooks = books.filter((b) => !b.builtIn);
+  /**
+   * Everything this learner added, one row per collection name: their own collections, and the
+   * words they added to a shared one (also when that shared collection has since been taken down).
+   */
+  const personal = useMemo(() => {
+    const key = (id: string) => id.trim().toLowerCase();
+    const rows = new Map<string, { id: string; title: string; words: number; shared: boolean }>();
+    const add = (id: string, words: number) => {
+      if (!words) return;
+      const k = key(id);
+      const book = books.find((b) => key(b.id) === k);
+      const row = rows.get(k) ?? { id, title: book?.title ?? id, words: 0, shared: !!book?.builtIn };
+      rows.set(k, { ...row, words: row.words + words });
+    };
+    for (const c of data.customBooks) add(c.id, c.words.length);
+    for (const [id, words] of Object.entries(data.extraWords)) add(id, words.length);
+    return [...rows.values()].sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
+  }, [data.customBooks, data.extraWords, books]);
+
+  /** Drop the learner's own words under this name; the deletion stamp keeps cloud sync from bringing them back. */
+  const removePersonal = (id: string) =>
+    update((d) => {
+      const k = id.trim().toLowerCase();
+      const now = Date.now();
+      const deletedBooks = { ...d.deletedBooks };
+      const extraWords = { ...d.extraWords };
+      for (const c of d.customBooks) if (c.id.trim().toLowerCase() === k) deletedBooks[c.id] = now;
+      for (const x of Object.keys(extraWords)) {
+        if (x.trim().toLowerCase() !== k) continue;
+        delete extraWords[x];
+        deletedBooks[x] = now;
+      }
+      return { ...d, customBooks: d.customBooks.filter((c) => c.id.trim().toLowerCase() !== k), extraWords, deletedBooks };
+    });
 
   return (
     <div className="flex h-full flex-col">
@@ -355,27 +392,19 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
           )}
         </Section>
 
-        {customBooks.length > 0 && (
-          <Section title={t.books}>
+        {personal.length > 0 && (
+          <Section title={t.books} hint={t.myCollectionsHint}>
             <ul className="border-t border-rule-soft">
-              {customBooks.map((b) => (
-                <li key={b.id} className="flex items-center gap-4 border-b border-rule-soft py-3">
-                  <span className="font-serif text-[22px] font-bold">{b.title}</span>
-                  <span className="tabular flex-1 text-[13px] text-hanji-2">{t.wordCount(b.words.length)}</span>
-                  <ConfirmButton
-                    label={t.deleteBook}
-                    confirmLabel={`${t.deleteBook}?`}
-                    icon={<Trash2 size={16} aria-hidden />}
-                    onConfirm={() =>
-                      update((d) => ({
-                        ...d,
-                        customBooks: d.customBooks.filter((x) => x.id !== b.id),
-                        deletedBooks: { ...d.deletedBooks, [b.id]: Date.now() },
-                      }))
-                    }
-                  />
-                </li>
-              ))}
+              {personal.map((b) => {
+                const label = b.shared ? t.removeMyWords : t.deleteBook;
+                return (
+                  <li key={b.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-rule-soft py-3">
+                    <span className="font-serif text-[22px] font-bold">{b.title}</span>
+                    <span className="tabular flex-1 text-[13px] text-hanji-2">{b.shared ? t.myWords(b.words) : t.wordCount(b.words)}</span>
+                    <ConfirmButton label={label} confirmLabel={`${label}?`} icon={<Trash2 size={16} aria-hidden />} onConfirm={() => removePersonal(b.id)} />
+                  </li>
+                );
+              })}
             </ul>
           </Section>
         )}

@@ -21,6 +21,7 @@ export function emptyData(): UserData {
     stages: {},
     customBooks: [],
     extraWords: {},
+    extraAddedAt: {},
     deletedBooks: {},
     activity: {},
   };
@@ -131,10 +132,15 @@ export function sanitizeData(raw: unknown): UserData {
     if (target) addExtra(target.id, book.words);
     else if (!customBooks.some((x) => x.id === book.id)) customBooks.push(book);
   }
-  const deletedBooks: Record<string, number> = {};
-  if (d.deletedBooks && typeof d.deletedBooks === 'object') {
-    for (const [k, v] of Object.entries(d.deletedBooks)) if (Number.isFinite(Number(v))) deletedBooks[k] = Number(v);
-  }
+  const stamps = (raw: unknown) => {
+    const out: Record<string, number> = {};
+    if (raw && typeof raw === 'object') for (const [k, v] of Object.entries(raw)) if (Number.isFinite(Number(v))) out[k] = Number(v);
+    return out;
+  };
+  const deletedBooks = stamps(d.deletedBooks);
+  const extraAddedAt = stamps(d.extraAddedAt);
+  // Data from before extraAddedAt existed: words beside an older deletion were added after it.
+  for (const id of Object.keys(extraWords)) if (deletedBooks[id] !== undefined && extraAddedAt[id] === undefined) extraAddedAt[id] = deletedBooks[id] + 1;
   const memory = sanitizeMemory(d.memory);
   // v1 kept a flat list of mastered word ids: carry each over as level 1, due for review now.
   const legacy = (d as { mastered?: unknown }).mastered;
@@ -149,6 +155,7 @@ export function sanitizeData(raw: unknown): UserData {
     stages: d.stages && typeof d.stages === 'object' ? d.stages : {},
     customBooks,
     extraWords,
+    extraAddedAt,
     deletedBooks,
     activity: sanitizeActivity(d.activity),
   };

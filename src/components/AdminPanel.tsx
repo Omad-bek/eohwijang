@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Download, EyeOff, FileUp, Lock, LogOut, Pencil, RotateCcw, Save, Upload } from 'lucide-react';
+import { Download, EyeOff, FileUp, Lock, LogOut, Pencil, RotateCcw, Save, Trash2, Upload } from 'lucide-react';
 import type { Book, VocabEntry } from '../types';
 import { BUILT_IN_BOOKS } from '../lib/books';
 import type { GlobalWord } from '../lib/global';
 import { DEFAULT_UNIT, downloadText, parseWords, wordFileText } from '../lib/storage';
 import { SYNC_AVAILABLE, SyncError, rpc } from '../lib/sync';
+import { ConfirmButton } from './ConfirmButton';
 
 /**
  * Author-only editor for the global vocabulary, opened with #admin. The panel is merely hidden;
@@ -21,6 +22,8 @@ interface Props {
 
 const TOKEN_KEY = 'project-vocab:admin-token';
 const NEW = '__new__';
+/** admin_put_words refuses more than this many words per call. */
+const MAX_PUT = 2000;
 const fieldCls = 'w-full border border-rule bg-ink-2 px-3 text-[15px] text-hanji placeholder:text-hanji-2/85 focus:border-hanji focus:outline-none';
 const labelCls = 'mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2';
 const btn = 'flex h-10 items-center gap-2 border border-rule px-3.5 text-[13px] font-semibold hover:border-hanji-2 disabled:cursor-not-allowed disabled:text-hanji-2';
@@ -54,6 +57,8 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
+  /** Which section the message belongs to, so it shows next to the button that caused it. */
+  const [msgAt, setMsgAt] = useState<'edit' | 'remove'>('edit');
 
   const [bookSel, setBookSel] = useState(shared[0]?.id ?? NEW);
   const [newBook, setNewBook] = useState('');
@@ -124,6 +129,11 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
     if (unitSel !== NEW && !units.includes(unitSel)) setUnitSel(units[0] ?? NEW);
   }, [units, unitSel]);
 
+  // A removed book leaves the list: fall back to the first one still there.
+  useEffect(() => {
+    if (bookSel !== NEW && !shared.some((b) => b.id === bookSel)) setBookSel(shared[0]?.id ?? NEW);
+  }, [shared, bookSel]);
+
   const bundled = BUILT_IN_BOOKS.find((b) => same(b.id, book));
   const rowFor = (u: string, ko: string) => rows.find((r) => same(r.book, book) && r.unit === u && r.ko === ko);
   const list = useMemo(() => {
@@ -132,11 +142,13 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
     return [...live.map((w) => ({ w, hidden: false })), ...hidden.map((w) => ({ w: w as VocabEntry, hidden: true }))];
   }, [current, rows, book, unit]);
 
-  const put = async (words: Put[], done: string) => {
+  const put = async (words: Put[], done: string, at: 'edit' | 'remove' = 'edit') => {
     setBusy(true);
     setMsg(null);
+    setMsgAt(at);
     try {
-      const n = await rpc<number>('admin_put_words', { p_token: token, p_words: words });
+      let n = 0;
+      for (let i = 0; i < words.length; i += MAX_PUT) n += await rpc<number>('admin_put_words', { p_token: token, p_words: words.slice(i, i + MAX_PUT) });
       await refresh();
       setMsg({ tone: 'ok', text: `${done} (${n}). Live for every learner on their next refresh.` });
       return true;
@@ -211,6 +223,12 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
   }
 
   const isBundled = (w: VocabEntry) => !!bundled?.words.some((b) => b.unit === w.unit && b.ko === w.ko);
+  // Taking down a book or unit deletes its global rows: words that exist only globally go away for
+  // everyone, and bundled words (1A) fall back to the version shipped with the app.
+  const bookRows = rows.filter((r) => same(r.book, book));
+  const unitRows = bookRows.filter((r) => r.unit === unit);
+  const unitBundled = !!bundled?.words.some((w) => w.unit === unit);
+  const takeDown = (list: GlobalWord[], done: string) => put(list.map((r) => ({ book: r.book, unit: r.unit, ko: r.ko, revert: true })), done, 'remove');
   const canSave = !!book && !!unit && !!form.ko.trim() && !!(form.uz.trim() || form.ru.trim() || form.en.trim());
   const parsed = (() => {
     if (!bulk.trim()) return null;
@@ -288,7 +306,7 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
             </button>
           </div>
           <p className="mt-2 text-[12px] text-hanji-2">Saving a Korean word that already exists in this unit updates its translations; learners keep their progress on it.</p>
-          {status}
+          {msgAt === 'edit' && status}
         </section>
 
         <section className="border-b border-rule py-4">
@@ -402,6 +420,34 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
             </button>
             {parsed && parsed.skipped > 0 && <span className="text-[13px] text-hanji-2">{parsed.skipped} lines skipped</span>}
           </div>
+        </section>
+
+        <section className="border-b border-rule py-4">
+          <h2 className="mb-1 text-[15px] font-bold">Remove from the site</h2>
+          <p className="mb-3 max-w-[70ch] text-[13px] text-hanji-2">
+            Deletes every published word in the unit or book for every learner on their next refresh. Words bundled with the app (1A) cannot be deleted this way; they
+            return to their shipped version. Learners keep their progress and their own added words. Download the JSON below first if you may want it back.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {unitRows.length > 0 && (
+              <ConfirmButton
+                label={unitBundled ? `Revert ${unit} to bundled (${unitRows.length})` : `Remove ${unit} (${unitRows.length} words)`}
+                confirmLabel={`${unitBundled ? 'Revert' : 'Remove'} ${unit} for everyone?`}
+                icon={<Trash2 size={15} aria-hidden />}
+                onConfirm={() => void takeDown(unitRows, unitBundled ? `Reverted ${unit}` : `Removed ${unit}`)}
+              />
+            )}
+            {bookRows.length > 0 && (
+              <ConfirmButton
+                label={bundled ? `Revert ${book} to bundled (${bookRows.length})` : `Remove book ${book} (${bookRows.length} words)`}
+                confirmLabel={`${bundled ? 'Revert' : 'Remove'} all of ${book} for everyone?`}
+                icon={<Trash2 size={15} aria-hidden />}
+                onConfirm={() => void takeDown(bookRows, bundled ? `Reverted ${book}` : `Removed ${book}`)}
+              />
+            )}
+            {!bookRows.length && <p className="text-[13px] text-hanji-2">Nothing published in {book || 'this book'} yet.</p>}
+          </div>
+          {msgAt === 'remove' && status}
         </section>
 
         <section className="py-4">

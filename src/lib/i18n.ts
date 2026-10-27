@@ -95,6 +95,9 @@ export interface Strings {
   all: string;
   notHangul: string;
   deleteBook: string;
+  removeMyWords: string;
+  myWords: (n: number) => string;
+  myCollectionsHint: string;
   bookExists: string;
   dropHint: string;
   dropActive: string;
@@ -261,6 +264,9 @@ const en: Strings = {
   all: 'All',
   notHangul: 'That is not Hangul. Switch your keyboard to Korean (한국어) and try again.',
   deleteBook: 'Delete collection',
+  removeMyWords: 'Remove my words',
+  myWords: (n) => `${n} ${n === 1 ? 'word' : 'words'} you added`,
+  myCollectionsHint: 'Your own collections, and words you added to the shared ones. Removing them never changes the shared lists.',
   bookExists: 'A collection with that name already exists; words will be added to it.',
   offline: 'Offline',
   cloudSync: 'Cloud Sync',
@@ -424,6 +430,9 @@ const ru: Strings = {
   all: 'Все',
   notHangul: 'Это не хангыль. Переключите клавиатуру на корейский (한국어) и попробуйте снова.',
   deleteBook: 'Удалить коллекцию',
+  removeMyWords: 'Удалить мои слова',
+  myWords: (n) => `добавлено вами: ${n}`,
+  myCollectionsHint: 'Ваши коллекции и слова, которые вы добавили в общие. Удаление не меняет общие списки.',
   bookExists: 'Такая коллекция уже есть — слова будут добавлены в неё.',
   offline: 'Офлайн',
   cloudSync: 'Облачная синхронизация',
@@ -588,6 +597,9 @@ const uz: Strings = {
   all: 'Bari',
   notHangul: "Bu hangul emas. Klaviaturani koreyschaga (한국어) o'tkazing va qayta yozing.",
   deleteBook: "To'plamni o'chirish",
+  removeMyWords: "Mening so'zlarimni o'chirish",
+  myWords: (n) => `siz qo'shgan ${n} ta so'z`,
+  myCollectionsHint: "O'zingiz yaratgan to'plamlar va umumiy to'plamlarga qo'shgan so'zlaringiz. O'chirish umumiy ro'yxatlarni o'zgartirmaydi.",
   bookExists: "Bu nomdagi to'plam bor — so'zlar unga qo'shiladi.",
   offline: 'Oflayn',
   cloudSync: 'Bulutli sinxronlash',
@@ -751,6 +763,9 @@ const ko: Strings = {
   all: '전체',
   notHangul: '한글이 아닙니다. 한국어 자판으로 바꾸고 다시 입력하세요.',
   deleteBook: '컬렉션 삭제',
+  removeMyWords: '내 단어 삭제',
+  myWords: (n) => `내가 추가한 단어 ${n}개`,
+  myCollectionsHint: '직접 만든 컬렉션과 공용 컬렉션에 추가한 단어입니다. 삭제해도 공용 목록은 바뀌지 않습니다.',
   bookExists: '같은 이름의 컬렉션이 있어 그 컬렉션에 추가됩니다.',
   offline: '오프라인',
   cloudSync: '클라우드 동기화',

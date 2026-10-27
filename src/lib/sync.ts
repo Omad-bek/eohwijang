@@ -151,19 +151,34 @@ export function mergeData(local: UserData, remote: UserData): UserData {
   }
   const customBooks = [...books.values()].filter((b) => deletedBooks[b.id] === undefined || (b.addedAt ?? 0) > deletedBooks[b.id]);
 
-  const extraWords = { ...local.extraWords };
-  for (const [id, words] of Object.entries(remote.extraWords)) extraWords[id] = mergeWords(extraWords[id] ?? [], words);
+  const extraAddedAt = { ...local.extraAddedAt };
+  for (const [id, at] of Object.entries(remote.extraAddedAt)) extraAddedAt[id] = Math.max(extraAddedAt[id] ?? 0, at);
+
+  // Words added to a shared collection stay removed unless more were added after the removal.
+  const extraWords: Record<string, VocabEntry[]> = {};
+  for (const [id, words] of [...Object.entries(local.extraWords), ...Object.entries(remote.extraWords)]) {
+    if (deletedBooks[id] !== undefined && (extraAddedAt[id] ?? 0) <= deletedBooks[id]) continue;
+    extraWords[id] = mergeWords(extraWords[id] ?? [], words);
+  }
 
   // Each day keeps the higher count: merging the same history twice never inflates it.
   const activity = { ...local.activity };
   for (const [day, n] of Object.entries(remote.activity)) activity[day] = Math.max(activity[day] ?? 0, n);
 
-  return { ...local, memory, stages, customBooks, extraWords, deletedBooks, activity };
+  return { ...local, memory, stages, customBooks, extraWords, extraAddedAt, deletedBooks, activity };
 }
 
 /** The part of the data that travels; settings stay on each device. */
 function payload(d: UserData) {
-  return { memory: d.memory, stages: d.stages, customBooks: d.customBooks, extraWords: d.extraWords, deletedBooks: d.deletedBooks, activity: d.activity };
+  return {
+    memory: d.memory,
+    stages: d.stages,
+    customBooks: d.customBooks,
+    extraWords: d.extraWords,
+    extraAddedAt: d.extraAddedAt,
+    deletedBooks: d.deletedBooks,
+    activity: d.activity,
+  };
 }
 
 function stable(value: unknown): string {
