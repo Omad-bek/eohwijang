@@ -51,6 +51,15 @@ const PAGES: { id: string; label: string; variants: Variant[] }[] = [
       { id: 'b', label: 'Brand', Page: lazy(() => import('./OgLab').then((m) => ({ default: m.OgB }))) },
     ],
   },
+  {
+    id: 'feedback',
+    label: 'Feedback',
+    variants: [
+      { id: 'a', label: 'Sheet', Page: lazy(() => import('./FeedbackLab').then((m) => ({ default: m.FeedbackLabA }))) },
+      { id: 'b', label: 'Topic cards', Page: lazy(() => import('./FeedbackLab').then((m) => ({ default: m.FeedbackLabB }))) },
+      { id: 'c', label: 'Note', Page: lazy(() => import('./FeedbackLab').then((m) => ({ default: m.FeedbackLabC }))) },
+    ],
+  },
   { id: 'states', label: 'States', variants: [{ id: 'fixtures', label: 'Fixtures', Page: lazy(() => import('./StatesLab')) }] },
 ];
 
@@ -95,7 +104,7 @@ export default function Lab() {
     <div className="relative flex h-full flex-col bg-ink text-hanji">
       {/* The app-wide ambient layer, so previews sit on the same ground as the live app. */}
       <AmbientParticles />
-      <nav aria-label="Design lab" className="relative flex h-11 shrink-0 items-center gap-1.5 overflow-x-auto border-b-2 border-rule bg-ink-2 px-3">
+      <nav aria-label="Design lab" className="relative z-[70] flex h-11 shrink-0 items-center gap-1.5 overflow-x-auto border-b-2 border-rule bg-ink-2 px-3">
         <span className="mr-1.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-amber">
           <FlaskConical size={14} aria-hidden /> Lab
         </span>

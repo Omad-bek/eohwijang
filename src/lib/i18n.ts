@@ -147,6 +147,25 @@ export interface Strings {
   privacyFeedbackHint: string;
   privacyPolicy: string;
   sendFeedback: string;
+  fbLead: string;
+  fbCategory: string;
+  fbCategories: Record<'bug' | 'word' | 'idea' | 'other', string>;
+  fbMessage: string;
+  fbMessagePlaceholder: string;
+  fbTooShort: (n: number) => string;
+  fbContact: string;
+  fbContactHint: string;
+  fbAttached: string;
+  fbSend: string;
+  fbSending: string;
+  fbSentTitle: string;
+  fbSentBody: string;
+  fbOffline: string;
+  fbError: string;
+  fbRateLimited: string;
+  fbCaptcha: string;
+  fbCooldown: (seconds: number) => string;
+  fbDevelopers: string;
   connectCloud: string;
   linkDevice: string;
   linkDeviceHint: string;
@@ -276,6 +295,25 @@ const en: Strings = {
   privacyFeedbackHint: 'What is stored where, how to erase it, and how to reach us.',
   privacyPolicy: 'Privacy',
   sendFeedback: 'Send feedback',
+  fbLead: 'Found a mistake or have an idea? It goes straight to the developer.',
+  fbCategory: 'What is it about?',
+  fbCategories: { bug: 'Bug', word: 'Wrong word or translation', idea: 'Idea', other: 'Other' },
+  fbMessage: 'Message',
+  fbMessagePlaceholder: 'What happened, or what would make the app better?',
+  fbTooShort: (n) => `At least ${n} characters`,
+  fbContact: 'Contact',
+  fbContactHint: 'Telegram username or email, only if you want a reply',
+  fbAttached: 'We also send the collection and unit you are on, the interface language, the app version and your browser. Never your Sync ID.',
+  fbSend: 'Send',
+  fbSending: 'Sending…',
+  fbSentTitle: 'Thank you!',
+  fbSentBody: 'Your message is on its way to the developer.',
+  fbOffline: 'You need internet to send feedback.',
+  fbError: 'Could not send. Please try again.',
+  fbRateLimited: 'Too many messages for now. Please try again later.',
+  fbCaptcha: 'We could not confirm you are not a robot. Please try again.',
+  fbCooldown: (s) => `You can send another message in ${s} s.`,
+  fbDevelopers: 'Developers: GitHub',
   connectCloud: 'Connect Cloud',
   linkDevice: 'Link this device',
   linkDeviceHint: 'Already synced on another device? Enter its Sync ID to pull and merge that progress here.',
@@ -442,6 +480,25 @@ const ru: Strings = {
   privacyFeedbackHint: 'Что и где хранится, как это удалить и как с нами связаться.',
   privacyPolicy: 'Конфиденциальность',
   sendFeedback: 'Написать отзыв',
+  fbLead: 'Нашли ошибку или есть идея? Сообщение придёт прямо разработчику.',
+  fbCategory: 'О чём сообщение?',
+  fbCategories: { bug: 'Ошибка', word: 'Неверное слово или перевод', idea: 'Идея', other: 'Другое' },
+  fbMessage: 'Сообщение',
+  fbMessagePlaceholder: 'Что случилось или что сделало бы приложение лучше?',
+  fbTooShort: (n) => `Минимум ${n} символов`,
+  fbContact: 'Контакт',
+  fbContactHint: 'Ник в Telegram или email — только если ждёте ответа',
+  fbAttached: 'Мы также отправим текущую коллекцию и урок, язык интерфейса, версию приложения и браузер. Sync ID — никогда.',
+  fbSend: 'Отправить',
+  fbSending: 'Отправка…',
+  fbSentTitle: 'Спасибо!',
+  fbSentBody: 'Сообщение отправлено разработчику.',
+  fbOffline: 'Чтобы отправить отзыв, нужен интернет.',
+  fbError: 'Не удалось отправить. Попробуйте ещё раз.',
+  fbRateLimited: 'Слишком много сообщений. Попробуйте позже.',
+  fbCaptcha: 'Не удалось подтвердить, что вы не робот. Попробуйте ещё раз.',
+  fbCooldown: (s) => `Следующее сообщение можно отправить через ${s} с.`,
+  fbDevelopers: 'Разработчикам: GitHub',
   connectCloud: 'Подключить облако',
   linkDevice: 'Связать это устройство',
   linkDeviceHint: 'Уже синхронизируете на другом устройстве? Введите его Sync ID, чтобы загрузить и объединить прогресс.',
@@ -609,6 +666,25 @@ const uz: Strings = {
   privacyFeedbackHint: "Nima qayerda saqlanadi, uni qanday o'chirish va biz bilan qanday bog'lanish.",
   privacyPolicy: 'Maxfiylik',
   sendFeedback: 'Fikr yuborish',
+  fbLead: "Xato topdingizmi yoki g'oyangiz bormi? Xabar to'g'ridan-to'g'ri dasturchiga boradi.",
+  fbCategory: 'Xabar nima haqida?',
+  fbCategories: { bug: 'Xato', word: "Noto'g'ri so'z yoki tarjima", idea: "G'oya", other: 'Boshqa' },
+  fbMessage: 'Xabar',
+  fbMessagePlaceholder: "Nima bo'ldi yoki ilovani nima yaxshiroq qiladi?",
+  fbTooShort: (n) => `Kamida ${n} ta belgi`,
+  fbContact: 'Aloqa',
+  fbContactHint: 'Telegram nomi yoki email — faqat javob kutsangiz',
+  fbAttached: "Shuningdek, joriy to'plam va dars, interfeys tili, ilova versiyasi va brauzer yuboriladi. Sync ID hech qachon yuborilmaydi.",
+  fbSend: 'Yuborish',
+  fbSending: 'Yuborilmoqda…',
+  fbSentTitle: 'Rahmat!',
+  fbSentBody: 'Xabaringiz dasturchiga yuborildi.',
+  fbOffline: 'Fikr yuborish uchun internet kerak.',
+  fbError: "Yuborib bo'lmadi. Qaytadan urinib ko'ring.",
+  fbRateLimited: "Hozircha xabarlar juda ko'p. Keyinroq urinib ko'ring.",
+  fbCaptcha: "Robot emasligingizni tasdiqlab bo'lmadi. Qaytadan urinib ko'ring.",
+  fbCooldown: (s) => `Keyingi xabarni ${s} soniyadan keyin yuborishingiz mumkin.`,
+  fbDevelopers: 'Dasturchilar uchun: GitHub',
   connectCloud: 'Bulutga ulash',
   linkDevice: 'Bu qurilmani bog‘lash',
   linkDeviceHint: "Boshqa qurilmada sinxronlaganmisiz? Natijalarni bu yerga yuklab birlashtirish uchun o'sha Sync ID ni kiriting.",
@@ -775,6 +851,25 @@ const ko: Strings = {
   privacyFeedbackHint: '무엇이 어디에 저장되는지, 지우는 방법, 연락하는 방법.',
   privacyPolicy: '개인정보 처리방침',
   sendFeedback: '의견 보내기',
+  fbLead: '오류를 찾았거나 아이디어가 있나요? 개발자에게 바로 전달됩니다.',
+  fbCategory: '어떤 내용인가요?',
+  fbCategories: { bug: '버그', word: '단어·번역 오류', idea: '아이디어', other: '기타' },
+  fbMessage: '메시지',
+  fbMessagePlaceholder: '무슨 일이 있었는지, 무엇이 앱을 더 좋게 만들지 알려 주세요.',
+  fbTooShort: (n) => `${n}자 이상 입력해 주세요`,
+  fbContact: '연락처',
+  fbContactHint: '답장을 원할 때만 텔레그램 아이디나 이메일을 적어 주세요',
+  fbAttached: '현재 컬렉션과 단원, 인터페이스 언어, 앱 버전, 브라우저 정보도 함께 보냅니다. Sync ID는 절대 보내지 않습니다.',
+  fbSend: '보내기',
+  fbSending: '보내는 중…',
+  fbSentTitle: '감사합니다!',
+  fbSentBody: '메시지가 개발자에게 전달되고 있습니다.',
+  fbOffline: '의견을 보내려면 인터넷 연결이 필요합니다.',
+  fbError: '보내지 못했습니다. 다시 시도해 주세요.',
+  fbRateLimited: '메시지가 너무 많습니다. 잠시 후 다시 시도해 주세요.',
+  fbCaptcha: '로봇이 아님을 확인하지 못했습니다. 다시 시도해 주세요.',
+  fbCooldown: (s) => `${s}초 후에 다시 보낼 수 있습니다.`,
+  fbDevelopers: '개발자용: GitHub',
   connectCloud: '클라우드 연결',
   linkDevice: '이 기기 연결',
   linkDeviceHint: '다른 기기에서 이미 동기화 중인가요? 그 기기의 Sync ID를 입력하면 진도를 가져와 합칩니다.',

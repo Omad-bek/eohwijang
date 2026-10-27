@@ -41,7 +41,8 @@ interface UnitSummary {
 
 const UNIT_KEY = (bookId: string) => `project-vocab:unit:${bookId}`;
 
-function readUnit(bookId: string): string | null {
+/** The unit last opened in a book, if any. */
+export function readUnit(bookId: string): string | null {
   try {
     return localStorage.getItem(UNIT_KEY(bookId));
   } catch {

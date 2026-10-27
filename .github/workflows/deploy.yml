@@ -41,6 +41,9 @@ jobs:
           # UMAMI_SCRIPT_URL only when self-hosting. Leave unset to ship without analytics.
           VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
           VITE_UMAMI_SCRIPT_URL: ${{ vars.UMAMI_SCRIPT_URL }}
+          # Feedback form: repo Variable VITE_TURNSTILE_SITE_KEY (the public Cloudflare Turnstile site
+          # key; the secret key lives only in Supabase). Leave unset to keep the GitHub link instead.
+          VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
 
       - uses: actions/configure-pages@v5
 

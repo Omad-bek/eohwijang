@@ -224,6 +224,17 @@ export async function rpcResponse(fn: string, body: Record<string, unknown>, opt
   return res;
 }
 
+/** POST JSON to a Supabase Edge Function. Any HTTP status comes back as is; only a failed connection throws. */
+export async function callFunction(name: string, body: Record<string, unknown>): Promise<Response> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', apikey: API_KEY };
+  if (API_KEY.startsWith('eyJ')) headers.Authorization = `Bearer ${API_KEY}`;
+  try {
+    return await fetch(`${API_URL}/functions/v1/${name}`, { method: 'POST', headers, body: JSON.stringify(body), cache: 'no-store' });
+  } catch {
+    throw new SyncError('network');
+  }
+}
+
 export async function rpc<T>(fn: string, body: Record<string, unknown>): Promise<T> {
   const text = await (await rpcResponse(fn, body)).text();
   return (text ? JSON.parse(text) : null) as T;

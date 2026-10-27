@@ -1,16 +1,18 @@
 /**
  * The privacy page's words, shared by its design variants (A, B) so they differ only in layout.
  * Every statement here must stay true to the code: storage keys in src/lib/*.ts, the vault
- * columns in supabase/schema.sql, and the analytics setup in src/lib/analytics.ts.
+ * columns in supabase/schema.sql, the analytics setup in src/lib/analytics.ts, and the feedback
+ * form (src/lib/feedback.ts, supabase/feedback.sql, supabase/functions/send-feedback).
  */
-import { CloudUpload, Eraser, HardDrive, LibraryBig, MessageCircle, Server, ChartNoAxesColumn, type LucideIcon } from 'lucide-react';
+import { CloudUpload, Eraser, HardDrive, LibraryBig, MessageCircle, MessageSquareText, Server, ChartNoAxesColumn, type LucideIcon } from 'lucide-react';
 import { ANALYTICS_CONFIGURED } from '../../lib/analytics';
+import { FEEDBACK_AVAILABLE } from '../../lib/feedback';
 
-export const UPDATED = '25 October 2026';
+export const UPDATED = '27 October 2026';
 
 export const INTRO = {
   title: 'Privacy',
-  lead: '어휘장 has no accounts. It never asks for your name, email or password, shows no ads, and sets no cookies.',
+  lead: '어휘장 has no accounts. It never needs your name, email or password, shows no ads, and sets no cookies.',
 };
 
 /** The short version, as four facts. */
@@ -69,12 +71,31 @@ export const SECTIONS: Section[] = [
         ]
       : ['This copy of the app counts nothing: no analytics script is loaded.'],
   },
+  ...(FEEDBACK_AVAILABLE
+    ? [
+        {
+          id: 'feedback',
+          icon: MessageSquareText,
+          title: 'If you send feedback',
+          body: [
+            'The feedback form sends only what you write and a little context, and only when you press Send:',
+            'It never includes your Sync ID, your words or your progress. The message is saved in our Supabase database and forwarded to the developer as a private Telegram message, so Telegram handles it too, under its own privacy policy. To tell people from spam bots, the form runs a Cloudflare Turnstile check while it is open; Cloudflare processes that check under its own privacy policy.',
+            'To limit spam, we keep a salted one-way hash of your IP address and the time you sent, never the address itself. These records are not attached to your message and are deleted automatically after two days. Want a message deleted? Send another one asking for it.',
+          ],
+          list: [
+            'the topic you picked and your message',
+            'a contact, only if you type one in (a Telegram username or email, so we can reply)',
+            'the collection and unit you were on, the interface language, the app version, and a short browser and system name such as “Chrome 130 · Android”',
+          ],
+        } satisfies Section,
+      ]
+    : []),
   {
     id: 'hosting',
     icon: Server,
     title: 'Hosting',
     body: [
-      'The site is served by GitHub Pages and the database runs on Supabase. Like any web server, they see your IP address when your browser connects, and may keep it in short-lived technical logs under their own privacy policies. We don’t store it in the app’s database.',
+      'The site is served by GitHub Pages and the database runs on Supabase. Like any web server, they see your IP address when your browser connects, and may keep it in short-lived technical logs under their own privacy policies. We don’t store it in the app’s database; the feedback form keeps only the temporary hash described above.',
     ],
   },
   {
@@ -92,6 +113,6 @@ export const SECTIONS: Section[] = [
     id: 'contact',
     icon: MessageCircle,
     title: 'Questions',
-    body: ['Questions about privacy, or a deletion request? Get in touch through the feedback link below.'],
+    body: ['Questions about privacy, or a deletion request? Get in touch through the feedback form below.'],
   },
 ];

@@ -7,7 +7,7 @@ import { CloudSyncSection } from './CloudSyncSection';
 import { ConfirmButton } from './ConfirmButton';
 import { MAX_STAGE, MIN_STAGE } from '../lib/books';
 import { downloadText, exportJson, parseWords, sanitizeData, wordFileText } from '../lib/storage';
-import { FEEDBACK_URL, hrefFor } from '../lib/route';
+import { FEEDBACK_URL, GITHUB_URL, hrefFor } from '../lib/route';
 
 interface Props {
   t: Strings;
@@ -21,6 +21,8 @@ interface Props {
   onBack: () => void;
   /** Opens /privacy in place. */
   onPrivacy: () => void;
+  /** Opens the feedback form; without it (no Turnstile key in this build) the GitHub link is shown. */
+  onFeedback?: () => void;
   sync: CloudSync;
 }
 
@@ -41,7 +43,7 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
 const fieldCls = 'w-full border border-rule bg-ink-2 px-3 text-[16px] text-hanji placeholder:text-hanji-2/85 focus:border-hanji focus:outline-none';
 const labelCls = 'mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-hanji-2';
 
-export function Manager({ t, data, books, startWithNewBook, update, replace, onBookCreated, onBack, onPrivacy, sync }: Props) {
+export function Manager({ t, data, books, startWithNewBook, update, replace, onBookCreated, onBack, onPrivacy, onFeedback, sync }: Props) {
   const [target, setTarget] = useState(startWithNewBook ? NEW : books[0]?.id ?? NEW);
   const [newId, setNewId] = useState('');
   const [text, setText] = useState('');
@@ -421,16 +423,31 @@ export function Manager({ t, data, books, startWithNewBook, update, replace, onB
             >
               <ShieldCheck size={16} aria-hidden /> {t.privacyPolicy}
             </a>
-            <a
-              href={FEEDBACK_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="flex h-11 items-center gap-2 border border-rule px-4 text-[14px] font-semibold hover:border-hanji-2"
-            >
-              <MessageSquareText size={16} aria-hidden /> {t.sendFeedback}
-              <ArrowUpRight size={14} aria-hidden className="opacity-60" />
-            </a>
+            {onFeedback ? (
+              <button
+                type="button"
+                onClick={onFeedback}
+                className="flex h-11 items-center gap-2 border border-rule px-4 text-[14px] font-semibold hover:border-hanji-2"
+              >
+                <MessageSquareText size={16} aria-hidden /> {t.sendFeedback}
+              </button>
+            ) : (
+              <a
+                href={FEEDBACK_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="flex h-11 items-center gap-2 border border-rule px-4 text-[14px] font-semibold hover:border-hanji-2"
+              >
+                <MessageSquareText size={16} aria-hidden /> {t.sendFeedback}
+                <ArrowUpRight size={14} aria-hidden className="opacity-60" />
+              </a>
+            )}
           </div>
+          {onFeedback && (
+            <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="mt-3 inline-block text-[12px] font-semibold text-hanji-2 hover:text-hanji hover:underline">
+              {t.fbDevelopers}
+            </a>
+          )}
         </Section>
       </div>
     </div>

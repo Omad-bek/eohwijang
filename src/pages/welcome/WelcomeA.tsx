@@ -496,7 +496,18 @@ const BUNDLED = coverageOf(BUILT_IN_BOOKS);
  * `coverage`: the textbooks that really have words (App passes the shared lists; the lab and a
  * first offline visit fall back to the bundled ones).
  */
-export default function WelcomeA({ onStart, returning = false, coverage = BUNDLED }: { onStart?: () => void; returning?: boolean; coverage?: Coverage }) {
+export default function WelcomeA({
+  onStart,
+  onFeedback,
+  returning = false,
+  coverage = BUNDLED,
+}: {
+  onStart?: () => void;
+  /** Opens the feedback form; without it the footer links to GitHub. */
+  onFeedback?: () => void;
+  returning?: boolean;
+  coverage?: Coverage;
+}) {
   const cta = returning ? 'Back to learning' : HERO.cta;
   const hero = useParallax<HTMLElement>();
   const closer = useParallax<HTMLElement>();
@@ -642,9 +653,15 @@ export default function WelcomeA({ onStart, returning = false, coverage = BUNDLE
               <a href={hrefFor('privacy')} className="hover:text-hanji">
                 Privacy
               </a>
-              <a href={FEEDBACK_URL} target="_blank" rel="noreferrer" className="hover:text-hanji">
-                Feedback &amp; contact
-              </a>
+              {onFeedback ? (
+                <button type="button" onClick={onFeedback} className="font-bold hover:text-hanji">
+                  Feedback &amp; contact
+                </button>
+              ) : (
+                <a href={FEEDBACK_URL} target="_blank" rel="noreferrer" className="hover:text-hanji">
+                  Feedback &amp; contact
+                </a>
+              )}
               <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="hover:text-hanji">
                 Source code
               </a>

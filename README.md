@@ -167,6 +167,10 @@ Without these values the app builds normally and the Cloud Sync section says it 
 
 Access rules: [`supabase/harden.sql`](supabase/harden.sql) re-applies them (RLS on with no policies, no table grants, only the app's RPCs executable) and can be run any number of times. Run [`supabase/global-words-json.sql`](supabase/global-words-json.sql) first: it adds `get_global_words_all`, which returns every shared word in one JSON value instead of rows capped at PostgREST's 1000-row limit. Until it exists, the app pages through `get_global_words`. `npm run check:words` (with `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` set) confirms the app receives as many rows as the server holds.
 
+### Feedback form
+
+Messages from the in-app feedback form reach the developer as Telegram messages through the `send-feedback` Supabase Edge Function, guarded by Cloudflare Turnstile, a honeypot, per-IP and global rate limits and a duplicate check. Every message is saved before it is forwarded. The form stays hidden, and the GitHub link stays in place, until the repo variable `VITE_TURNSTILE_SITE_KEY` is set. Setup and a test plan: [FEEDBACK_SETUP.md](FEEDBACK_SETUP.md).
+
 ### Shared vs personal data
 
 - **Shared, read-only:** the bundled collections (`src/data`) plus global updates published in admin mode. Identical for every learner, never written by the app, never stored in anyone's progress or Sync ID vault.

@@ -8,7 +8,7 @@ import { addActivity } from './lib/activity';
 import { useTheme } from './lib/theme';
 import { useSound } from './lib/soundEngine';
 import { clearSession, loadSession, sessionFor, type SavedSession } from './lib/session';
-import { Home } from './components/Home';
+import { Home, readUnit } from './components/Home';
 import { Manager } from './components/Manager';
 import { Navbar } from './components/Navbar';
 import { CloudSyncDialog } from './components/CloudSyncDialog';
@@ -20,10 +20,12 @@ import { AmbientParticles } from './components/AmbientParticles';
 import { coverageOf } from './lib/coverage';
 import { PAGE_TITLE, dropPrerender, useRoute } from './lib/route';
 import { track } from './lib/analytics';
+import { APP_VERSION, FEEDBACK_AVAILABLE, deviceSummary, type FeedbackContext } from './lib/feedback';
 
 // Only new learners, /about and /privacy need these, so they load on demand (and are precached for offline like every chunk).
 const Welcome = lazy(() => import('./pages/welcome/WelcomeA'));
 const Privacy = lazy(() => import('./pages/privacy/Privacy'));
+const FeedbackDialog = lazy(() => import('./components/feedback/FeedbackDialog'));
 
 type View =
   | { kind: 'home' }
@@ -86,6 +88,9 @@ export default function App() {
   const [preview, setPreview] = useState<Stage | null>(null);
   const [syncOpen, setSyncOpen] = useState(false);
   const closeSync = useCallback(() => setSyncOpen(false), []);
+  /** Where the learner was when they opened the feedback form; null while it is closed. */
+  const [feedback, setFeedback] = useState<FeedbackContext | null>(null);
+  const closeFeedback = useCallback(() => setFeedback(null), []);
 
   const activeBook = books.find((b) => b.id === bookId) ?? books[0];
 
@@ -118,6 +123,23 @@ export default function App() {
     if (route !== 'app') go('app');
     setView({ kind: 'home' });
   };
+
+  // Without a Turnstile key (or Supabase) in this build, the pages keep their GitHub link instead.
+  const openFeedback = FEEDBACK_AVAILABLE
+    ? () =>
+        setFeedback({
+          book: activeBook?.id ?? '',
+          unit: (view.kind === 'quiz' ? view.stage.unit : activeBook && readUnit(activeBook.id)) ?? '',
+          lang: data.settings.uiLang,
+          version: APP_VERSION,
+          ua: deviceSummary(),
+        })
+    : undefined;
+  const feedbackDialog = feedback && (
+    <Suspense fallback={null}>
+      <FeedbackDialog t={t} context={feedback} online={online} onClose={closeFeedback} />
+    </Suspense>
+  );
 
   const showWelcome = !admin && (route === 'about' || (route === 'app' && !welcomed));
   const showPrivacy = !admin && route === 'privacy';
@@ -214,8 +236,13 @@ export default function App() {
       <div className="relative h-full">
         <AmbientParticles />
         <Suspense fallback={null}>
-          {showPrivacy ? <Privacy onBack={() => go('app')} /> : <Welcome onStart={enterApp} returning={welcomed} coverage={coverage} />}
+          {showPrivacy ? (
+            <Privacy onBack={() => go('app')} onFeedback={openFeedback} />
+          ) : (
+            <Welcome onStart={enterApp} onFeedback={openFeedback} returning={welcomed} coverage={coverage} />
+          )}
         </Suspense>
+        {feedbackDialog}
       </div>
     );
   }
@@ -304,6 +331,7 @@ export default function App() {
               }}
               onBack={() => setView({ kind: 'home' })}
               onPrivacy={openPrivacy}
+              onFeedback={openFeedback}
               sync={sync}
             />
           )}
@@ -323,6 +351,7 @@ export default function App() {
         />
       )}
       {syncOpen && <CloudSyncDialog t={t} sync={sync} uiLang={data.settings.uiLang} onClose={closeSync} />}
+      {feedbackDialog}
     </div>
   );
 }

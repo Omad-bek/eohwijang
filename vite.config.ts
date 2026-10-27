@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import pkg from './package.json' with { type: 'json' };
 
 /**
  * Public base path. The site is served from the custom root domain
@@ -27,7 +28,11 @@ export default defineConfig(({ mode }) => {
   base,
   // scripts/prerender.mjs reads it to link the Welcome chunk's stylesheet into the static pages, then deletes it.
   build: { manifest: true },
-  define:Object.fromEntries(PUBLIC_ENV.map((k) => [`import.meta.env.${k}`, JSON.stringify(env[k] ?? '')])),
+  define: {
+    ...Object.fromEntries(PUBLIC_ENV.map((k) => [`import.meta.env.${k}`, JSON.stringify(env[k] ?? '')])),
+    // Sent with feedback, so a report can be matched to the build it came from.
+    __APP_VERSION__: JSON.stringify(env.GITHUB_SHA ? `${pkg.version}+${env.GITHUB_SHA.slice(0, 7)}` : pkg.version),
+  },
   plugins: [
     react(),
     tailwindcss(),

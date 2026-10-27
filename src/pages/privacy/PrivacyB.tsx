@@ -9,7 +9,7 @@ import { dropPrerender } from '../../lib/route';
 import { BackLink, FeedbackButton, PrivacyFooter } from './PrivacyA';
 import { GLANCE, INTRO, SECTIONS } from './content';
 
-export default function PrivacyB({ onBack }: { onBack?: () => void }) {
+export default function PrivacyB({ onBack, onFeedback }: { onBack?: () => void; onFeedback?: () => void }) {
   useEffect(dropPrerender, []);
   return (
     <div className="scroll-smooth-motion h-full overflow-y-auto text-hanji">
@@ -77,7 +77,7 @@ export default function PrivacyB({ onBack }: { onBack?: () => void }) {
               ))}
               {id === 'contact' && (
                 <div className="mt-5">
-                  <FeedbackButton />
+                  <FeedbackButton onFeedback={onFeedback} />
                 </div>
               )}
             </section>

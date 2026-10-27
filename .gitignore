@@ -7,6 +7,10 @@ dev-dist
 .env
 .env.*
 !.env.example
+# Supabase CLI state (linked project ref, local branches); function secrets never live in the repo
+supabase/.temp/
+supabase/.branches/
+supabase/functions/**/.env
 
 # Local editor/agent tooling and design-process artifacts (not part of the app)
 .claude/

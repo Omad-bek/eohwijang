@@ -28,13 +28,22 @@ export function BackLink({ onBack, className = '' }: { onBack?: () => void; clas
   );
 }
 
-export function FeedbackButton() {
+/** Opens the feedback form when the app provides one (the prerendered page links to GitHub instead). */
+export function FeedbackButton({ onFeedback }: { onFeedback?: () => void }) {
+  const cls = 'juicy lip-accent inline-flex h-12 items-center gap-2 bg-accent px-5 text-[15px] font-black text-white';
+  if (onFeedback) {
+    return (
+      <button type="button" onClick={onFeedback} className={cls}>
+        <MessageSquareText size={18} strokeWidth={2.5} aria-hidden /> Send feedback
+      </button>
+    );
+  }
   return (
     <a
       href={FEEDBACK_URL}
       target="_blank"
       rel="noreferrer"
-      className="juicy lip-accent inline-flex h-12 items-center gap-2 bg-accent px-5 text-[15px] font-black text-white"
+      className={cls}
     >
       <MessageSquareText size={18} strokeWidth={2.5} aria-hidden /> Send feedback
     </a>
@@ -57,7 +66,7 @@ export function PrivacyFooter() {
   );
 }
 
-export default function PrivacyA({ onBack }: { onBack?: () => void }) {
+export default function PrivacyA({ onBack, onFeedback }: { onBack?: () => void; onFeedback?: () => void }) {
   useEffect(dropPrerender, []);
   return (
     <div className="scroll-smooth-motion h-full overflow-y-auto text-hanji">
@@ -105,7 +114,7 @@ export default function PrivacyA({ onBack }: { onBack?: () => void }) {
               ))}
               {id === 'contact' && (
                 <div className="mt-5">
-                  <FeedbackButton />
+                  <FeedbackButton onFeedback={onFeedback} />
                 </div>
               )}
             </section>
