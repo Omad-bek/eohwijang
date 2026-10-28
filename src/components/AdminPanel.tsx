@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Download, EyeOff, FileUp, Lock, LogOut, Pencil, RotateCcw, Save, Trash2, Upload } from 'lucide-react';
+import { ChevronDown, Download, EyeOff, FileUp, Lock, LogOut, Pencil, RotateCcw, Save, Trash2, Upload } from 'lucide-react';
 import type { Book, VocabEntry } from '../types';
 import { BUILT_IN_BOOKS } from '../lib/books';
 import type { GlobalWord } from '../lib/global';
@@ -50,6 +50,22 @@ function keepToken(token: string | null) {
 
 const same = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 const EMPTY: VocabEntry = { unit: '', ko: '', uz: '', ru: '', en: '' };
+const LIST_KEY = 'project-vocab:admin-word-list';
+
+/** Old answers a fix file retires (`{ "book", "words", "remove": [{ "unit", "ko" }] }`), removed in the same publish. */
+function removalsIn(text: string): { unit: string; ko: string }[] {
+  const t = text.replace(/^﻿/, '').trim();
+  if (!t.startsWith('{')) return [];
+  try {
+    const list: unknown = JSON.parse(t)?.remove;
+    if (!Array.isArray(list)) return [];
+    return list
+      .filter((r): r is { unit: string; ko: string } => !!r && typeof r.unit === 'string' && typeof r.ko === 'string' && !!r.ko.trim())
+      .map((r) => ({ unit: r.unit.trim(), ko: r.ko.trim().normalize('NFC') }));
+  } catch {
+    return [];
+  }
+}
 
 export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
   const [token, setToken] = useState(readToken);
@@ -68,8 +84,24 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
   const [bulk, setBulk] = useState('');
   const [bulkFile, setBulkFile] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const [showList, setShowList] = useState(() => {
+    try {
+      return localStorage.getItem(LIST_KEY) !== 'hidden';
+    } catch {
+      return true;
+    }
+  });
+  const toggleList = () => {
+    const next = !showList;
+    setShowList(next);
+    try {
+      localStorage.setItem(LIST_KEY, next ? 'shown' : 'hidden');
+    } catch {
+      /* just not remembered */
+    }
+  };
 
-  /** Load a word file into the bulk box; a file naming its book (JSON) or a new book picks up that name. */
+  /** Load a word file into the bulk box. A file naming its book (JSON) selects that book, so it can't land in another one. */
   const loadFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -77,15 +109,18 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
       setBulk(text);
       setBulkFile(file.name);
       setMsg(null);
-      if (bookSel === NEW && !newBook.trim()) {
-        let name: string | undefined;
-        try {
-          name = parseWords(text).book;
-        } catch {
-          /* shown as 0 words below */
-        }
-        setNewBook((name ?? file.name.replace(/\.[^.]+$/, '')).slice(0, 24));
+      let name: string | undefined;
+      try {
+        name = parseWords(text).book;
+      } catch {
+        /* shown as 0 words below */
       }
+      const known = name ? shared.find((b) => same(b.id, name)) : undefined;
+      if (known) setBookSel(known.id);
+      else if (name) {
+        setBookSel(NEW);
+        setNewBook(name.slice(0, 24));
+      } else if (bookSel === NEW && !newBook.trim()) setNewBook(file.name.replace(/\.[^.]+$/, '').slice(0, 24));
     };
     reader.onerror = () => setMsg({ tone: 'err', text: `Could not read ${file.name}.` });
     reader.readAsText(file);
@@ -238,6 +273,9 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
       return null;
     }
   })();
+  const removals = removalsIn(bulk);
+  // A file that names its book only goes into that book.
+  const wrongBook = !!parsed?.book && !!book && !same(parsed.book, book);
 
   return (
     <div className="flex h-full flex-col">
@@ -310,10 +348,14 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
         </section>
 
         <section className="border-b border-rule py-4">
-          <h2 className="mb-2 text-[15px] font-bold">
-            {book || '—'} · {unit || '—'} <span className="font-normal text-hanji-2">({list.filter((x) => !x.hidden).length} words)</span>
+          <h2 className="text-[15px] font-bold">
+            <button type="button" onClick={toggleList} aria-expanded={showList} aria-controls="admin-word-list" className="flex items-center gap-2 text-left hover:text-hanji">
+              <ChevronDown size={16} aria-hidden className={`shrink-0 text-hanji-2 transition-transform ${showList ? '' : '-rotate-90'}`} />
+              {book || '—'} · {unit || '—'} <span className="font-normal text-hanji-2">({list.filter((x) => !x.hidden).length} words)</span>
+              <span className="text-[12px] font-semibold text-hanji-2">{showList ? 'Hide list' : 'Show list'}</span>
+            </button>
           </h2>
-          <ul className="border-t border-rule-soft">
+          <ul id="admin-word-list" hidden={!showList} className="mt-2 border-t border-rule-soft">
             {list.map(({ w, hidden }) => {
               const row = rowFor(w.unit, w.ko);
               const tag = hidden ? 'hidden' : row ? (isBundled(w) ? 'edited' : 'added') : 'bundled';
@@ -406,20 +448,27 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <button
               type="button"
-              disabled={busy || !book || !parsed?.words.length}
+              disabled={busy || !book || wrongBook || !(parsed?.words.length || removals.length)}
               onClick={async () => {
-                const words = parsed!.words.map((w) => ({ ...w, book, unit: w.unit === DEFAULT_UNIT && unit ? unit : w.unit }));
-                if (await put(words, 'Published')) {
+                const words: Put[] = parsed!.words.map((w) => ({ ...w, book, unit: w.unit === DEFAULT_UNIT && unit ? unit : w.unit }));
+                const gone: Put[] = removals.map((r) => ({ book, unit: r.unit, ko: r.ko, revert: true }));
+                if (await put([...words, ...gone], gone.length ? `Published, ${gone.length} old answers removed` : 'Published')) {
                   setBulk('');
                   setBulkFile(null);
                 }
               }}
               className={primary}
             >
-              <Upload size={15} aria-hidden /> Publish {parsed?.words.length ?? 0} words to {book || '…'}
+              <Upload size={15} aria-hidden /> Publish {parsed?.words.length ?? 0} words
+              {removals.length > 0 && ` and remove ${removals.length} old answers`} to {book || '…'}
             </button>
             {parsed && parsed.skipped > 0 && <span className="text-[13px] text-hanji-2">{parsed.skipped} lines skipped</span>}
           </div>
+          {wrongBook && (
+            <p role="alert" className="mt-2 text-[13px] font-semibold text-danger-text">
+              This file is for {parsed!.book}, but {book} is selected. Choose {parsed!.book} under Book to publish it.
+            </p>
+          )}
         </section>
 
         <section className="border-b border-rule py-4">
