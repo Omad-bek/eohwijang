@@ -1,0 +1,147 @@
+{
+ "book": "1B",
+ "words": [
+  {
+   "unit": "9과",
+   "ko": "자다",
+   "uz": "uxlamoq",
+   "ru": "спать",
+   "en": "to sleep"
+  },
+  {
+   "unit": "9과",
+   "ko": "주무시다",
+   "uz": "uxlamoq (hurmat)",
+   "ru": "спать (уваж.)",
+   "en": "to sleep (polite)"
+  },
+  {
+   "unit": "9과",
+   "ko": "먹다",
+   "uz": "yemoq",
+   "ru": "есть",
+   "en": "to eat"
+  },
+  {
+   "unit": "9과",
+   "ko": "마시다",
+   "uz": "ichmoq",
+   "ru": "пить",
+   "en": "to drink"
+  },
+  {
+   "unit": "9과",
+   "ko": "드시다",
+   "uz": "yemoq, ichmoq (hurmat)",
+   "ru": "кушать, пить (уваж.)",
+   "en": "to eat, to drink (polite)"
+  },
+  {
+   "unit": "9과",
+   "ko": "나이",
+   "uz": "yosh",
+   "ru": "возраст",
+   "en": "age"
+  },
+  {
+   "unit": "9과",
+   "ko": "연세",
+   "uz": "yosh (hurmat)",
+   "ru": "возраст (уваж.)",
+   "en": "age (polite)"
+  },
+  {
+   "unit": "9과",
+   "ko": "사람",
+   "uz": "odam",
+   "ru": "человек",
+   "en": "person"
+  },
+  {
+   "unit": "9과",
+   "ko": "명",
+   "uz": "kishi (sanoq so'z)",
+   "ru": "человек (счётное слово)",
+   "en": "counter for people"
+  },
+  {
+   "unit": "9과",
+   "ko": "분",
+   "uz": "kishi (hurmat)",
+   "ru": "человек (уваж.)",
+   "en": "person (polite)"
+  },
+  {
+   "unit": "9과",
+   "ko": "집",
+   "uz": "uy",
+   "ru": "дом",
+   "en": "house, home"
+  },
+  {
+   "unit": "9과",
+   "ko": "댁",
+   "uz": "uy (hurmat)",
+   "ru": "дом, жилище (уваж.)",
+   "en": "home (polite)"
+  },
+  {
+   "unit": "9과",
+   "ko": "있다",
+   "uz": "bor bo'lmoq",
+   "ru": "иметься, находиться",
+   "en": "to exist, to be"
+  },
+  {
+   "unit": "9과",
+   "ko": "계시다",
+   "uz": "bor bo'lmoq (hurmat)",
+   "ru": "находиться (уваж.)",
+   "en": "to be (polite)"
+  },
+  {
+   "unit": "9과",
+   "ko": "이름",
+   "uz": "ism",
+   "ru": "имя",
+   "en": "name"
+  },
+  {
+   "unit": "9과",
+   "ko": "성함",
+   "uz": "ism (hurmat)",
+   "ru": "имя (уваж.)",
+   "en": "name (polite)"
+  }
+ ],
+ "remove": [
+  {
+   "unit": "9과",
+   "ko": "자다/주무시다"
+  },
+  {
+   "unit": "9과",
+   "ko": "먹다/마시다/드시다"
+  },
+  {
+   "unit": "9과",
+   "ko": "나이/연세"
+  },
+  {
+   "unit": "9과",
+   "ko": "사람/명/분"
+  },
+  {
+   "unit": "9과",
+   "ko": "집/댁"
+  },
+  {
+   "unit": "9과",
+   "ko": "있다/계시다"
+  },
+  {
+   "unit": "9과",
+   "ko": "이름/성함"
+  }
+ ]
+}

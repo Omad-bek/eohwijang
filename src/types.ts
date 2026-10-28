@@ -10,7 +10,7 @@ export interface Example {
   en: string;
 }
 
-/** One vocabulary entry. `ko` may hold alternatives separated by "/" (e.g. "아래/ 밑"). */
+/** One vocabulary entry. `ko` may hold alternatives separated by "/" (e.g. "다음날/다음 날"). */
 export interface VocabEntry {
   unit: string;
   ko: string;

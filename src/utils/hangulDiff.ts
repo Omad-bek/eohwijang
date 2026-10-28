@@ -44,7 +44,7 @@ export function normalize(s: string): string {
   return s.trim().normalize('NFC');
 }
 
-/** Collapse runs of whitespace and remove spaces around "/", so "아래/ 밑" and "아래 / 밑" compare equal. */
+/** Collapse runs of whitespace and remove spaces around "/", so "다음날/ 다음 날" and "다음날 / 다음 날" compare equal. */
 function canonical(s: string): string {
   return normalize(s).replace(/\s*\/\s*/g, '/').replace(/\s+/g, ' ');
 }
@@ -65,7 +65,7 @@ export function decompose(ch: string): Jamo | null {
 }
 
 /**
- * Every form accepted for a target. "아래/ 밑" accepts "아래", "밑", and "아래/밑".
+ * Every form accepted for a target. "다음날/다음 날" accepts "다음날", "다음 날", and "다음날/다음 날".
  */
 export function acceptedAnswers(target: string): string[] {
   const full = canonical(target);

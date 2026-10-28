@@ -1,7 +1,7 @@
 import type { Book, VocabEntry } from '../types';
 import { dayKey } from './activity';
 
-/** First form of a slash alternative, composed (NFC) so it renders and splits into syllables cleanly ("아래/ 밑" → "아래"). */
+/** First form of a slash alternative, composed (NFC) so it renders and splits into syllables cleanly ("다음날/다음 날" → "다음날"). */
 export const firstForm = (ko: string) => ko.normalize('NFC').split('/')[0].trim();
 
 function hash(s: string): number {

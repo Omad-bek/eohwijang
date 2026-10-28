@@ -1,0 +1,79 @@
+{
+ "book": "2A",
+ "words": [
+  {
+   "unit": "1과",
+   "ko": "이름",
+   "uz": "ism",
+   "ru": "имя",
+   "en": "name"
+  },
+  {
+   "unit": "1과",
+   "ko": "성함",
+   "uz": "ism (hurmat shakli)",
+   "ru": "имя (вежливое слово)",
+   "en": "name (honorific)",
+   "example": {
+    "en": "May I have your name?",
+    "ko": "성함이 어떻게 되세요?",
+    "ru": "Как вас зовут?",
+    "uz": "Ismingiz nima?"
+   }
+  },
+  {
+   "unit": "1과",
+   "ko": "나이",
+   "uz": "yosh",
+   "ru": "возраст",
+   "en": "age"
+  },
+  {
+   "unit": "1과",
+   "ko": "연세",
+   "uz": "yosh (hurmat shakli)",
+   "ru": "возраст (вежливое слово)",
+   "en": "age (honorific)",
+   "example": {
+    "en": "How old is your grandfather?",
+    "ko": "할아버지 연세가 어떻게 되세요?",
+    "ru": "Сколько лет вашему дедушке?",
+    "uz": "Bobongiz necha yoshdalar?"
+   }
+  },
+  {
+   "unit": "1과",
+   "ko": "연락처",
+   "uz": "aloqa ma'lumotlari",
+   "ru": "контакты",
+   "en": "contact details",
+   "example": {
+    "en": "My contact number is 010-1234-5678.",
+    "ko": "제 연락처는 010-1234-5678이에요.",
+    "ru": "Мой номер телефона: 010-1234-5678.",
+    "uz": "Mening telefon raqamim: 010-1234-5678."
+   }
+  },
+  {
+   "unit": "1과",
+   "ko": "전화번호",
+   "uz": "telefon raqami",
+   "ru": "номер телефона",
+   "en": "phone number"
+  }
+ ],
+ "remove": [
+  {
+   "unit": "1과",
+   "ko": "이름/성함"
+  },
+  {
+   "unit": "1과",
+   "ko": "나이/연세"
+  },
+  {
+   "unit": "1과",
+   "ko": "연락처/전화번호"
+  }
+ ]
+}

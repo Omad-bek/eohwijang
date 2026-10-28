@@ -10,7 +10,8 @@ export interface VocabWord extends VocabEntry {
   book: string;
 }
 
-// Format: [ko, uz, ru, en, example?]. `ko` may list alternatives with "/" (e.g. "아래/ 밑"); any one is accepted.
+// Format: [ko, uz, ru, en, example?]. `ko` may list spellings of one word with "/" (e.g. "다음날/다음 날"); any one is accepted.
+// Different words are separate rows, each with its own translation.
 // Examples in 1A use only what the book has taught: present tense (-(스)ㅂ니다, -아/어요) and the particles 은/는, 이/가, 을/를, 에, 에서.
 type Row = [ko: string, uz: string, ru: string, en: string, example?: Example];
 
@@ -325,7 +326,8 @@ const RAW_1A_DATA: Record<(typeof UNITS_1A)[number], Row[]> = {
     ["뒤", "orqasi", "сзади / позади", "back / behind"],
     ["옆", "yoni", "рядом / сбоку", "side / next to"],
     ["안", "ichi", "внутри", "inside"],
-    ["아래/ 밑", "osti/tagi", "внизу / под", "under / below"],
+    ["아래", "osti", "внизу", "below"],
+    ["밑", "tagi", "под", "under"],
     ["위", "usti", "наверху / над", "on / above"],
     ["인사동", "Insadong", "район Инсадон", "Insadong"],
     ["서울타워", "Seul minorasi", "Сеульская башня", "Seoul Tower"],
