@@ -274,6 +274,8 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
     }
   })();
   const removals = removalsIn(bulk);
+  // The phone's onscreen keyboard has only Hangul and space ("/" separates accepted answers), so anything else can't be answered there.
+  const untypeable = (parsed?.words ?? []).filter((w) => /[^가-힣ㄱ-ㆎ\s/]/.test(w.ko)).map((w) => w.ko);
   // A file that names its book only goes into that book.
   const wrongBook = !!parsed?.book && !!book && !same(parsed.book, book);
 
@@ -464,6 +466,13 @@ export function AdminPanel({ shared, rows, refresh, onExit }: Props) {
             </button>
             {parsed && parsed.skipped > 0 && <span className="text-[13px] text-hanji-2">{parsed.skipped} lines skipped</span>}
           </div>
+          {untypeable.length > 0 && (
+            <p className="mt-2 max-w-[70ch] text-[13px] font-semibold text-amber">
+              {untypeable.length} {untypeable.length === 1 ? 'answer has' : 'answers have'} symbols the phone keyboard can&apos;t type, so learners can&apos;t get{' '}
+              {untypeable.length === 1 ? 'it' : 'them'} right on a phone: {untypeable.slice(0, 6).join(' · ')}
+              {untypeable.length > 6 ? ' …' : ''}. Write optional parts as two answers instead, e.g. 노래를 부르다/부르다.
+            </p>
+          )}
           {wrongBook && (
             <p role="alert" className="mt-2 text-[13px] font-semibold text-danger-text">
               This file is for {parsed!.book}, but {book} is selected. Choose {parsed!.book} under Book to publish it.

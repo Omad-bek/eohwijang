@@ -1,0 +1,267 @@
+{
+ "book": "2A",
+ "words": [
+  {
+   "unit": "2과",
+   "ko": "춤을 추다/춤추다/춤 추다",
+   "uz": "raqsga tushmoq",
+   "ru": "танцевать",
+   "en": "to dance"
+  },
+  {
+   "unit": "2과",
+   "ko": "사진을 올리다/올리다",
+   "uz": "rasm qo'ymoq",
+   "ru": "выкладывать (фото)",
+   "en": "to upload a picture"
+  },
+  {
+   "unit": "6과",
+   "ko": "편지를 부치다/편지를 보내다",
+   "uz": "xat jo'natmoq",
+   "ru": "отправить письмо",
+   "en": "to send a letter"
+  },
+  {
+   "unit": "7과",
+   "ko": "건너다/건너가다",
+   "uz": "kesmoq, kesib o'tib bormoq",
+   "ru": "переходить (улицу)",
+   "en": "to cross"
+  },
+  {
+   "unit": "9과",
+   "ko": "을 위한/를 위한",
+   "uz": "uchun",
+   "ru": "для (кого-либо)",
+   "en": "for"
+  },
+  {
+   "unit": "1과",
+   "ko": "에 대해서",
+   "uz": "...haqida",
+   "ru": "о (чём-либо), про",
+   "en": "about (a topic)",
+   "example": {
+    "en": "In class, I gave a presentation about Korean culture.",
+    "ko": "수업 시간에 한국 문화에 대해서 발표했어요.",
+    "ru": "На уроке я выступил с докладом о корейской культуре.",
+    "uz": "Darsda Koreya madaniyati haqida taqdimot qildim."
+   }
+  },
+  {
+   "unit": "1과",
+   "ko": "학교에 들어가다/들어가다",
+   "uz": "(o'qishga) kirmoq; ichkariga kirmoq",
+   "ru": "поступать (в учебное заведение); входить",
+   "en": "to enter, get into (a school); to go in",
+   "example": {
+    "en": "I got into university last year.",
+    "ko": "작년에 대학교에 들어갔어요.",
+    "ru": "В прошлом году я поступил в университет.",
+    "uz": "O'tgan yili universitetga o'qishga kirdim."
+   }
+  },
+  {
+   "unit": "1과",
+   "ko": "이름을 부르다/부르다",
+   "uz": "(ismini aytib) chaqirmoq",
+   "ru": "звать, называть (по имени)",
+   "en": "to call (someone's name)",
+   "example": {
+    "en": "The teacher called my name.",
+    "ko": "선생님이 제 이름을 불렀어요.",
+    "ru": "Учитель назвал моё имя.",
+    "uz": "O'qituvchi ismimni aytib chaqirdi."
+   }
+  },
+  {
+   "unit": "2과",
+   "ko": "야구를 하다/야구하다/야구 하다",
+   "uz": "beysbol o'ynamoq",
+   "ru": "играть в бейсбол",
+   "en": "to play baseball"
+  },
+  {
+   "unit": "3과",
+   "ko": "아흐레",
+   "uz": "9 kun",
+   "ru": "9 дней",
+   "en": "9 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "엿새",
+   "uz": "6 kun",
+   "ru": "6 дней",
+   "en": "6 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "이레",
+   "uz": "7 kun",
+   "ru": "7 дней",
+   "en": "7 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "여드레",
+   "uz": "8 kun",
+   "ru": "8 дней",
+   "en": "8 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "열흘",
+   "uz": "10 kun",
+   "ru": "10 дней",
+   "en": "10 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "하루",
+   "uz": "1 kun / kun bo'yi",
+   "ru": "1 день / весь день",
+   "en": "one day / all day"
+  },
+  {
+   "unit": "3과",
+   "ko": "이틀",
+   "uz": "2 kun",
+   "ru": "2 дня",
+   "en": "2 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "사흘",
+   "uz": "3 kun",
+   "ru": "3 дня",
+   "en": "3 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "나흘",
+   "uz": "4 kun",
+   "ru": "4 дня",
+   "en": "4 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "닷새",
+   "uz": "5 kun",
+   "ru": "5 дней",
+   "en": "5 days"
+  },
+  {
+   "unit": "6과",
+   "ko": "엽서를 부치다/엽서를 보내다",
+   "uz": "otkritka jo'natmoq",
+   "ru": "отправить открытку",
+   "en": "to send a postcard"
+  },
+  {
+   "unit": "6과",
+   "ko": "노래를 부르다/부르다",
+   "uz": "kuylamoq",
+   "ru": "петь (песню)",
+   "en": "to sing (a song)"
+  },
+  {
+   "unit": "8과",
+   "ko": "화가 나다/화나다/화 나다",
+   "uz": "jahli chiqmoq",
+   "ru": "злиться",
+   "en": "to be angry"
+  }
+ ],
+ "remove": [
+  {
+   "unit": "2과",
+   "ko": "춤(을) 추다"
+  },
+  {
+   "unit": "2과",
+   "ko": "(사진을) 올리다"
+  },
+  {
+   "unit": "6과",
+   "ko": "편지를 부치다(보내다)"
+  },
+  {
+   "unit": "7과",
+   "ko": "건너다(건너가다)"
+  },
+  {
+   "unit": "9과",
+   "ko": "을\\를 위한"
+  },
+  {
+   "unit": "1과",
+   "ko": "~에 대해서"
+  },
+  {
+   "unit": "1과",
+   "ko": "(학교에)들어가다"
+  },
+  {
+   "unit": "1과",
+   "ko": "(이름을)부르다"
+  },
+  {
+   "unit": "2과",
+   "ko": "야구(를) 하다"
+  },
+  {
+   "unit": "3과",
+   "ko": "9 일 - 아흐레"
+  },
+  {
+   "unit": "3과",
+   "ko": "6 일 - 엿새"
+  },
+  {
+   "unit": "3과",
+   "ko": "7 일 - 이레"
+  },
+  {
+   "unit": "3과",
+   "ko": "8 일 - 여드레"
+  },
+  {
+   "unit": "3과",
+   "ko": "10 일 - 열흘"
+  },
+  {
+   "unit": "3과",
+   "ko": "1 일 - 하루"
+  },
+  {
+   "unit": "3과",
+   "ko": "2 일 - 이틀"
+  },
+  {
+   "unit": "3과",
+   "ko": "3 일 - 사흘"
+  },
+  {
+   "unit": "3과",
+   "ko": "4 일 - 나흘"
+  },
+  {
+   "unit": "3과",
+   "ko": "5 일 - 닷새"
+  },
+  {
+   "unit": "6과",
+   "ko": "엽서를 부치다(보내다)"
+  },
+  {
+   "unit": "6과",
+   "ko": "(노래를)부르다"
+  },
+  {
+   "unit": "8과",
+   "ko": "화(가) 나다"
+  }
+ ]
+}
