@@ -1,0 +1,936 @@
+{
+ "book": "1B",
+ "words": [
+  {
+   "unit": "10과",
+   "ko": "방학",
+   "uz": "ta'til",
+   "ru": "каникулы",
+   "en": "school vacation"
+  },
+  {
+   "unit": "10과",
+   "ko": "조금 후",
+   "uz": "birozdan so'ng",
+   "ru": "немного позже",
+   "en": "after a little while"
+  },
+  {
+   "unit": "10과",
+   "ko": "주말 잘 보내다",
+   "uz": "dam olish kunini yaxshi o'tkazmoq",
+   "ru": "хорошо провести выходные",
+   "en": "to have a good weekend"
+  },
+  {
+   "unit": "10과",
+   "ko": "전통",
+   "uz": "an'ana",
+   "ru": "традиция",
+   "en": "tradition"
+  },
+  {
+   "unit": "10과",
+   "ko": "출입국관리사무소",
+   "uz": "muhojirlar markazi",
+   "ru": "иммиграционная служба",
+   "en": "immigration office"
+  },
+  {
+   "unit": "10과",
+   "ko": "일어나다",
+   "uz": "uyg'onmoq",
+   "ru": "просыпаться, вставать",
+   "en": "to get up / to wake up"
+  },
+  {
+   "unit": "10과",
+   "ko": "회의하다",
+   "uz": "majlis o'tkazmoq",
+   "ru": "проводить совещание",
+   "en": "to hold a meeting"
+  },
+  {
+   "unit": "10과",
+   "ko": "운전하다",
+   "uz": "mashina haydamoq",
+   "ru": "водить машину",
+   "en": "to drive"
+  },
+  {
+   "unit": "10과",
+   "ko": "시험을 보다",
+   "uz": "imtihon topshirmoq",
+   "ru": "сдавать экзамен",
+   "en": "to take an exam"
+  },
+  {
+   "unit": "11과",
+   "ko": "유행이다",
+   "uz": "urf bo'lmoq",
+   "ru": "быть в моде, популярным",
+   "en": "to be in fashion"
+  },
+  {
+   "unit": "11과",
+   "ko": "바쁘다",
+   "uz": "band bo'lmoq",
+   "ru": "занятый",
+   "en": "busy"
+  },
+  {
+   "unit": "11과",
+   "ko": "열이 나다/열이 있다",
+   "uz": "isitma chiqmoq",
+   "ru": "температурить, иметь жар",
+   "en": "to have a fever"
+  },
+  {
+   "unit": "11과",
+   "ko": "목이 아프다",
+   "uz": "tomog'i og'rimoq",
+   "ru": "болит горло",
+   "en": "to have a sore throat"
+  },
+  {
+   "unit": "11과",
+   "ko": "기침을 하다",
+   "uz": "yo'talmoq",
+   "ru": "кашлять",
+   "en": "to cough"
+  },
+  {
+   "unit": "11과",
+   "ko": "입",
+   "uz": "og'iz",
+   "ru": "рот",
+   "en": "mouth"
+  },
+  {
+   "unit": "11과",
+   "ko": "눈",
+   "uz": "ko'z",
+   "ru": "глаз",
+   "en": "eye"
+  },
+  {
+   "unit": "11과",
+   "ko": "다리",
+   "uz": "oyoq",
+   "ru": "нога",
+   "en": "leg"
+  },
+  {
+   "unit": "11과",
+   "ko": "가슴",
+   "uz": "ko'krak",
+   "ru": "грудь",
+   "en": "chest"
+  },
+  {
+   "unit": "11과",
+   "ko": "손",
+   "uz": "qo'l",
+   "ru": "кисть руки, рука",
+   "en": "hand"
+  },
+  {
+   "unit": "11과",
+   "ko": "팔",
+   "uz": "qo'l",
+   "ru": "рука (от плеча до кисти)",
+   "en": "arm"
+  },
+  {
+   "unit": "11과",
+   "ko": "목",
+   "uz": "bo'yin",
+   "ru": "шея",
+   "en": "neck"
+  },
+  {
+   "unit": "11과",
+   "ko": "생신",
+   "uz": "tug'ilgan kun (hurmat)",
+   "ru": "день рождения (уваж.)",
+   "en": "birthday (polite)"
+  },
+  {
+   "unit": "11과",
+   "ko": "파",
+   "uz": "ko'k piyoz",
+   "ru": "зеленый лук",
+   "en": "green onion"
+  },
+  {
+   "unit": "11과",
+   "ko": "헹구다",
+   "uz": "og'izni chaymoq",
+   "ru": "полоскать",
+   "en": "to rinse"
+  },
+  {
+   "unit": "11과",
+   "ko": "리포트",
+   "uz": "referat",
+   "ru": "доклад, реферат",
+   "en": "report"
+  },
+  {
+   "unit": "11과",
+   "ko": "끄다",
+   "uz": "o'chirmoq",
+   "ru": "выключать",
+   "en": "to turn off"
+  },
+  {
+   "unit": "11과",
+   "ko": "걱정",
+   "uz": "xavotir",
+   "ru": "беспокойство, тревога",
+   "en": "worry / concern"
+  },
+  {
+   "unit": "11과",
+   "ko": "피시방",
+   "uz": "kompyuter xonasi",
+   "ru": "компьютерный клуб (PC-bang)",
+   "en": "PC room"
+  },
+  {
+   "unit": "11과",
+   "ko": "싸우다",
+   "uz": "urishmoq",
+   "ru": "ссориться, драться",
+   "en": "to fight"
+  },
+  {
+   "unit": "11과",
+   "ko": "주차금지",
+   "uz": "mashina qo'yish taqiqlanadi",
+   "ru": "парковка запрещена",
+   "en": "no parking"
+  },
+  {
+   "unit": "11과",
+   "ko": "코감기",
+   "uz": "burun shamollashi",
+   "ru": "насморк",
+   "en": "nasal cold / cold in the nose"
+  },
+  {
+   "unit": "11과",
+   "ko": "목감기",
+   "uz": "tomoq shamollashi",
+   "ru": "простуда горла",
+   "en": "throat cold"
+  },
+  {
+   "unit": "11과",
+   "ko": "몸살 감기/몸살감기",
+   "uz": "tana shamollashi",
+   "ru": "ломота в теле при простуде",
+   "en": "body ache cold"
+  },
+  {
+   "unit": "11과",
+   "ko": "다행이다",
+   "uz": "xudoga shukur",
+   "ru": "слава Богу, повезло",
+   "en": "it's a relief"
+  },
+  {
+   "unit": "11과",
+   "ko": "괜찮다",
+   "uz": "durust bo'lmoq",
+   "ru": "в порядке, нормально",
+   "en": "to be okay / fine"
+  },
+  {
+   "unit": "11과",
+   "ko": "씻다",
+   "uz": "yuvmoq",
+   "ru": "мыть",
+   "en": "to wash"
+  },
+  {
+   "unit": "11과",
+   "ko": "술",
+   "uz": "spirtli ichimlik",
+   "ru": "алкоголь, спиртное",
+   "en": "alcohol"
+  },
+  {
+   "unit": "11과",
+   "ko": "말하다/말을 하다",
+   "uz": "gapirmoq",
+   "ru": "говорить",
+   "en": "to speak"
+  },
+  {
+   "unit": "12과",
+   "ko": "사고가 나다",
+   "uz": "avariya sodir bo'lmoq",
+   "ru": "произошел несчастный случай / авария",
+   "en": "an accident occurred"
+  },
+  {
+   "unit": "12과",
+   "ko": "도둑이 들다",
+   "uz": "o'g'ri kirmoq",
+   "ru": "залез вор",
+   "en": "a thief broke in"
+  },
+  {
+   "unit": "12과",
+   "ko": "늦잠",
+   "uz": "uxlab qolish",
+   "ru": "долгий сон, просыпание",
+   "en": "oversleeping"
+  },
+  {
+   "unit": "12과",
+   "ko": "조금 전",
+   "uz": "biroz oldin",
+   "ru": "незадолго до этого, только что",
+   "en": "a little while ago"
+  },
+  {
+   "unit": "12과",
+   "ko": "뭘요",
+   "uz": "muammo yo'q",
+   "ru": "не за что",
+   "en": "you're welcome"
+  },
+  {
+   "unit": "12과",
+   "ko": "오랜만이에요",
+   "uz": "ko'rishmaganimizga ancha bo'ldi",
+   "ru": "давно не виделись",
+   "en": "long time no see"
+  },
+  {
+   "unit": "12과",
+   "ko": "전화하다/전화를 하다",
+   "uz": "telefon qilmoq",
+   "ru": "звонить",
+   "en": "to make a phone call"
+  },
+  {
+   "unit": "12과",
+   "ko": "전화를 받다",
+   "uz": "qo'ng'iroq kelmoq",
+   "ru": "принимать звонок",
+   "en": "to receive a call"
+  },
+  {
+   "unit": "12과",
+   "ko": "문자를 보내다",
+   "uz": "sms jo'natmoq",
+   "ru": "отправить смс",
+   "en": "to send a text message"
+  },
+  {
+   "unit": "12과",
+   "ko": "전화번호",
+   "uz": "telefon raqami",
+   "ru": "номер телефона",
+   "en": "phone number"
+  },
+  {
+   "unit": "13과",
+   "ko": "비행기",
+   "uz": "samolyot",
+   "ru": "самолет",
+   "en": "airplane"
+  },
+  {
+   "unit": "13과",
+   "ko": "자전거",
+   "uz": "velosiped",
+   "ru": "велосипед",
+   "en": "bicycle"
+  },
+  {
+   "unit": "13과",
+   "ko": "갈아타다",
+   "uz": "transport almashtirmoq",
+   "ru": "пересаживаться",
+   "en": "to transfer"
+  },
+  {
+   "unit": "13과",
+   "ko": "버스 정류장",
+   "uz": "avtobus bekati",
+   "ru": "автобусная остановка",
+   "en": "bus stop"
+  },
+  {
+   "unit": "13과",
+   "ko": "고속버스 터미널",
+   "uz": "tez yurar avtobus terminali",
+   "ru": "автовокзал междугородних автобусов",
+   "en": "express bus terminal"
+  },
+  {
+   "unit": "13과",
+   "ko": "묻다",
+   "uz": "so'ramoq",
+   "ru": "спрашивать",
+   "en": "to ask"
+  },
+  {
+   "unit": "13과",
+   "ko": "먼저",
+   "uz": "birinchi navbatda",
+   "ru": "сначала, прежде всего",
+   "en": "first / ahead"
+  },
+  {
+   "unit": "13과",
+   "ko": "놀라다",
+   "uz": "hayron bo'lmoq",
+   "ru": "удивляться",
+   "en": "to be surprised"
+  },
+  {
+   "unit": "13과",
+   "ko": "하다",
+   "uz": "qilmoq/o'ramoq(sharf)",
+   "ru": "делать / завязывать (шарф)",
+   "en": "to do / to wear (scarf)"
+  },
+  {
+   "unit": "13과",
+   "ko": "기쁘다",
+   "uz": "xursand bo'lmoq",
+   "ru": "радостный, счастливый",
+   "en": "glad / happy"
+  },
+  {
+   "unit": "13과",
+   "ko": "한번/한 번",
+   "uz": "bir marta",
+   "ru": "один раз",
+   "en": "once"
+  },
+  {
+   "unit": "13과",
+   "ko": "보내다",
+   "uz": "jo'natmoq",
+   "ru": "отправлять / проводить (время)",
+   "en": "to send / to spend time"
+  },
+  {
+   "unit": "13과",
+   "ko": "선물하다",
+   "uz": "sovg'a qilmoq",
+   "ru": "дарить подарок",
+   "en": "to present a gift"
+  },
+  {
+   "unit": "13과",
+   "ko": "체격이 좋다",
+   "uz": "qomati yaxshi bo'lmoq",
+   "ru": "иметь хорошее телосложение",
+   "en": "to have a good physique"
+  },
+  {
+   "unit": "13과",
+   "ko": "청바지",
+   "uz": "jinsi shim",
+   "ru": "джинсы",
+   "en": "jeans"
+  },
+  {
+   "unit": "13과",
+   "ko": "키",
+   "uz": "bo'y",
+   "ru": "рост (человека)",
+   "en": "height"
+  },
+  {
+   "unit": "13과",
+   "ko": "슬프다",
+   "uz": "g'amgin",
+   "ru": "грустный",
+   "en": "sad"
+  },
+  {
+   "unit": "13과",
+   "ko": "무섭다",
+   "uz": "qo'rqinchli",
+   "ru": "страшный",
+   "en": "scary"
+  },
+  {
+   "unit": "13과",
+   "ko": "유행이다",
+   "uz": "mashhur bo'lmoq",
+   "ru": "быть в моде",
+   "en": "to be popular / in fashion"
+  },
+  {
+   "unit": "13과",
+   "ko": "놀다",
+   "uz": "o'ynamoq",
+   "ru": "развлекаться, гулять",
+   "en": "to play / to hang out"
+  },
+  {
+   "unit": "13과",
+   "ko": "신다",
+   "uz": "kiymoq (poyabzal)",
+   "ru": "обувать (обувь)",
+   "en": "to wear (shoes)"
+  },
+  {
+   "unit": "13과",
+   "ko": "입다",
+   "uz": "kiymoq",
+   "ru": "надевать (одежду)",
+   "en": "to wear (clothes)"
+  },
+  {
+   "unit": "13과",
+   "ko": "원피스",
+   "uz": "ko'ylak",
+   "ru": "платье",
+   "en": "one-piece dress"
+  },
+  {
+   "unit": "13과",
+   "ko": "치마/스커트",
+   "uz": "yubka",
+   "ru": "юбка",
+   "en": "skirt"
+  },
+  {
+   "unit": "13과",
+   "ko": "셔츠",
+   "uz": "ko'ylak",
+   "ru": "рубашка",
+   "en": "shirt"
+  },
+  {
+   "unit": "13과",
+   "ko": "깎다",
+   "uz": "chegirma qilmoq; qirqmoq",
+   "ru": "делать скидку / стричь",
+   "en": "to give a discount / to cut / to peel"
+  },
+  {
+   "unit": "13과",
+   "ko": "요금",
+   "uz": "to'lov",
+   "ru": "плата (за проезд, услуги)",
+   "en": "fare / fee"
+  },
+  {
+   "unit": "13과",
+   "ko": "다음날/다음 날",
+   "uz": "keyingi kun",
+   "ru": "следующий день",
+   "en": "the next day"
+  },
+  {
+   "unit": "13과",
+   "ko": "얼마 전",
+   "uz": "bir necha vaqt oldin",
+   "ru": "недавно, некоторое время назад",
+   "en": "some time ago"
+  },
+  {
+   "unit": "13과",
+   "ko": "세우다",
+   "uz": "to'xtatmoq",
+   "ru": "останавливать",
+   "en": "to stop"
+  },
+  {
+   "unit": "13과",
+   "ko": "쭉",
+   "uz": "to'g'riga",
+   "ru": "прямо",
+   "en": "straight"
+  },
+  {
+   "unit": "13과",
+   "ko": "가위바위보",
+   "uz": "tosh-qaychi-qog'oz",
+   "ru": "Камень-ножницы-бумага",
+   "en": "Rock-paper-scissors"
+  },
+  {
+   "unit": "13과",
+   "ko": "울다",
+   "uz": "yig'lamoq",
+   "ru": "плакать",
+   "en": "to cry"
+  },
+  {
+   "unit": "15과",
+   "ko": "도착하다",
+   "uz": "yetib bormoq",
+   "ru": "прибывать",
+   "en": "to arrive"
+  },
+  {
+   "unit": "15과",
+   "ko": "출발하다",
+   "uz": "jo'nab ketmoq",
+   "ru": "отправляться",
+   "en": "to depart"
+  },
+  {
+   "unit": "15과",
+   "ko": "맛있는 음식이 많다",
+   "uz": "mazali ovqatlari ko'p",
+   "ru": "много вкусной еды",
+   "en": "there is a lot of delicious food"
+  },
+  {
+   "unit": "15과",
+   "ko": "물건 값이 싸다",
+   "uz": "mahsulot narxi arzon",
+   "ru": "дешевые цены на товары",
+   "en": "goods are cheap"
+  },
+  {
+   "unit": "15과",
+   "ko": "구경거리가 많다",
+   "uz": "tomosha joylari ko'p",
+   "ru": "много достопримечательностей",
+   "en": "there are many things to see"
+  },
+  {
+   "unit": "15과",
+   "ko": "사람도 없고 조용하다",
+   "uz": "odam yo'q, tinch",
+   "ru": "людей нет, тихо",
+   "en": "quiet with no people"
+  },
+  {
+   "unit": "15과",
+   "ko": "프러포즈",
+   "uz": "turmush qurish taklifi",
+   "ru": "предложение (руки и сердца)",
+   "en": "proposal"
+  },
+  {
+   "unit": "15과",
+   "ko": "떠나다",
+   "uz": "jo'nab ketmoq",
+   "ru": "покидать, уезжать",
+   "en": "to leave"
+  },
+  {
+   "unit": "15과",
+   "ko": "안동",
+   "uz": "Andong",
+   "ru": "Андон (город)",
+   "en": "Andong"
+  },
+  {
+   "unit": "15과",
+   "ko": "찜닭",
+   "uz": "dimlangan tovuq",
+   "ru": "курица чимдак (тушеная)",
+   "en": "Jjimdak"
+  },
+  {
+   "unit": "15과",
+   "ko": "휴가",
+   "uz": "ta'til",
+   "ru": "отпуск",
+   "en": "vacation"
+  },
+  {
+   "unit": "15과",
+   "ko": "야구 경기",
+   "uz": "beyzbol o'yini",
+   "ru": "бейсбольный матч",
+   "en": "baseball game"
+  },
+  {
+   "unit": "15과",
+   "ko": "말",
+   "uz": "ot; gap",
+   "ru": "лошадь / слова",
+   "en": "horse / words"
+  },
+  {
+   "unit": "15과",
+   "ko": "비행기표를 예매하다",
+   "uz": "samolyot biletini zakaz qilmoq",
+   "ru": "бронировать билет на самолет",
+   "en": "to book a plane ticket"
+  },
+  {
+   "unit": "15과",
+   "ko": "여권을 만들다",
+   "uz": "pasport tayyorlamoq",
+   "ru": "делать паспорт",
+   "en": "to make a passport"
+  },
+  {
+   "unit": "15과",
+   "ko": "미술관",
+   "uz": "san'at galereyasi",
+   "ru": "художественный музей / галерея",
+   "en": "art museum"
+  },
+  {
+   "unit": "15과",
+   "ko": "삼악산",
+   "uz": "Samak tog'i",
+   "ru": "гора Самаксан",
+   "en": "Mount Samaksan"
+  },
+  {
+   "unit": "15과",
+   "ko": "올라가다",
+   "uz": "ko'tarilmoq",
+   "ru": "подниматься",
+   "en": "to go up"
+  },
+  {
+   "unit": "15과",
+   "ko": "보이다",
+   "uz": "ko'rinmoq",
+   "ru": "быть видным, показываться",
+   "en": "to be visible"
+  },
+  {
+   "unit": "15과",
+   "ko": "선물하다",
+   "uz": "sovg'a qilmoq",
+   "ru": "дарить",
+   "en": "to give a gift"
+  },
+  {
+   "unit": "15과",
+   "ko": "연락하다",
+   "uz": "bog'lanmoq",
+   "ru": "связываться, звонить",
+   "en": "to contact"
+  },
+  {
+   "unit": "15과",
+   "ko": "많이",
+   "uz": "ko'p",
+   "ru": "много",
+   "en": "a lot / much"
+  },
+  {
+   "unit": "15과",
+   "ko": "열심히",
+   "uz": "astoydil",
+   "ru": "усердно",
+   "en": "hard / diligently"
+  },
+  {
+   "unit": "15과",
+   "ko": "일찍",
+   "uz": "vaqtli, erta",
+   "ru": "рано",
+   "en": "early"
+  },
+  {
+   "unit": "15과",
+   "ko": "천천히",
+   "uz": "sekin-sekin",
+   "ru": "медленно",
+   "en": "slowly"
+  },
+  {
+   "unit": "15과",
+   "ko": "별일",
+   "uz": "alohida ish",
+   "ru": "особенное дело / событие",
+   "en": "special event / matter"
+  },
+  {
+   "unit": "15과",
+   "ko": "이사하다",
+   "uz": "ko'chmoq",
+   "ru": "переезжать",
+   "en": "to move (house)"
+  },
+  {
+   "unit": "15과",
+   "ko": "팝콘",
+   "uz": "popkorn",
+   "ru": "попкорн",
+   "en": "popcorn"
+  },
+  {
+   "unit": "15과",
+   "ko": "시간을 보내다",
+   "uz": "vaqt o'tkazmoq",
+   "ru": "проводить время",
+   "en": "to spend time"
+  },
+  {
+   "unit": "15과",
+   "ko": "이메일 주소",
+   "uz": "elektron pochta manzili",
+   "ru": "адрес электронной почты",
+   "en": "email address"
+  },
+  {
+   "unit": "15과",
+   "ko": "놀이",
+   "uz": "o'yin",
+   "ru": "игра, забава",
+   "en": "play / game"
+  },
+  {
+   "unit": "9과",
+   "ko": "되다",
+   "uz": "bo'lmoq",
+   "ru": "становиться",
+   "en": "to become"
+  },
+  {
+   "unit": "9과",
+   "ko": "할머니",
+   "uz": "buvi",
+   "ru": "бабушка",
+   "en": "grandmother"
+  },
+  {
+   "unit": "9과",
+   "ko": "할아버지",
+   "uz": "buva",
+   "ru": "дедушка",
+   "en": "grandfather"
+  },
+  {
+   "unit": "9과",
+   "ko": "누나",
+   "uz": "opa (o'g'il bolalar uchun)",
+   "ru": "старшая сестра (для мальчиков)",
+   "en": "older sister (for males)"
+  },
+  {
+   "unit": "9과",
+   "ko": "형",
+   "uz": "aka (o'g'il bolalarga)",
+   "ru": "старший брат (для мальчиков)",
+   "en": "older brother (for males)"
+  },
+  {
+   "unit": "9과",
+   "ko": "오빠",
+   "uz": "aka (qizlarga)",
+   "ru": "старший брат (для девочек)",
+   "en": "older brother (for females)"
+  },
+  {
+   "unit": "9과",
+   "ko": "아들",
+   "uz": "o'g'il farzand",
+   "ru": "сын",
+   "en": "son"
+  },
+  {
+   "unit": "9과",
+   "ko": "스물",
+   "uz": "20",
+   "ru": "двадцать",
+   "en": "twenty"
+  },
+  {
+   "unit": "9과",
+   "ko": "이름/성함",
+   "uz": "ism",
+   "ru": "имя / имя (уваж.)",
+   "en": "name / name (polite)"
+  },
+  {
+   "unit": "9과",
+   "ko": "있다/계시다",
+   "uz": "bor bo'lmoq",
+   "ru": "иметься / находиться (уваж.)",
+   "en": "to exist / to be (polite)"
+  },
+  {
+   "unit": "9과",
+   "ko": "꺼내다",
+   "uz": "sug'urmoq",
+   "ru": "вынимать, доставать",
+   "en": "to take out"
+  },
+  {
+   "unit": "9과",
+   "ko": "운전",
+   "uz": "haydash",
+   "ru": "вождение",
+   "en": "driving"
+  },
+  {
+   "unit": "9과",
+   "ko": "동아리",
+   "uz": "to'garak",
+   "ru": "клуб, кружок",
+   "en": "club / circle"
+  },
+  {
+   "unit": "9과",
+   "ko": "같은 과",
+   "uz": "bir fakultetdagi kursdosh",
+   "ru": "однокурсник (по кафедре)",
+   "en": "same department classmate"
+  },
+  {
+   "unit": "9과",
+   "ko": "윗사람",
+   "uz": "o'zidan katta odam",
+   "ru": "старший по возрасту/положению",
+   "en": "superior / elder"
+  },
+  {
+   "unit": "9과",
+   "ko": "반 친구",
+   "uz": "sinfdosh",
+   "ru": "одноклассник / сокурсник",
+   "en": "classmate"
+  },
+  {
+   "unit": "9과",
+   "ko": "신문사",
+   "uz": "gazeta tahririyati",
+   "ru": "редакция газеты",
+   "en": "newspaper company"
+  },
+  {
+   "unit": "9과",
+   "ko": "중학교",
+   "uz": "o'rta maktab",
+   "ru": "средняя школа",
+   "en": "middle school"
+  },
+  {
+   "unit": "9과",
+   "ko": "취미",
+   "uz": "xobbi",
+   "ru": "хобби",
+   "en": "hobby"
+  },
+  {
+   "unit": "9과",
+   "ko": "태어나다",
+   "uz": "tug'ilmoq",
+   "ru": "рождаться",
+   "en": "to be born"
+  },
+  {
+   "unit": "9과",
+   "ko": "다른 나라",
+   "uz": "boshqa davlat",
+   "ru": "другая страна",
+   "en": "other country"
+  }
+ ]
+}

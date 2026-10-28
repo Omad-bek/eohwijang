@@ -1,0 +1,810 @@
+{
+ "book": "2A",
+ "words": [
+  {
+   "unit": "2과",
+   "ko": "인형을 모으다",
+   "uz": "qo'g'irchoq yig'moq",
+   "ru": "коллекционировать кукол",
+   "en": "to collect dolls"
+  },
+  {
+   "unit": "2과",
+   "ko": "요리",
+   "uz": "ovqat pishirish",
+   "ru": "кулинария",
+   "en": "cooking"
+  },
+  {
+   "unit": "2과",
+   "ko": "컴퓨터 게임",
+   "uz": "kompyuter o'yini",
+   "ru": "компьютерная игра",
+   "en": "computer game"
+  },
+  {
+   "unit": "2과",
+   "ko": "야구(를) 하다",
+   "uz": "beysbol o'ynamoq",
+   "ru": "играть в бейсбол",
+   "en": "to play baseball"
+  },
+  {
+   "unit": "3과",
+   "ko": "기억에 남다",
+   "uz": "xotirada qolmoq",
+   "ru": "остаться в памяти",
+   "en": "to remain in memory"
+  },
+  {
+   "unit": "3과",
+   "ko": "존경하다",
+   "uz": "hurmat qilmoq",
+   "ru": "уважать",
+   "en": "to respect"
+  },
+  {
+   "unit": "3과",
+   "ko": "빌려 주다",
+   "uz": "qarzga bermoq",
+   "ru": "одалживать",
+   "en": "to lend"
+  },
+  {
+   "unit": "3과",
+   "ko": "감독",
+   "uz": "boshqaruvchi, rejissyor",
+   "ru": "режиссер",
+   "en": "director"
+  },
+  {
+   "unit": "3과",
+   "ko": "낙타",
+   "uz": "tuya",
+   "ru": "верблюд",
+   "en": "camel"
+  },
+  {
+   "unit": "3과",
+   "ko": "유럽",
+   "uz": "Yevropa",
+   "ru": "Европа",
+   "en": "Europe"
+  },
+  {
+   "unit": "3과",
+   "ko": "1 일 - 하루",
+   "uz": "1 kun",
+   "ru": "1 день",
+   "en": "1 day"
+  },
+  {
+   "unit": "3과",
+   "ko": "2 일 - 이틀",
+   "uz": "2 kun",
+   "ru": "2 дня",
+   "en": "2 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "3 일 - 사흘",
+   "uz": "3 kun",
+   "ru": "3 дня",
+   "en": "3 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "4 일 - 나흘",
+   "uz": "4 kun",
+   "ru": "4 дня",
+   "en": "4 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "5 일 - 닷새",
+   "uz": "5 kun",
+   "ru": "5 дней",
+   "en": "5 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "6 일 - 엿새",
+   "uz": "6 kun",
+   "ru": "6 дней",
+   "en": "6 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "7 일 - 이레",
+   "uz": "7 kun",
+   "ru": "7 дней",
+   "en": "7 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "8 일 - 여드레",
+   "uz": "8 kun",
+   "ru": "8 дней",
+   "en": "8 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "10 일 - 열흘",
+   "uz": "10 kun",
+   "ru": "10 дней",
+   "en": "10 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "음악회",
+   "uz": "konsert",
+   "ru": "музыкальный концерт",
+   "en": "musical concert"
+  },
+  {
+   "unit": "3과",
+   "ko": "9 일 - 아흐레",
+   "uz": "9 kun",
+   "ru": "9 дней",
+   "en": "9 days"
+  },
+  {
+   "unit": "3과",
+   "ko": "뮤지컬",
+   "uz": "myuzikl",
+   "ru": "мюзикл",
+   "en": "musical"
+  },
+  {
+   "unit": "3과",
+   "ko": "전시회",
+   "uz": "ko'rgazma",
+   "ru": "выставка",
+   "en": "exhibition"
+  },
+  {
+   "unit": "3과",
+   "ko": "사물놀이",
+   "uz": "samulnori (koreys an'anaviy zarbli musiqasi)",
+   "ru": "самульнори (корейская ударная музыка)",
+   "en": "Samulnori"
+  },
+  {
+   "unit": "3과",
+   "ko": "배낭여행",
+   "uz": "rukzak osib sayohat qilish",
+   "ru": "путешествие с рюкзаком",
+   "en": "backpacking trip"
+  },
+  {
+   "unit": "3과",
+   "ko": "아르바이트",
+   "uz": "yarim kunlik ish",
+   "ru": "подработка",
+   "en": "part-time job"
+  },
+  {
+   "unit": "3과",
+   "ko": "공연장",
+   "uz": "konsert zali",
+   "ru": "концертный зал",
+   "en": "concert hall"
+  },
+  {
+   "unit": "3과",
+   "ko": "번지 점프",
+   "uz": "balandlikdan sakrash",
+   "ru": "банджи-джампинг",
+   "en": "bungee jumping"
+  },
+  {
+   "unit": "3과",
+   "ko": "노래방",
+   "uz": "karaoke",
+   "ru": "караоке",
+   "en": "karaoke"
+  },
+  {
+   "unit": "3과",
+   "ko": "한복",
+   "uz": "koreys milliy kiyimi",
+   "ru": "ханбок (нац. одежда)",
+   "en": "Hanbok"
+  },
+  {
+   "unit": "3과",
+   "ko": "하루",
+   "uz": "kun bo'yi",
+   "ru": "весь день",
+   "en": "one day/all day"
+  },
+  {
+   "unit": "3과",
+   "ko": "생선회",
+   "uz": "xom baliq (sashimi)",
+   "ru": "сырая рыба (сашими)",
+   "en": "sliced raw fish"
+  },
+  {
+   "unit": "3과",
+   "ko": "요가",
+   "uz": "yoga mashqi",
+   "ru": "йога",
+   "en": "yoga"
+  },
+  {
+   "unit": "3과",
+   "ko": "한라산",
+   "uz": "Halla tog'i",
+   "ru": "гора Халласан",
+   "en": "Mt. Hallasan"
+  },
+  {
+   "unit": "3과",
+   "ko": "자리",
+   "uz": "joy, o'rin",
+   "ru": "место",
+   "en": "seat"
+  },
+  {
+   "unit": "3과",
+   "ko": "출장",
+   "uz": "komandirovka",
+   "ru": "командировка",
+   "en": "business trip"
+  },
+  {
+   "unit": "4과",
+   "ko": "스웨터",
+   "uz": "sviter",
+   "ru": "свитер",
+   "en": "sweater"
+  },
+  {
+   "unit": "4과",
+   "ko": "양복",
+   "uz": "kostyum",
+   "ru": "костюм",
+   "en": "suit"
+  },
+  {
+   "unit": "4과",
+   "ko": "청바지",
+   "uz": "jinsi shim",
+   "ru": "джинсы",
+   "en": "jeans"
+  },
+  {
+   "unit": "4과",
+   "ko": "맛",
+   "uz": "ta'm",
+   "ru": "вкус",
+   "en": "taste"
+  },
+  {
+   "unit": "4과",
+   "ko": "무서운 영화",
+   "uz": "qo'rqinchli film",
+   "ru": "фильм ужасов",
+   "en": "scary movie"
+  },
+  {
+   "unit": "4과",
+   "ko": "코미디 영화",
+   "uz": "komediya kino",
+   "ru": "комедия",
+   "en": "comedy movie"
+  },
+  {
+   "unit": "4과",
+   "ko": "싱싱하다",
+   "uz": "yangi, toza",
+   "ru": "свежий",
+   "en": "fresh"
+  },
+  {
+   "unit": "4과",
+   "ko": "고추장",
+   "uz": "qalampir pastasi",
+   "ru": "кочхуджан (острая паста)",
+   "en": "Gochujang"
+  },
+  {
+   "unit": "5과",
+   "ko": "비즈니스석",
+   "uz": "biznes klass",
+   "ru": "бизнес-класс",
+   "en": "business class"
+  },
+  {
+   "unit": "5과",
+   "ko": "성인",
+   "uz": "katta yoshli",
+   "ru": "взрослый",
+   "en": "adult"
+  },
+  {
+   "unit": "5과",
+   "ko": "여정 선택",
+   "uz": "yo'nalishni tanlash",
+   "ru": "выбор маршрута",
+   "en": "choosing an itinerary"
+  },
+  {
+   "unit": "5과",
+   "ko": "항공권 예약",
+   "uz": "avia biletga zakaz berish",
+   "ru": "бронирование авиабилета",
+   "en": "flight reservation"
+  },
+  {
+   "unit": "5과",
+   "ko": "항공료",
+   "uz": "samolyot to'lovi",
+   "ru": "стоимость авиабилета",
+   "en": "airfare"
+  },
+  {
+   "unit": "5과",
+   "ko": "일정",
+   "uz": "belgilash, dastur, reja",
+   "ru": "расписание/план",
+   "en": "schedule/itinerary"
+  },
+  {
+   "unit": "5과",
+   "ko": "전통적",
+   "uz": "an'anaviy",
+   "ru": "традиционный",
+   "en": "traditional"
+  },
+  {
+   "unit": "5과",
+   "ko": "한옥",
+   "uz": "koreys milliy uyi",
+   "ru": "ханок (нац. дом)",
+   "en": "Hanok (traditional Korean house)"
+  },
+  {
+   "unit": "5과",
+   "ko": "게스트하우스",
+   "uz": "mehmon uyi",
+   "ru": "гостевой дом",
+   "en": "guest house"
+  },
+  {
+   "unit": "5과",
+   "ko": "콘도",
+   "uz": "turar joy katta mehmonxona",
+   "ru": "кондоминиум",
+   "en": "condominium"
+  },
+  {
+   "unit": "5과",
+   "ko": "다양하다",
+   "uz": "har xil",
+   "ru": "разнообразный",
+   "en": "various"
+  },
+  {
+   "unit": "5과",
+   "ko": "건축물",
+   "uz": "arxitektura",
+   "ru": "здание/архитектура",
+   "en": "building/architecture"
+  },
+  {
+   "unit": "5과",
+   "ko": "가이드",
+   "uz": "tarjimon, tanishtiruvchi",
+   "ru": "гид/экскурсовод",
+   "en": "guide"
+  },
+  {
+   "unit": "5과",
+   "ko": "포함되어 있다",
+   "uz": "tarkibiga kirmoq",
+   "ru": "быть включенным",
+   "en": "to be included"
+  },
+  {
+   "unit": "5과",
+   "ko": "자세하다",
+   "uz": "batafsil",
+   "ru": "подробный",
+   "en": "detailed"
+  },
+  {
+   "unit": "5과",
+   "ko": "거리",
+   "uz": "ko'cha, masofa",
+   "ru": "улица/расстояние",
+   "en": "street/distance"
+  },
+  {
+   "unit": "5과",
+   "ko": "알아보다",
+   "uz": "surishtirmoq, aniqlamoq",
+   "ru": "узнавать/выяснять",
+   "en": "to find out"
+  },
+  {
+   "unit": "5과",
+   "ko": "느끼다",
+   "uz": "his qilmoq, sezmoq",
+   "ru": "чувствовать",
+   "en": "to feel"
+  },
+  {
+   "unit": "5과",
+   "ko": "일등석",
+   "uz": "birinchi klass",
+   "ru": "первый класс",
+   "en": "first class"
+  },
+  {
+   "unit": "6과",
+   "ko": "들다",
+   "uz": "pul sarflamoq, ichkariga kirmoq, ko'tarmoq",
+   "ru": "тратить (деньги)/входить/поднимать",
+   "en": "to cost/to enter/to lift"
+  },
+  {
+   "unit": "6과",
+   "ko": "신용 카드",
+   "uz": "kredit kartasi",
+   "ru": "кредитная карта",
+   "en": "credit card"
+  },
+  {
+   "unit": "6과",
+   "ko": "현금 카드",
+   "uz": "naqd pul kartasi",
+   "ru": "дебетовая/наличная карта",
+   "en": "cash card"
+  },
+  {
+   "unit": "6과",
+   "ko": "엽서를 부치다(보내다)",
+   "uz": "otkritka jo'natmoq",
+   "ru": "отправить открытку",
+   "en": "to send a postcard"
+  },
+  {
+   "unit": "6과",
+   "ko": "간판",
+   "uz": "peshlavha",
+   "ru": "вывеска",
+   "en": "signboard"
+  },
+  {
+   "unit": "6과",
+   "ko": "바로",
+   "uz": "to'g'ridan-to'g'ri, bevosita",
+   "ru": "прямо/сразу",
+   "en": "straight/immediately"
+  },
+  {
+   "unit": "6과",
+   "ko": "배치 시험",
+   "uz": "darajani aniqlash testi",
+   "ru": "распределительный тест",
+   "en": "placement test"
+  },
+  {
+   "unit": "6과",
+   "ko": "신청하다",
+   "uz": "ariza bermoq",
+   "ru": "подавать заявление",
+   "en": "to apply"
+  },
+  {
+   "unit": "6과",
+   "ko": "택배 기사",
+   "uz": "yetkazib berish kuryeri",
+   "ru": "курьер доставки",
+   "en": "delivery driver"
+  },
+  {
+   "unit": "6과",
+   "ko": "맡기다",
+   "uz": "omonatga bermoq",
+   "ru": "оставлять на хранение/поручать",
+   "en": "to entrust/to leave"
+  },
+  {
+   "unit": "6과",
+   "ko": "환율",
+   "uz": "valyuta kursi",
+   "ru": "обменный курс",
+   "en": "exchange rate"
+  },
+  {
+   "unit": "6과",
+   "ko": "외국인등록증",
+   "uz": "chet elliklarning guvohnomasi",
+   "ru": "регистрационная карта иностранца",
+   "en": "alien registration card"
+  },
+  {
+   "unit": "6과",
+   "ko": "서두르다",
+   "uz": "shoshilmoq",
+   "ru": "торопиться",
+   "en": "to hurry"
+  },
+  {
+   "unit": "6과",
+   "ko": "(노래를)부르다",
+   "uz": "kuylamoq",
+   "ru": "петь (песню)",
+   "en": "to sing (a song)"
+  },
+  {
+   "unit": "6과",
+   "ko": "맞다",
+   "uz": "to'g'ri, mos tushmoq",
+   "ru": "правильный/подходить",
+   "en": "to be right/to fit"
+  },
+  {
+   "unit": "6과",
+   "ko": "상자",
+   "uz": "quti, yashik",
+   "ru": "коробка/ящик",
+   "en": "box"
+  },
+  {
+   "unit": "6과",
+   "ko": "올리다",
+   "uz": "qo'ymoq",
+   "ru": "класть сверху/поднимать",
+   "en": "to put on/to raise"
+  },
+  {
+   "unit": "7과",
+   "ko": "지나다",
+   "uz": "o'tmoq",
+   "ru": "проходить (мимо/о времени)",
+   "en": "to pass"
+  },
+  {
+   "unit": "7과",
+   "ko": "사고가 나다",
+   "uz": "avariya sodir bo'lmoq",
+   "ru": "произойти (об аварии)",
+   "en": "an accident occurs"
+  },
+  {
+   "unit": "7과",
+   "ko": "한옥마을",
+   "uz": "hanok qishlog'i",
+   "ru": "деревня ханок",
+   "en": "Hanok village"
+  },
+  {
+   "unit": "7과",
+   "ko": "우회전하다",
+   "uz": "o'ngga burilmoq",
+   "ru": "повернуть направо (для авто)",
+   "en": "to make a right turn"
+  },
+  {
+   "unit": "7과",
+   "ko": "좌회전하다",
+   "uz": "chapga burilmoq",
+   "ru": "повернуть налево (для авто)",
+   "en": "to make a left turn"
+  },
+  {
+   "unit": "7과",
+   "ko": "오른쪽으로 돌아가다",
+   "uz": "o'ngga burilib bormoq",
+   "ru": "повернуть направо",
+   "en": "to turn right"
+  },
+  {
+   "unit": "7과",
+   "ko": "왼쪽으로 돌아가다",
+   "uz": "chapga burilib bormoq",
+   "ru": "повернуть налево",
+   "en": "to turn left"
+  },
+  {
+   "unit": "7과",
+   "ko": "쭉 가다",
+   "uz": "to'g'riga bormoq",
+   "ru": "идти прямо",
+   "en": "to go straight"
+  },
+  {
+   "unit": "7과",
+   "ko": "신호등",
+   "uz": "svetofor",
+   "ru": "светофор",
+   "en": "traffic light"
+  },
+  {
+   "unit": "7과",
+   "ko": "사거리",
+   "uz": "chorraha",
+   "ru": "перекресток",
+   "en": "intersection"
+  },
+  {
+   "unit": "7과",
+   "ko": "경찰서",
+   "uz": "politsiya bo'limi",
+   "ru": "полицейский участок",
+   "en": "police station"
+  },
+  {
+   "unit": "7과",
+   "ko": "대한 은행",
+   "uz": "Dehan banki",
+   "ru": "банк Тэхан",
+   "en": "Daehan Bank"
+  },
+  {
+   "unit": "7과",
+   "ko": "잡채",
+   "uz": "chapche (koreys taomi)",
+   "ru": "чапче (блюдо)",
+   "en": "Japchae (noodles)"
+  },
+  {
+   "unit": "7과",
+   "ko": "조선 시대",
+   "uz": "Choson sulolasi",
+   "ru": "эпоха Чосон",
+   "en": "Joseon Dynasty"
+  },
+  {
+   "unit": "8과",
+   "ko": "기분이 나쁘다",
+   "uz": "kayfiyati yomon",
+   "ru": "плохое настроение",
+   "en": "to feel bad"
+  },
+  {
+   "unit": "8과",
+   "ko": "즐겁다",
+   "uz": "zavqlanmoq",
+   "ru": "веселый/приятный",
+   "en": "joyful/pleasant"
+  },
+  {
+   "unit": "8과",
+   "ko": "속상하다",
+   "uz": "xafa bo'lmoq",
+   "ru": "расстроенный",
+   "en": "upset"
+  },
+  {
+   "unit": "8과",
+   "ko": "긴장되다",
+   "uz": "hayajonlanmoq",
+   "ru": "нервничать/напрягаться",
+   "en": "to be nervous"
+  },
+  {
+   "unit": "8과",
+   "ko": "화(가) 나다",
+   "uz": "jahli chiqmoq",
+   "ru": "злиться",
+   "en": "to be angry"
+  },
+  {
+   "unit": "8과",
+   "ko": "교통사고가 나다",
+   "uz": "avariya sodir bo'lmoq",
+   "ru": "произойти (о ДТП)",
+   "en": "a traffic accident occurs"
+  },
+  {
+   "unit": "8과",
+   "ko": "퇴원하다",
+   "uz": "kasalxonadan chiqmoq",
+   "ru": "выписаться из больницы",
+   "en": "to be discharged from hospital"
+  },
+  {
+   "unit": "8과",
+   "ko": "노트북",
+   "uz": "noutbuk",
+   "ru": "ноутбук",
+   "en": "laptop"
+  },
+  {
+   "unit": "8과",
+   "ko": "종점",
+   "uz": "so'nggi to'xtash joyi",
+   "ru": "конечная остановка",
+   "en": "terminus/last stop"
+  },
+  {
+   "unit": "8과",
+   "ko": "당황하다",
+   "uz": "esankiramoq, dovdirab qolmoq",
+   "ru": "растеряться",
+   "en": "to be flustered"
+  },
+  {
+   "unit": "9과",
+   "ko": "부탁하다",
+   "uz": "iltimos qilmoq",
+   "ru": "просить",
+   "en": "to ask/request"
+  },
+  {
+   "unit": "9과",
+   "ko": "공사",
+   "uz": "qurilish",
+   "ru": "строительство",
+   "en": "construction"
+  },
+  {
+   "unit": "9과",
+   "ko": "국립극장",
+   "uz": "milliy teatr",
+   "ru": "Национальный театр",
+   "en": "National Theater"
+  },
+  {
+   "unit": "9과",
+   "ko": "예술의전당",
+   "uz": "Seul san'at markazi",
+   "ru": "Сеульский центр искусств",
+   "en": "Seoul Arts Center"
+  },
+  {
+   "unit": "9과",
+   "ko": "전시",
+   "uz": "ko'rgazma",
+   "ru": "выставка",
+   "en": "exhibition"
+  },
+  {
+   "unit": "9과",
+   "ko": "술",
+   "uz": "spirtli ichimlik",
+   "ru": "алкоголь/спиртное",
+   "en": "alcohol"
+  },
+  {
+   "unit": "9과",
+   "ko": "말씀하다",
+   "uz": "gapirmoq (hurmat)",
+   "ru": "говорить (вежл.)",
+   "en": "to speak (honorific)"
+  },
+  {
+   "unit": "9과",
+   "ko": "퀴즈",
+   "uz": "savol-javob",
+   "ru": "викторина/квиз",
+   "en": "quiz"
+  },
+  {
+   "unit": "9과",
+   "ko": "한국학",
+   "uz": "koreyashunoslik",
+   "ru": "корееведение",
+   "en": "Korean studies"
+  },
+  {
+   "unit": "9과",
+   "ko": "궁금하다",
+   "uz": "qiziqmoq, bilgisi kelmoq",
+   "ru": "любопытно/интересоваться",
+   "en": "to be curious"
+  },
+  {
+   "unit": "9과",
+   "ko": "치료를 받다",
+   "uz": "davolanmoq",
+   "ru": "получать лечение",
+   "en": "to receive medical treatment"
+  }
+ ]
+}
