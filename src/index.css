@@ -460,6 +460,80 @@ select {
   --lip: var(--color-flame-lip);
 }
 
+/*
+ * The floating feedback button. Shapes that aren't boxes (the speech bubble) get their lip from a
+ * zero-blur drop-shadow, which follows the outline the way .juicy's box-shadow follows a box.
+ */
+.lip-drop {
+  filter: drop-shadow(0 5px 0 var(--lip, var(--color-rule)));
+  transition:
+    transform 90ms ease-out,
+    filter 90ms ease-out;
+}
+.fab:hover .lip-drop {
+  filter: drop-shadow(0 5px 0 var(--lip, var(--color-rule))) brightness(1.06);
+}
+.fab:active .lip-drop {
+  filter: drop-shadow(0 1px 0 var(--lip, var(--color-rule)));
+  transform: translateY(4px);
+}
+@keyframes fab-in {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Backwards fill only, so the press transform still works once it has landed. */
+.anim-fab {
+  animation: fab-in 520ms var(--ease-spring) 250ms backwards;
+}
+@keyframes tab-in {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: none;
+  }
+}
+.anim-tab {
+  animation: tab-in 420ms var(--ease-out-expo) backwards;
+}
+@keyframes bug-wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-14deg);
+  }
+  45% {
+    transform: rotate(11deg);
+  }
+  70% {
+    transform: rotate(-6deg);
+  }
+}
+.fab:hover .fab-bug,
+.fab:focus-visible .fab-bug,
+.fab-bug.is-wiggling {
+  animation: bug-wiggle 560ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .anim-fab,
+  .anim-tab,
+  .fab .fab-bug,
+  .fab-bug.is-wiggling {
+    animation: none;
+  }
+  .lip-drop {
+    transition: none;
+  }
+}
+
 /* A softer squish for everything else that is tappable. */
 .press {
   transition: transform 160ms var(--ease-spring);

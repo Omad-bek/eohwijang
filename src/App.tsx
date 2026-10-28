@@ -21,6 +21,7 @@ import { coverageOf } from './lib/coverage';
 import { PAGE_TITLE, dropPrerender, useRoute } from './lib/route';
 import { track } from './lib/analytics';
 import { APP_VERSION, FEEDBACK_AVAILABLE, deviceSummary, type FeedbackContext } from './lib/feedback';
+import { FeedbackFab, usePhone } from './components/feedback/FeedbackFab';
 
 // Only new learners, /about and /privacy need these, so they load on demand (and are precached for offline like every chunk).
 const Welcome = lazy(() => import('./pages/welcome/WelcomeA'));
@@ -140,6 +141,11 @@ export default function App() {
       <FeedbackDialog t={t} context={feedback} online={online} onClose={closeFeedback} />
     </Suspense>
   );
+  // Every screen gets the floating button while the form is closed; in a quiz on a phone it tucks to the edge.
+  const phone = usePhone();
+  const feedbackFab = openFeedback && !feedback && (
+    <FeedbackFab t={t} onOpen={openFeedback} tucked={phone && !admin && view.kind === 'quiz'} />
+  );
 
   const showWelcome = !admin && (route === 'about' || (route === 'app' && !welcomed));
   const showPrivacy = !admin && route === 'privacy';
@@ -243,6 +249,7 @@ export default function App() {
           )}
         </Suspense>
         {feedbackDialog}
+        {feedbackFab}
       </div>
     );
   }
@@ -352,6 +359,7 @@ export default function App() {
       )}
       {syncOpen && <CloudSyncDialog t={t} sync={sync} uiLang={data.settings.uiLang} onClose={closeSync} />}
       {feedbackDialog}
+      {feedbackFab}
     </div>
   );
 }
