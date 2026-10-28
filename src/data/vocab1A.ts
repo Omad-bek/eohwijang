@@ -56,7 +56,7 @@ const RAW_1A_DATA: Record<(typeof UNITS_1A)[number], Row[]> = {
     ["키", "balandlik (bo'y)", "рост", "height (stature)"],
     ["타조", "tuyaqush", "страус", "ostrich"],
     ["토마토", "pomidor", "помидор", "tomato"],
-    ["투우수", "matador", "матадор / тореадор", "bullfighter"],
+    ["투우사", "matador", "матадор / тореадор", "bullfighter"],
     ["파리", "Parij / pashsha", "Париж / муха", "Paris / fly"],
     ["포도", "uzum", "виноград", "grape"],
     ["우표", "pochta markasi", "почтовая марка", "postage stamp"],
