@@ -39,14 +39,36 @@ export function bookList(c: Coverage): string {
   return ids.length < 2 ? (ids[0] ?? '') : `${ids.slice(0, -1).join(', ')} and ${ids[ids.length - 1]}`;
 }
 
+/** Every SNU Korean textbook, in course order. */
+export const TEXTBOOKS = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'] as const;
+
+/** "1A to 6A" when the books run unbroken from 1A, otherwise the plain list ("1A, 2A and 3B"). */
+export function bookSpan(c: Coverage): string {
+  const ids = c.books.map((b) => b.id);
+  const run = ids.length > 1 && ids.every((id, i) => id === TEXTBOOKS[i]);
+  return run ? `${ids[0]} to ${ids[ids.length - 1]}` : bookList(c);
+}
+
+/** Textbooks with no words yet, in course order. */
+export function missingBooks(c: Coverage): string[] {
+  const have = new Set(c.books.map((b) => b.id));
+  return TEXTBOOKS.filter((id) => !have.has(id));
+}
+
 /** The hero lines that state coverage, true to whatever the data holds today. */
 export function coverageCopy(c: Coverage) {
   const list = bookList(c);
+  const span = bookSpan(c);
   const words = c.words.toLocaleString('en');
+  const missing = missingBooks(c);
+  // 6B has no vocabulary list to type up, so every other book in means the set is complete.
+  const complete = missing.length === 1 && missing[0] === '6B';
   return {
-    eyebrow: `SNU Korean ${list} · ${words} words`,
-    badgeSub: `${list} so far · more books on the way`,
-    textbookBody: `Synced unit by unit with the SNU Korean textbooks, so you study exactly what’s on tomorrow’s test. ${list} ${c.books.length === 1 ? 'is' : 'are'} in today (${words} words), and more books are added as they’re typed up.`,
+    eyebrow: `SNU Korean ${span} · ${words} words`,
+    badgeSub: complete ? `Every book from ${span} · ${words} words` : `${list} so far · more books on the way`,
+    textbookBody: complete
+      ? `Synced unit by unit with the SNU Korean textbooks, so you study exactly what’s on tomorrow’s test. Every book from ${span} is in: ${words} words. There is no 6B vocabulary list, so 6B isn’t included.`
+      : `Synced unit by unit with the SNU Korean textbooks, so you study exactly what’s on tomorrow’s test. ${list} ${c.books.length === 1 ? 'is' : 'are'} in today (${words} words), and more books are added as they’re typed up.`,
     examples: c.exampleShare >= EXAMPLES_CLAIM_AT,
   };
 }

@@ -10,10 +10,10 @@ import { Bug } from 'lucide-react';
 import type { Strings } from '../../lib/i18n';
 
 /** A soft red for the bug: a hint of "bug report" that still keeps 3:1 on the green in both themes. */
-const BUG_INK = 'text-[#ffd2cc]';
+export const BUG_INK = 'text-[#ffd2cc]';
 
 /** A speech bubble with its tail at the bottom right, pointing into the corner it sits in. 64 × 60. */
-const BUBBLE = 'M22 2H42A20 20 0 0 1 62 22V42Q62 52 60 58Q51 55 45 50H22A20 20 0 0 1 2 30V22A20 20 0 0 1 22 2Z';
+export const BUBBLE = 'M22 2H42A20 20 0 0 1 62 22V42Q62 52 60 58Q51 55 45 50H22A20 20 0 0 1 2 30V22A20 20 0 0 1 22 2Z';
 
 /** Wiggles the bug once, a few seconds after the button appears, so it is noticed without nagging. */
 function useWiggleOnce(delay = 2600) {

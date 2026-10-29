@@ -9,7 +9,7 @@ import { AmbientParticles } from './components/AmbientParticles';
 import Privacy from './pages/privacy/Privacy';
 import WelcomeA from './pages/welcome/WelcomeA';
 import { BUILT_IN_BOOKS } from './lib/books';
-import { bookList, coverageOf, type Coverage } from './lib/coverage';
+import { bookSpan, coverageOf, type Coverage } from './lib/coverage';
 import { applyGlobal, fetchGlobalWords } from './lib/global';
 import { PAGE_TITLE, type Route } from './lib/route';
 import { SYNC_AVAILABLE } from './lib/sync';
@@ -36,7 +36,7 @@ export function metaFor(route: Route, coverage: Coverage): PageMeta {
   }
   return {
     title: PAGE_TITLE[route],
-    description: `Type-to-recall Korean vocabulary for SNU Korean ${bookList(coverage)} (${coverage.words.toLocaleString('en')} words), with Uzbek, Russian and English prompts. Free, no account, works offline.`,
+    description: `Type-to-recall Korean vocabulary for SNU Korean ${bookSpan(coverage)} (${coverage.words.toLocaleString('en')} words), with Uzbek, Russian and English prompts. Free, no account, works offline.`,
   };
 }
 

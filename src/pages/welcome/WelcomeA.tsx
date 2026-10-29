@@ -36,6 +36,7 @@ import {
   useTilt,
 } from './content';
 import { Burst, JamoField, Orb, Sparkles } from './fx';
+import { FeedbackSteps } from './FeedbackSteps';
 
 /* ---------- The playable word block ---------- */
 
@@ -176,24 +177,35 @@ const TONE: Record<number, string> = {
   7: 'bg-amber-wash text-amber',
 };
 
-/** The textbooks that have words today, each with its word count, and an open slot for the next. */
+/** The textbooks by level, A and B side by side: a filled tile per book with words, a dashed one per gap. */
 function LevelsVisual({ coverage }: { coverage: Coverage }) {
+  const have = new Map(coverage.books.map((b) => [b.id, b]));
   return (
-    <ul className="grid grid-cols-4 gap-1.5 sm:gap-2" aria-label="Textbooks available">
-      {coverage.books.map((b) => (
-        <li
-          key={b.id}
-          title={`${b.words} words in ${b.units} units`}
-          className="flex h-14 flex-col items-center justify-center rounded-xl bg-accent text-white shadow-[0_4px_0_var(--color-accent-lip)]"
-        >
-          <span className="font-serif text-[17px] leading-none">{b.id}</span>
-          <span className="tabular mt-1 text-[10px] font-extrabold leading-none text-white/80">{b.words} words</span>
+    <ol className="space-y-1.5" aria-label="Textbooks by level">
+      {[1, 2, 3, 4, 5, 6].map((n) => (
+        <li key={n} className="flex items-center gap-2">
+          <span className="w-14 shrink-0 text-[11px] font-black uppercase tracking-[0.1em] text-hanji-2">Level {n}</span>
+          {(['A', 'B'] as const).map((half) => {
+            const b = have.get(`${n}${half}`);
+            return b ? (
+              <span
+                key={half}
+                title={`${b.words} words in ${b.units} units`}
+                className="flex h-9 flex-1 items-center justify-between rounded-lg bg-accent px-3 text-white shadow-[0_3px_0_var(--color-accent-lip)]"
+              >
+                <span className="font-serif text-[15px] leading-none">{b.id}</span>
+                <span className="tabular text-[10px] font-extrabold text-white/80">{b.words}</span>
+              </span>
+            ) : (
+              <span key={half} className="flex h-9 flex-1 items-center justify-between rounded-lg border-2 border-dashed border-rule px-3 text-hanji-2">
+                <span className="font-serif text-[15px] leading-none">{`${n}${half}`}</span>
+                <span className="text-[10px] font-extrabold">{n === 6 && half === 'B' ? 'no list' : 'soon'}</span>
+              </span>
+            );
+          })}
         </li>
       ))}
-      <li className="flex h-14 items-center justify-center rounded-xl border-2 border-dashed border-rule px-1 text-center text-[11px] font-extrabold leading-tight text-hanji-2">
-        More soon
-      </li>
-    </ul>
+    </ol>
   );
 }
 
@@ -542,6 +554,9 @@ export default function WelcomeA({
             <button type="button" onClick={() => scrollTo('story-a')} className="press hidden rounded-full px-3 py-2 hover:text-hanji sm:block">
               Our story
             </button>
+            <button type="button" onClick={() => scrollTo('feedback-a')} className="press hidden rounded-full px-3 py-2 hover:text-hanji sm:block">
+              Feedback
+            </button>
             <button type="button" onClick={onStart} className="juicy lip-accent ml-1 h-10 bg-accent px-4 text-[14px] font-extrabold text-white">
               {returning ? 'My stages' : 'Start free'}
             </button>
@@ -619,8 +634,11 @@ export default function WelcomeA({
           </div>
         </section>
 
-        <div className="py-28">
+        <div className="pt-28">
           <Story />
+        </div>
+        <div className="my-28">
+          <FeedbackSteps onFeedback={onFeedback} />
         </div>
 
         <div className="px-3 pb-3 sm:px-5 sm:pb-5">
