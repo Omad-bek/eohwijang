@@ -16,3 +16,6 @@ supabase/functions/**/.env
 .claude/
 .cursor/
 .impeccable/
+
+# Raw word lists for /auto-uploader and the admin token (never commit the token)
+src/VOCAB/
